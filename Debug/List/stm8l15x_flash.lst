@@ -1,0 +1,789 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:29
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_flash.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_flash.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_flash.lst
+#    Object file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_flash.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_flash.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_flash.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the FLASH firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "stm8l15x_flash.h"
+     23          
+     24          /** @addtogroup STM8L15x_StdPeriph_Driver
+     25            * @{
+     26            */
+     27          
+     28          /**
+     29          @code
+     30           This driver provides functions to configure and program the Flash memory of all
+     31           STM8L15x/16x devices.
+     32          
+     33           It includes as well functions that can be either executed from RAM or not, and
+     34           other functions that must be excuted from RAM otherwise useless.
+     35          
+     36           The table below lists the functions that can be executed from RAM.
+     37          
+     38           +--------------------------------------------------------------------------------|
+     39           |   Functions prototypes      |    RAM execution            |     Comments       |
+     40           ---------------------------------------------------------------------------------|
+     41           |                             | Mandatory in case of block  | Can be executed    |
+     42           | FLASH_WaitForLastOperation  | Operation:                  | from Flash in case |
+     43           |                             | - Block programming         | of byte and word   |
+     44           |                             | - Block erase               | Operations         |
+     45           |--------------------------------------------------------------------------------|
+     46           | FLASH_PowerRunModeConfig    |       Exclusively           | useless from Flash |
+     47           |--------------------------------------------------------------------------------|
+     48           | FLASH_GetPowerStatus        |       Exclusively           | useless from Flash |
+     49           |--------------------------------------------------------------------------------|
+     50           | FLASH_ProgramBlock          |       Exclusively           | useless from Flash |
+     51           |--------------------------------------------------------------------------------|
+     52           | FLASH_EraseBlock            |       Exclusively           | useless from Flash |
+     53           |--------------------------------------------------------------------------------|
+     54          
+     55           To be able to execute functions from RAM several steps have to be followed.
+     56           These steps may differ from one toolchain to another.
+     57           A detailed description is available below within this driver.
+     58           You can also refer to the Flash_DataProgram example provided within the
+     59           STM8L15x_StdPeriph_Lib package.
+     60          
+     61          @endcode
+     62          */
+     63          /* Private typedef -----------------------------------------------------------*/
+     64          /* Private define ------------------------------------------------------------*/
+     65          #define FLASH_CLEAR_BYTE   ((uint8_t)0x00)
+     66          #define FLASH_SET_BYTE     ((uint8_t)0xFF)
+     67          #define OPERATION_TIMEOUT  ((uint16_t)0xFFFF)
+     68          
+     69          /* Private macro -------------------------------------------------------------*/
+     70          /* Private variables ---------------------------------------------------------*/
+     71          /* Private function prototypes -----------------------------------------------*/
+     72          /* Private Constants ---------------------------------------------------------*/
+     73          /* Public functions ----------------------------------------------------------*/
+     74          
+     75          /** @addtogroup FLASH_Public_functions
+     76            * @{
+     77            */
+     78          
+     79          /**
+     80            * @brief  Unlocks the program or data EEPROM memory
+     81            * @param  FLASH_MemType : Memory type to unlock
+     82            *         This parameter can be a value of @ref FLASH_MemType_TypeDef
+     83            * @retval None
+     84            */
+     85          void FLASH_Unlock(FLASH_MemType_TypeDef FLASH_MemType)
+     86          {
+     87            /* Check parameter */
+     88            assert_param(IS_FLASH_MEMORY_TYPE(FLASH_MemType));
+     89          
+     90            /* Unlock program memory */
+     91            if (FLASH_MemType == FLASH_MemType_Program)
+     92            {
+     93              FLASH->PUKR = FLASH_RASS_KEY1;
+     94              FLASH->PUKR = FLASH_RASS_KEY2;
+     95            }
+     96          
+     97            /* Unlock data memory */
+     98            if (FLASH_MemType == FLASH_MemType_Data)
+     99            {
+    100              FLASH->DUKR = FLASH_RASS_KEY2; /* Warning: keys are reversed on data memory !!! */
+    101              FLASH->DUKR = FLASH_RASS_KEY1;
+    102            }
+    103          }
+    104          
+    105          /**
+    106            * @brief  Locks the program or data EEPROM memory
+    107            * @param  FLASH_MemType : Memory type
+    108            *         This parameter can be a value of @ref FLASH_MemType_TypeDef
+    109            * @retval None
+    110            */
+    111          void FLASH_Lock(FLASH_MemType_TypeDef FLASH_MemType)
+    112          {
+    113            /* Check parameter */
+    114            assert_param(IS_FLASH_MEMORY_TYPE(FLASH_MemType));
+    115            /* Lock memory */
+    116            FLASH->IAPSR &= (uint8_t)FLASH_MemType;
+    117          }
+    118          
+    119          /**
+    120            * @brief  Deinitializes the FLASH registers to their default reset values.
+    121            * @param  None
+    122            * @retval None
+    123            */
+    124          void FLASH_DeInit(void)
+    125          {
+    126            FLASH->CR1 = FLASH_CR1_RESET_VALUE;
+    127            FLASH->CR2 = FLASH_CR2_RESET_VALUE;
+    128            FLASH->IAPSR = FLASH_IAPSR_RESET_VALUE;
+    129            (void) FLASH->IAPSR; /* Reading of this register causes the clearing of status flags */
+    130          }
+    131          
+    132          /**
+    133            * @brief  Enables or Disables the Flash interrupt mode
+    134            * @param  NewState : The new state of the flash interrupt mode
+    135            *         This parameter can be a value of @ref FunctionalState enumeration.
+    136            * @retval None
+    137            */
+    138          void FLASH_ITConfig(FunctionalState NewState)
+    139          {
+    140          
+    141            /* Check parameter */
+    142            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    143          
+    144            if (NewState != DISABLE)
+    145            {
+    146              /* Enables the interrupt sources */
+    147              FLASH->CR1 |= FLASH_CR1_IE;
+    148            }
+    149            else
+    150            {
+    151              /* Disables the interrupt sources */
+    152              FLASH->CR1 &= (uint8_t)(~FLASH_CR1_IE);
+    153            }
+    154          }
+    155          
+    156          /**
+    157            * @brief  Erases one byte in the program or data EEPROM memory
+    158            * @param  Address : Address of the byte to erase
+    159            * @retval None
+    160            */
+    161          void FLASH_EraseByte(uint32_t Address)
+    162          {
+    163            /* Check parameter */
+    164            assert_param(IS_FLASH_ADDRESS(Address));
+    165          
+    166            *(PointerAttr uint8_t*) (uint16_t)Address = FLASH_CLEAR_BYTE; /* Erase byte */
+    167          }
+    168          /**
+    169            * @brief  Programs one byte in program or data EEPROM memory
+    170            * @param  Address : Address where the byte will be programmed
+    171            * @param  Data : Value to be programmed
+    172            * @retval None
+    173            */
+    174          void FLASH_ProgramByte(uint32_t Address, uint8_t Data)
+    175          {
+    176            /* Check parameters */
+    177            assert_param(IS_FLASH_ADDRESS(Address));
+    178          
+    179            *(PointerAttr uint8_t*) (uint16_t)Address = Data;
+    180          }
+    181          
+    182          /**
+    183            * @brief  Programs one word (4 bytes) in program or data EEPROM memory
+    184            * @param  Address : The address where the data will be programmed
+    185            * @param  Data : Value to be programmed
+    186            * @retval None
+    187            */
+    188          void FLASH_ProgramWord(uint32_t Address, uint32_t Data)
+    189          {
+    190            /* Check parameters */
+    191            assert_param(IS_FLASH_ADDRESS(Address));
+    192            /* Enable Word Write Once */
+    193            FLASH->CR2 |= FLASH_CR2_WPRG;
+    194          
+    195            /* Write one byte - from lowest address*/
+    196            *((PointerAttr uint8_t*)(uint16_t)Address)       = *((uint8_t*)(&Data));   
+    197            /* Write one byte*/
+    198            *(((PointerAttr uint8_t*)(uint16_t)Address) + 1) = *((uint8_t*)(&Data) + 1);
+    199            /* Write one byte*/
+    200            *(((PointerAttr uint8_t*)(uint16_t)Address) + 2) = *((uint8_t*)(&Data) + 2); 
+    201            /* Write one byte - from higher address*/
+    202            *(((PointerAttr uint8_t*)(uint16_t)Address) + 3) = *((uint8_t*)(&Data) + 3); 
+    203          }
+    204          
+    205          /**
+    206            * @brief  Programs option byte
+    207            * @param  Address : option byte address to program
+    208            * @param  Data : Value to write
+    209            * @retval None
+    210            */
+    211          void FLASH_ProgramOptionByte(uint16_t Address, uint8_t Data)
+    212          {
+    213            /* Check parameter */
+    214            assert_param(IS_OPTION_BYTE_ADDRESS(Address));
+    215          
+    216            /* Enable write access to option bytes */
+    217            FLASH->CR2 |= FLASH_CR2_OPT;
+    218          
+    219            /* Program option byte and his complement */
+    220            *((PointerAttr uint8_t*)Address) = Data;
+    221          
+    222            FLASH_WaitForLastOperation(FLASH_MemType_Program);
+    223          
+    224            /* Disable write access to option bytes */
+    225            FLASH->CR2 &= (uint8_t)(~FLASH_CR2_OPT);
+    226          }
+    227          
+    228          /**
+    229            * @brief  Erases option byte
+    230            * @param  Address : Option byte address to erase
+    231            * @retval None
+    232            */
+    233          void FLASH_EraseOptionByte(uint16_t Address)
+    234          {
+    235            /* Check parameter */
+    236            assert_param(IS_OPTION_BYTE_ADDRESS(Address));
+    237          
+    238            /* Enable write access to option bytes */
+    239            FLASH->CR2 |= FLASH_CR2_OPT;
+    240          
+    241            /* Erase option byte and his complement */
+    242            *((PointerAttr uint8_t*)Address) = FLASH_CLEAR_BYTE;
+    243          
+    244            FLASH_WaitForLastOperation(FLASH_MemType_Program);
+    245          
+    246            /* Disable write access to option bytes */
+    247            FLASH->CR2 &= (uint8_t)(~FLASH_CR2_OPT);
+    248          }
+    249          
+    250          /**
+    251            * @brief  Reads one byte from flash memory
+    252            * @param  Address : Address to read
+    253            * @retval Value of the byte
+    254            */
+    255          uint8_t FLASH_ReadByte(uint32_t Address)
+    256          {
+    257            /* Read byte */
+    258            return(*(PointerAttr uint8_t *) (uint16_t)Address);
+    259          }
+    260          /**
+    261            * @brief  Sets the fixed programming time
+    262            * @param  FLASH_ProgTime : Indicates the programming time to be fixed
+    263            *         This parameter can be a value of @ref FLASH_ProgramTime_TypeDef
+    264            * @retval None
+    265            */
+    266          void FLASH_SetProgrammingTime(FLASH_ProgramTime_TypeDef FLASH_ProgTime)
+    267          {
+    268            /* Check parameter */
+    269            assert_param(IS_FLASH_PROGRAM_TIME(FLASH_ProgTime));
+    270          
+    271            FLASH->CR1 &= (uint8_t)(~FLASH_CR1_FIX);
+    272            FLASH->CR1 |= (uint8_t)FLASH_ProgTime;
+    273          }
+    274          
+    275          /**
+    276            * @brief  Configues the power state for Flash program and data EEPROM during
+    277            *          wait for interrupt mode
+    278            * @param  FLASH_Power: The power state for Flash program and data EEPROM during
+    279            *         wait for interrupt mode
+    280            *         This parameter can be a value of @ref FLASH_Power_TypeDef
+    281            * @retval None
+    282            */
+    283          void FLASH_PowerWaitModeConfig(FLASH_Power_TypeDef FLASH_Power)
+    284          {
+    285            /* Check parameter */
+    286            assert_param(IS_FLASH_POWER(FLASH_Power));
+    287          
+    288            /* Flash program and data EEPROM in IDDQ during wait for interrupt mode*/
+    289            if (FLASH_Power != FLASH_Power_On)
+    290            {
+    291              FLASH->CR1 |= (uint8_t)FLASH_CR1_WAITM;
+    292            }
+    293            /* Flash program and data EEPROM not in IDDQ during wait for interrupt mode*/
+    294            else
+    295            {
+    296              FLASH->CR1 &= (uint8_t)(~FLASH_CR1_WAITM);
+    297            }
+    298          }
+    299          
+    300          /**
+    301            * @brief  Returns the fixed programming time
+    302            * @param  None
+    303            * @retval Fixed programming time value
+    304            */
+    305          FLASH_ProgramTime_TypeDef FLASH_GetProgrammingTime(void)
+    306          {
+    307            return((FLASH_ProgramTime_TypeDef)(FLASH->CR1 & FLASH_CR1_FIX));
+    308          }
+    309          
+    310          /**
+    311            * @brief  Returns the Boot memory size in bytes
+    312            * @param  None
+    313            * @retval Boot memory size in bytes
+    314            */
+    315          uint16_t FLASH_GetBootSize(void)
+    316          {
+    317            uint16_t temp = 0;
+    318          
+    319            /* Calculates the number of bytes */
+    320            temp = (uint16_t)((uint16_t)OPT->UBC * (uint16_t)128);
+    321          
+    322            /* Correction because size upper 8kb doesn't exist */
+    323            if (OPT->UBC > 0x7F)
+    324            {
+    325              temp = 8192;
+    326            }
+    327          
+    328            /* Return value */
+    329            return(temp);
+    330          
+    331          }
+    332          /**
+    333           *
+    334            * @brief  Returns the Code Area size in bytes
+    335            * @param  None
+    336            * @retval Code Area size in bytes
+    337            */
+    338          uint16_t FLASH_GetCodeSize(void)
+    339          {
+    340            uint16_t temp = 0;
+    341          
+    342            /* Calculates the number of bytes */
+    343            temp = (uint16_t)((uint16_t)OPT->PCODESIZE * (uint16_t)128);
+    344          
+    345            /* Correction because size upper of 8kb doesn't exist */
+    346            if (OPT->PCODESIZE > 0x7F)
+    347            {
+    348              temp = 8192;
+    349            }
+    350          
+    351            /* Return value */
+    352            return(temp);
+    353          }
+    354          
+    355          /**
+    356            * @brief  Returns the FLASH Read Out Protection Status.
+    357            * @param  None
+    358            * @retval FunctionalState: Indicates the FLASH Read Out Protection Status.
+    359            *   This parameter can be a ENABLE or DISABLE
+    360            */
+    361          FunctionalState FLASH_GetReadOutProtectionStatus(void)
+    362          {
+    363            FunctionalState state = DISABLE;
+    364          
+    365            if (OPT->ROP == FLASH_READOUTPROTECTION_KEY)
+    366            {
+    367              /* The status of the Flash read out protection is enabled*/
+    368              state =  ENABLE;
+    369            }
+    370            else
+    371            {
+    372              /* The status of the Flash read out protection is disabled*/
+    373              state =  DISABLE;
+    374            }
+    375          
+    376            return state;
+    377          }
+    378          
+    379          /**
+    380            * @brief  Checks whether the specified FLASH flag is set or not.
+    381            * @param  Flash_FLAG : specifies the Flash Flag to check.
+    382            *         This parameter can be a value of @ref FLASH_FLAG_TypeDef
+    383            * @retval FlagStatus : Indicates the state of the Flash_FLAG.
+    384            *         This parameter can be a value of @ref FlagStatus enumeration.
+    385            */
+    386          FlagStatus FLASH_GetFlagStatus(FLASH_FLAG_TypeDef FLASH_FLAG)
+    387          {
+    388            FlagStatus status = RESET;
+    389            assert_param(IS_FLASH_FLAGS(FLASH_FLAG));
+    390          
+    391            /* Check the status of the specified flash flag*/
+    392            if ((FLASH->IAPSR  & (uint8_t)FLASH_FLAG) != (uint8_t)RESET)
+    393            {
+    394              status = SET; /* Flash_FLAG is set*/
+    395            }
+    396            else
+    397            {
+    398              status = RESET; /* Flash_FLAG is reset*/
+    399            }
+    400          
+    401            /* Return the Flash_FLAG status*/
+    402            return status;
+    403          }
+    404          
+    405          /**
+    406          @code
+    407           All the functions defined below must be executed from RAM exclusively, except
+    408           for the FLASH_WaitForLastOperation function which can be executed from Flash.
+    409          
+    410           Steps of the execution from RAM differs from one toolchain to another:
+    411           - For Cosmic Compiler:
+    412              1- Define a segement FLASH_CODE by the mean of " #pragma section (FLASH_CODE)".
+    413              This segment is defined in the stm8l15x_flash.c file, and it's conditionned by
+    414                COSMIC_RAM_EXECUTION definifition.
+    415            2- Uncomment the "#define COSMIC_RAM_EXECUTION  (1)" line in the stm8l15x.h file,
+    416              or define it in Cosmic compiler preprocessor to enable the FLASH_CODE segment
+    417             definition.
+    418            3- In STVD Select Project\Settings\Linker\Category "input" and in the RAM section
+    419              add the FLASH_CODE segment with "-ic" options.
+    420            4- In main.c file call the _fctcpy() function with first segment character as 
+    421              parameter "_fctcpy('F');" to load the declared moveable code segment
+    422              (FLASH_CODE) in RAM before execution.
+    423            5- By default the _fctcpy function is packaged in the Cosmic machine library,
+    424              so the function prototype "int _fctcopy(char name);" must be added in main.c
+    425              file.
+    426          
+    427            - For Raisonance Compiler
+    428             1- Use the inram keyword in the function declaration to specify that it can be
+    429              executed from RAM.
+    430               This is done within the stm8l15x_flash.c file, and it's conditionned by 
+    431               RAISONANCE_RAM_EXECUTION definifition.
+    432            2- Uncomment the "#define RAISONANCE_RAM_EXECUTION  (1)" line in the stm8l15x.h
+    433             file, or define it in Raisonance compiler preprocessor to enable the access 
+    434             for the inram functions.
+    435             3- An inram function code is copied from Flash to RAM by the C startup code. 
+    436             In some applications, the RAM area where the code was initially stored may be
+    437             erased or corrupted, so it may be desirable to perform the copy again. 
+    438             Depending for the application memory model, the memcpy() or fmemcpy() functions
+    439             should be used to perform the copy.
+    440                • In case your project uses the SMALL memory model (code smaller than 64K),
+    441                 memcpy()function is recommended to perform the copy
+    442                • In case your project uses the LARGE memory model, functions can be 
+    443                everywhenre in the 24-bits address space (not limited to the first 64KB of
+    444                code), In this case, the use of memcpy() function will not be appropriate,
+    445                you need to use the specific fmemcpy() function (which copies objects with
+    446                24-bit addresses).
+    447                - The linker automatically defines 2 symbols for each inram function:
+    448                     • __address__functionname is a symbol that holds the Flash address 
+    449                     where the given function code is stored.
+    450                     • __size__functionname is a symbol that holds the function size in bytes.
+    451               And we already have the function address (which is itself a pointer)
+    452            4- In main.c file these two steps should be performed for each inram function:
+    453               • Import the "__address__functionname" and "__size__functionname" symbols
+    454                 as global variables:
+    455                   extern int __address__functionname; // Symbol holding the flash address
+    456                   extern int __size__functionname;    // Symbol holding the function size
+    457               • In case of SMALL memory model use, Call the memcpy() function to copy the
+    458                inram function to the RAM destination address:
+    459                          memcpy(functionname, // RAM destination address
+    460                                (void*)&__address__functionname, // Flash source address
+    461                                (int)&__size__functionname); // Code size of the function
+    462               • In case of LARGE memory model use, call the fmemcpy() function to copy 
+    463               the inram function to the RAM destination address:
+    464                           memcpy(functionname, // RAM destination address
+    465                                (void @far*)&__address__functionname, // Flash source address
+    466                                (int)&__size__functionname); // Code size of the function
+    467          
+    468           - For IAR Compiler:
+    469              1- Define a location FLASH_CODE before each code function by the mean of 
+    470              " #pragma location = "FLASH_CODE"".
+    471              This location is defined in the stm8l15x_flash.c file, and it's conditionned
+    472              by IAR_RAM_EXECUTION definifition.
+    473            2- Uncomment the "#define IAR_RAM_EXECUTION  (1)" line in the stm8l15x.h file,
+    474              or define it in IAR compiler preprocessor to enable the FLASH_CODE location 
+    475              definition.
+    476            3- Edit the linker file lnkstm8l15xxx.icf available under 
+    477              "$\IAR Systems\Embedded Workbench 6.0\stm8\config\lnkstm8l15xxx.icf"
+    478                 by updating the line "initialize by copy { rw, ro section .tiny.rodata };"
+    479                 with the the following one:
+    480                 "initialize by copy { rw, ro section .tiny.rodata, section FLASH_CODE};".
+    481          
+    482            4- The speed optimization is required to ensure proper execution from RAM.
+    483              -> In IAR Embedded workbench IDE Select Project\Options\C/C++ Compiler\Optimizations
+    484              select speed optimization 
+    485              Note: There is no need to add any specific code in main.c file, everything 
+    486              is handled by the linker in the start up phase.
+    487          
+    488           The Flash_DataProgram example given within the STM8L15x_StdPeriph_Lib package,
+    489           details all the steps described above.
+    490          
+    491          @endcode
+    492          */
+    493          
+    494          /**
+    495            * @brief
+    496            *******************************************************************************
+    497            *                         Execution from RAM enable
+    498            *******************************************************************************
+    499            *
+    500            * To enable execution from RAM you can either uncomment the following defines 
+    501            * in the stm8l15x.h file or define them in your toolchain compiler preprocessor
+    502            * and though depending on the used toolchain.
+    503            * - #define COSMIC_RAM_EXECUTION  (1)    with Cosmic
+    504            * - #define RAISONANCE_RAM_EXECUTION (1) with Raisonance
+    505            * - #define IAR_RAM_EXECUTION  (1)       with IAR
+    506            */
+    507          
+    508          #ifdef COSMIC_RAM_EXECUTION
+    509           #pragma section (FLASH_CODE)
+    510          #endif
+    511          
+    512          /**
+    513            * @brief  Waits for a Flash operation to complete.
+    514            * @note   The call and executin of this function must be done from RAM in case
+    515            *         of Block operation, otherwise it can be executed from Flash
+    516            * @param  FLASH_MemType : Memory type
+    517            *         This parameter can be a value of @ref FLASH_MemType_TypeDef
+    518            * @retval FLASH status
+    519            */
+    520          #ifdef IAR_RAM_EXECUTION
+    521           #pragma location = "FLASH_CODE"
+    522          #endif
+    523          
+    524          FLASH_Status_TypeDef FLASH_WaitForLastOperation(FLASH_MemType_TypeDef FLASH_MemType) IN_RAM
+    525          {
+    526            uint32_t timeout = OPERATION_TIMEOUT;
+    527            uint8_t flagstatus = 0x00;
+    528            /* Wait until operation completion or write protected page occured */
+    529            if (FLASH_MemType == FLASH_MemType_Program)
+    530            {
+    531            while ((flagstatus == 0x00) && (timeout != 0x00))
+    532              {
+    533                flagstatus = (uint8_t)(FLASH->IAPSR & (uint8_t)(FLASH_IAPSR_EOP |
+    534                                       FLASH_IAPSR_WR_PG_DIS));
+    535                timeout--;
+    536              }
+    537            }
+    538            else
+    539            {
+    540              while ((flagstatus == 0x00) && (timeout != 0x00))
+    541              {
+    542                flagstatus = (uint8_t)(FLASH->IAPSR & (uint8_t)(FLASH_IAPSR_HVOFF |
+    543                                       FLASH_IAPSR_WR_PG_DIS));
+    544                timeout--;
+    545              }
+    546            }
+    547            if (timeout == 0x00 )
+    548            {
+    549            flagstatus = FLASH_Status_TimeOut;
+    550            }
+    551          
+    552            return((FLASH_Status_TypeDef)flagstatus);
+    553          }
+    554          
+    555          /**
+    556            * @brief  Configues the power state for Flash program and data EEPROM during
+    557            *         run, low power run and low power wait modes
+    558            * @note   This function must be called and executed from RAM.
+    559            * @param  FLASH_Power: power state of the Flash program and data EEPROM
+    560            *         This parameter can be a value of @ref FLASH_Power_TypeDef
+    561            * @retval None
+    562            */
+    563          #ifdef IAR_RAM_EXECUTION
+    564           #pragma location = "FLASH_CODE"
+    565          #endif
+    566          
+    567          void FLASH_PowerRunModeConfig(FLASH_Power_TypeDef FLASH_Power) IN_RAM
+    568          {
+    569            /* Check parameter */
+    570            assert_param(IS_FLASH_POWER(FLASH_Power));
+    571          
+    572            if (FLASH_Power != FLASH_Power_On)
+    573            {
+    574            FLASH->CR1 |= (uint8_t)FLASH_CR1_EEPM;
+    575            }
+    576            else
+    577            {
+    578              FLASH->CR1 &= (uint8_t)(~FLASH_CR1_EEPM);
+    579            }
+    580          }
+    581          
+    582          /**
+    583            * @brief  Checks the power status for Flash program and data EEPROM
+    584            * @note   This function should be called and executed from RAM.
+    585            * @param  None
+    586            * @retval Flash program and data EEPROM power status
+    587            *         This parameter can be a value of @ref FLASH_PowerStatus_TypeDef
+    588            */
+    589          #ifdef IAR_RAM_EXECUTION
+    590           #pragma location = "FLASH_CODE"
+    591          #endif
+    592          
+    593          FLASH_PowerStatus_TypeDef FLASH_GetPowerStatus(void) IN_RAM
+    594          {
+    595            return((FLASH_PowerStatus_TypeDef)(FLASH->CR1 & (uint8_t)0x0C));
+    596          }
+    597          
+    598          /**
+    599            * @brief  Programs a memory block
+    600            * @note   This function should be called and executed from RAM.
+    601            * @param  FLASH_MemType : The type of memory to program
+    602            * @param  BlockNum : The block number
+    603            * @param  FLASH_ProgMode : The programming mode.
+    604            * @param  Buffer : Pointer to buffer containing source data.
+    605            * @retval None.
+    606            */
+    607          #ifdef IAR_RAM_EXECUTION
+    608           #pragma location = "FLASH_CODE"
+    609          #endif
+    610          
+    611          void FLASH_ProgramBlock(uint16_t BlockNum, FLASH_MemType_TypeDef FLASH_MemType,
+    612                                  FLASH_ProgramMode_TypeDef FLASH_ProgMode, uint8_t *Buffer) IN_RAM
+    613          {
+    614            uint16_t Count = 0;
+    615            uint32_t startaddress = 0;
+    616          
+    617            /* Check parameters */
+    618            assert_param(IS_FLASH_MEMORY_TYPE(FLASH_MemType));
+    619            assert_param(IS_FLASH_PROGRAM_MODE(FLASH_ProgMode));
+    620            if (FLASH_MemType == FLASH_MemType_Program)
+    621            {
+    622            assert_param(IS_FLASH_PROGRAM_BLOCK_NUMBER(BlockNum));
+    623              startaddress = FLASH_PROGRAM_START_PHYSICAL_ADDRESS;
+    624            }
+    625            else
+    626            {
+    627              assert_param(IS_FLASH_DATA_EEPROM_BLOCK_NUMBER(BlockNum));
+    628              startaddress = FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS;
+    629            }
+    630          
+    631            /* Point to the first block address */
+    632            startaddress = startaddress + ((uint32_t)BlockNum * FLASH_BLOCK_SIZE);
+    633          
+    634            /* Selection of Standard or Fast programming mode */
+    635            if (FLASH_ProgMode == FLASH_ProgramMode_Standard)
+    636            {
+    637            /* Standard programming mode */
+    638            FLASH->CR2 |= FLASH_CR2_PRG;
+    639            }
+    640            else
+    641            {
+    642            /* Fast programming mode */
+    643            FLASH->CR2 |= FLASH_CR2_FPRG;
+    644            }
+    645          
+    646            /* Copy data bytes from RAM to FLASH memory */
+    647            for (Count = 0; Count < FLASH_BLOCK_SIZE; Count++)
+    648            {
+    649          #if defined (STM8L15X_MD) || defined (STM8L15X_MDP)
+    650            *((PointerAttr uint8_t*) (uint16_t)startaddress + Count) = ((uint8_t)(Buffer[Count]));
+    651          #elif defined (STM8L15X_HD)
+    652            *((PointerAttr uint8_t*) (uint32_t)startaddress + Count) = ((uint8_t)(Buffer[Count]));
+    653          #endif
+    654            }
+    655          }
+    656          
+    657          /**
+    658            * @brief  Erases a block in the program or data memory.
+    659            * @note   This function should be called and executed from RAM.
+    660            * @param  FLASH_MemType :  The type of memory to erase
+    661            * @param  BlockNum : Indicates the block number to erase
+    662            * @retval None.
+    663            */
+    664          #ifdef IAR_RAM_EXECUTION
+    665           #pragma location = "FLASH_CODE"
+    666          #endif
+    667          
+    668          void FLASH_EraseBlock(uint16_t BlockNum, FLASH_MemType_TypeDef FLASH_MemType) IN_RAM
+    669          {
+    670            uint32_t startaddress = 0;
+    671          #if defined (STM8L15X_MD) || defined (STM8L15X_MDP)
+    672            uint32_t PointerAttr  *pwFlash;
+    673          #elif defined (STM8L15X_HD)
+    674            uint8_t PointerAttr  *pwFlash;
+    675          #endif
+    676          
+    677            /* Check parameters */
+    678            assert_param(IS_FLASH_MEMORY_TYPE(FLASH_MemType));
+    679            if (FLASH_MemType == FLASH_MemType_Program)
+    680            {
+    681            assert_param(IS_FLASH_PROGRAM_BLOCK_NUMBER(BlockNum));
+    682              startaddress = FLASH_PROGRAM_START_PHYSICAL_ADDRESS;
+    683            }
+    684            else
+    685            {
+    686              assert_param(IS_FLASH_DATA_EEPROM_BLOCK_NUMBER(BlockNum));
+    687              startaddress = FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS;
+    688            }
+    689          
+    690            /* Point to the first block address */
+    691          #if defined (STM8L15X_MD) || defined (STM8L15X_MDP)
+    692            pwFlash = (PointerAttr uint32_t *)(uint16_t)(startaddress + ((uint32_t)BlockNum * FLASH_BLOCK_SIZE));
+    693          #elif defined (STM8L15X_HD)
+    694            pwFlash = (PointerAttr uint8_t *)(uint32_t)(startaddress + ((uint32_t)BlockNum * FLASH_BLOCK_SIZE));
+    695          #endif
+    696          
+    697            /* Enable erase block mode */
+    698            FLASH->CR2 |= FLASH_CR2_ERASE;
+    699          
+    700          #if defined (STM8L15X_MD) || defined (STM8L15X_MDP)
+    701            *pwFlash = (uint32_t)0;
+    702          #elif defined (STM8L15X_HD)
+    703            *pwFlash = (uint8_t)0;
+    704            *(pwFlash + 1) = (uint8_t)0;
+    705            *(pwFlash + 2) = (uint8_t)0;
+    706            *(pwFlash + 3) = (uint8_t)0;
+    707          #endif
+    708          }
+    709          
+    710          
+    711          #ifdef COSMIC_RAM_EXECUTION
+    712           /* End of FLASH_CODE section */
+    713           #pragma section ()
+    714          #endif /* COSMIC_RAM_EXECUTION */
+    715          /**
+    716            * @}
+    717            */
+    718          
+    719          /**
+    720            * @}
+    721            */
+    722          
+    723          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      16  FLASH_DeInit
+      62  FLASH_EraseBlock
+       5  FLASH_EraseByte
+      17  FLASH_EraseOptionByte
+      36  FLASH_GetBootSize
+      36  FLASH_GetCodeSize
+      20  FLASH_GetFlagStatus
+       6  FLASH_GetPowerStatus
+       6  FLASH_GetProgrammingTime
+      20  FLASH_GetReadOutProtectionStatus
+      13  FLASH_ITConfig
+       7  FLASH_Lock
+      14  FLASH_PowerRunModeConfig
+      14  FLASH_PowerWaitModeConfig
+     141  FLASH_ProgramBlock
+       4  FLASH_ProgramByte
+      16  FLASH_ProgramOptionByte
+      38  FLASH_ProgramWord
+       4  FLASH_ReadByte
+      11  FLASH_SetProgrammingTime
+      25  FLASH_Unlock
+      93  FLASH_WaitForLastOperation
+
+ 
+ 604 bytes in section .far_func.text
+ 
+ 604 bytes of CODE memory
+
+Errors: none
+Warnings: none

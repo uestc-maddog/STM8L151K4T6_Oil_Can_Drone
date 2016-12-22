@@ -1,0 +1,175 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:29
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_irtim.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_irtim.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_irtim.lst
+#    Object file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_irtim.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_irtim.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_irtim.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the IRTIM firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          
+     22          /* Includes ------------------------------------------------------------------*/
+     23          #include "stm8l15x_irtim.h"
+     24          
+     25          /** @addtogroup STM8L15x_StdPeriph_Driver
+     26            * @{
+     27            */
+     28          
+     29          /* Private typedef -----------------------------------------------------------*/
+     30          /* Private define ------------------------------------------------------------*/
+     31          /* Private macro -------------------------------------------------------------*/
+     32          /* Private variables ---------------------------------------------------------*/
+     33          /* Private function prototypes -----------------------------------------------*/
+     34          
+     35          /**
+     36            * @addtogroup IRTIM_Public_Functions
+     37            * @{
+     38            */
+     39          
+     40          /**
+     41            * @brief  Deinitializes the IRTIM peripheral registers to their default reset values.
+     42            * @param  None
+     43            * @retval None
+     44            */
+     45          void IRTIM_DeInit(void)
+     46          {
+     47            IRTIM->CR = IRTIM_CR_RESET_VALUE;
+     48          }
+     49          
+     50          /**
+     51            * @brief  Enables or disables the IRTIM peripheral.
+     52            * @param  NewState : The new state of the IRTIM peripheral.
+     53            *         This parameter can be: ENABLE or DISABLE.
+     54            * @retval None
+     55            */
+     56          void IRTIM_Cmd(FunctionalState NewState)
+     57          {
+     58            /* Check the parameters */
+     59            assert_param(IS_FUNCTIONAL_STATE(NewState));
+     60          
+     61            /* set or Reset the EN Bit */
+     62            if (NewState ==   DISABLE)
+     63            {
+     64              IRTIM->CR &= (uint8_t)(~IRTIM_CR_EN) ;
+     65            }
+     66            else
+     67            {
+     68              IRTIM->CR |= IRTIM_CR_EN ;
+     69            }
+     70          }
+     71          
+     72          /**
+     73            * @brief  Enables or disables the High sink open drain buffer of the IRTIM peripheral.
+     74            * @param  NewState : The new state of the High sink open drain buffer.
+     75            *         This parameter can be: ENABLE or DISABLE.
+     76            * @retval None
+     77            */
+     78          void IRTIM_HighSinkODCmd(FunctionalState NewState)
+     79          {
+     80            /* Check the parameters */
+     81            assert_param(IS_FUNCTIONAL_STATE(NewState));
+     82          
+     83            /* set or Reset the EN Bit */
+     84            if (NewState == DISABLE)
+     85            {
+     86              IRTIM->CR &= (uint8_t)(~IRTIM_CR_HSEN) ;
+     87            }
+     88            else
+     89            {
+     90              IRTIM->CR |= IRTIM_CR_HSEN ;
+     91            }
+     92          }
+     93          
+     94          /**
+     95            * @brief  Checks whether the IRTIM device is enabled or not.
+     96            * @param  None
+     97            * @retval FunctionalState : state of the IRTIM device.
+     98            *         This parameter can be: ENABLE or DISABLE.
+     99            */
+    100          
+    101          FunctionalState IRTIM_GetStatus(void)
+    102          {
+    103            return ((FunctionalState) (IRTIM->CR & IRTIM_CR_EN));
+    104          }
+    105          
+    106          /**
+    107            * @brief  Checks whether the IRTIM High Sink Open Drain buffer is Enabled or not.
+    108            * @param  None
+    109            * @retval FunctionalState : state of High Sink Open Drain buffer.
+    110            *         This parameter can be: ENABLE or DISABLE.
+    111            */
+    112          
+    113          FunctionalState IRTIM_GetHighSinkODStatus(void)
+    114          {
+    115            return ((FunctionalState)(IRTIM->CR & IRTIM_CR_HSEN));
+    116          }
+    117          
+    118          /**
+    119            * @}
+    120            */
+    121          
+    122          /**
+    123            * @}
+    124            */
+    125          
+    126          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      13  IRTIM_Cmd
+       5  IRTIM_DeInit
+       6  IRTIM_GetHighSinkODStatus
+       6  IRTIM_GetStatus
+      13  IRTIM_HighSinkODCmd
+
+ 
+ 43 bytes in section .far_func.text
+ 
+ 43 bytes of CODE memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,556 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:27
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
+#    Command line =  
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c" -e -Ol
+#        --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\CC1101.lst
+#    Object file  =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\CC1101.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
+      1          /*
+      2          ================================================================================
+      3          Copyright   : Ebyte electronic co.,LTD
+      4          Website     : http://yh-ebyte.taobao.com
+      5                        http://yiheliyong.cn.alibaba.com
+      6          Description : This module contains the low level operations for CC1101
+      7          ================================================================================
+      8          */
+      9          #include "CC1101.H"
+     10          #include "STM8l15x_conf.h"
+     11          #include "stdio.h"
+     12          
+     13          ////10, 7, 5, 0, -5, -10, -15, -20, dbm output power, 0x12 == -30dbm
+     14          //INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E};
+     15          
+     16          INT8U PaTabel[] = {0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,};   // 915MHz   10dBm
+     17          
+     18          // Sync word qualifier mode = 30/32 sync word bits detected 
+     19          // CRC autoflush = false 
+     20          // Channel spacing = 199.951172 
+     21          // Data format = Normal mode 
+     22          // Data rate = 2.00224 
+     23          // RX filter BW = 58.035714 
+     24          // PA ramping = false 
+     25          // Preamble count = 4 
+     26          // Whitening = false 
+     27          // Address config = No address check 
+     28          // Carrier frequency = 400.199890 
+     29          // Device address = 0 
+     30          // TX power = 10 
+     31          // Manchester enable = false 
+     32          // CRC enable = true 
+     33          // Deviation = 5.157471 
+     34          // Packet length mode = Variable packet length mode. Packet length configured by the first byte after sync word 
+     35          // Packet length = 255 
+     36          // Modulation format = GFSK 
+     37          // Base frequency = 399.999939 
+     38          // Modulated = true 
+     39          // Channel number = 1 
+     40          // PA table 
+     41          #define PA_TABLE {0xc2,0x00,0x00,0x00,0x00,0x00,0x00,0x00,}
+     42          
+     43          // RF = 915MHz
+     44          static const uint8_t CC1101InitData[23][2]= 
+     45          {
+     46            {CC1101_IOCFG0,   0x06},
+     47            {CC1101_FIFOTHR,  0x47},
+     48            {CC1101_PKTCTRL0, 0x05},
+     49            {CC1101_CHANNR,   0x01},   // í¨μà1  Channel number = 1
+     50            {CC1101_FSCTRL1,  0x06},
+     51            {CC1101_FREQ2,    0x23},   // ?ù?μ  915.000000       ??2¨?μ?ê=?ù?μ+2???￡¨0.2MHz￡?* í¨μào?  915.199951MHz
+     52            {CC1101_FREQ1,    0x31},
+     53            {CC1101_FREQ0,    0x3B},
+     54            {CC1101_MDMCFG4,  0xFA},   // êy?Y?ù?ê￡o49.9878kBaud
+     55            {CC1101_MDMCFG3,  0xF8},
+     56            {CC1101_MDMCFG2,  0x13},
+     57            {CC1101_DEVIATN,  0x15},
+     58            {CC1101_MCSM2,    0x07},   // none
+     59            {CC1101_MCSM1,    0x30},   // 0x3B
+     60            {CC1101_MCSM0,    0x18},
+     61            {CC1101_FOCCFG,   0x16},
+     62            {CC1101_WORCTRL,  0xFB},
+     63            {CC1101_FSCAL3,   0xE9},
+     64            {CC1101_FSCAL2,   0x2A},
+     65            {CC1101_FSCAL1,   0x00},
+     66            {CC1101_FSCAL0,   0x1F},
+     67            {CC1101_TEST2,    0x81},
+     68            {CC1101_TEST1,    0x35},
+     69          };
+     70          
+     71          //// RF = 400MHz
+     72          //static const uint8_t CC1101InitData[22][2]= 
+     73          //{
+     74          //  {CC1101_IOCFG0,   0x06},
+     75          //  {CC1101_FIFOTHR,  0x47},
+     76          //  {CC1101_PKTCTRL0, 0x05},
+     77          //  {CC1101_CHANNR,   0x01},   // í¨μà1  Channel number = 1
+     78          //  {CC1101_FSCTRL1,  0x06},
+     79          //  {CC1101_FREQ2,    0x0F}, // ?ù?μ  399.999939MHz    ??2¨?μ?ê=?ù?μ+2???￡¨0.2MHz￡?* í¨μào?  400.199890MHz
+     80          //  {CC1101_FREQ1,    0x62},
+     81          //  {CC1101_FREQ0,    0x76},
+     82          //  {CC1101_MDMCFG4,  0xF6},
+     83          //  {CC1101_MDMCFG3,  0x43},
+     84          //  {CC1101_MDMCFG2,  0x13},
+     85          //  {CC1101_DEVIATN,  0x15},
+     86          //  {CC1101_MCSM0,    0x18},
+     87          //  {CC1101_FOCCFG,   0x16},
+     88          //  {CC1101_WORCTRL,  0xFB},
+     89          //  {CC1101_FSCAL3,   0xE9},
+     90          //  {CC1101_FSCAL2,   0x2A},
+     91          //  {CC1101_FSCAL1,   0x00},
+     92          //  {CC1101_FSCAL0,   0x1F},
+     93          //  {CC1101_TEST2,    0x81},
+     94          //  {CC1101_TEST1,    0x35},
+     95          //  {CC1101_MCSM1,    0x3B},
+     96          //};
+     97          
+     98          /*read a byte from the specified register*/
+     99          INT8U CC1101ReadReg( INT8U addr );
+    100          
+    101          /*Read some bytes from the rigisters continously*/
+    102          void CC1101ReadMultiReg( INT8U addr, INT8U *buff, INT8U size );
+    103          
+    104          /*Write a byte to the specified register*/
+    105          void CC1101WriteReg( INT8U addr, INT8U value );
+    106          
+    107          /*Flush the TX buffer of CC1101*/
+    108          void CC1101ClrTXBuff( void );
+    109          
+    110          /*Flush the RX buffer of CC1101*/
+    111          void CC1101ClrRXBuff( void );
+    112          
+    113          /*Get received count of CC1101*/
+    114          INT8U CC1101GetRXCnt( void );
+    115          
+    116          /*Reset the CC1101 device*/
+    117          void CC1101Reset( void );
+    118          
+    119          /*Write some bytes to the specified register*/
+    120          void CC1101WriteMultiReg( INT8U addr, INT8U *buff, INT8U size );
+    121          
+    122          extern INT8U SPI_ExchangeByte(INT8U input); // 通过SPI进行数据交换,见bsp.c
+    123          extern void DelayMs(u16 x); 
+    124          
+    125          /*
+    126          ================================================================================
+    127          Function : CC1101WORInit( )
+    128              Initialize the WOR function of CC1101
+    129          INPUT    : None
+    130          OUTPUT   : None
+    131          ================================================================================
+    132          */
+    133          void  CC1101WORInit( void )
+    134          {
+    135          
+    136              CC1101WriteReg(CC1101_MCSM0,0x18);
+    137              CC1101WriteReg(CC1101_WORCTRL,0x78); //Wake On Radio Control
+    138              CC1101WriteReg(CC1101_MCSM2,0x00);
+    139              CC1101WriteReg(CC1101_WOREVT1,0x8C);
+    140              CC1101WriteReg(CC1101_WOREVT0,0xA0);
+    141          	
+    142              CC1101WriteCmd( CC1101_SWORRST );
+    143          }
+    144          /*
+    145          ================================================================================
+    146          Function : CC1101ReadReg( )
+    147              read a byte from the specified register
+    148          INPUT    : addr, The address of the register
+    149          OUTPUT   : the byte read from the rigister
+    150          ================================================================================
+    151          */
+    152          INT8U CC1101ReadReg( INT8U addr )
+    153          {
+    154              INT8U i;
+    155              CC_CSN_LOW( );
+    156              SPI_ExchangeByte( addr | READ_SINGLE);
+    157              i = SPI_ExchangeByte( 0xFF );
+    158              CC_CSN_HIGH( );
+    159              return i;
+    160          }
+    161          /*
+    162          ================================================================================
+    163          Function : CC1101ReadMultiReg( )
+    164              Read some bytes from the rigisters continously
+    165          INPUT    : addr, The address of the register
+    166                     buff, The buffer stores the data
+    167                     size, How many bytes should be read
+    168          OUTPUT   : None
+    169          ================================================================================
+    170          */
+    171          void CC1101ReadMultiReg( INT8U addr, INT8U *buff, INT8U size )
+    172          {
+    173              INT8U i, j;
+    174              CC_CSN_LOW( );
+    175              SPI_ExchangeByte( addr | READ_BURST);
+    176              for( i = 0; i < size; i ++ )
+    177              {
+    178                  for( j = 0; j < 20; j ++ );
+    179                  *( buff + i ) = SPI_ExchangeByte( 0xFF );
+    180              }
+    181              CC_CSN_HIGH( );
+    182          }
+    183          /*
+    184          ================================================================================
+    185          Function : CC1101ReadStatus( )
+    186              Read a status register
+    187          INPUT    : addr, The address of the register
+    188          OUTPUT   : the value read from the status register
+    189          ================================================================================
+    190          */
+    191          INT8U CC1101ReadStatus( INT8U addr )
+    192          {
+    193              INT8U i;
+    194              CC_CSN_LOW( );
+    195              SPI_ExchangeByte( addr | READ_BURST);
+    196              i = SPI_ExchangeByte( 0xFF );
+    197              CC_CSN_HIGH( );
+    198              return i;
+    199          }
+    200          /*
+    201          ================================================================================
+    202          Function : CC1101SetTRMode( )
+    203              Set the device as TX mode or RX mode
+    204          INPUT    : mode selection
+    205          OUTPUT   : None
+    206          ================================================================================
+    207          */
+    208          void CC1101SetTRMode( TRMODE mode )
+    209          {
+    210              if( mode == TX_MODE )
+    211              {
+    212                  CC1101WriteReg(CC1101_IOCFG0,0x46);
+    213                  CC1101WriteCmd( CC1101_STX );
+    214              }
+    215              else if( mode == RX_MODE )
+    216              {
+    217                  CC1101WriteReg(CC1101_IOCFG0,0x46);
+    218                  CC1101WriteCmd( CC1101_SRX );
+    219              }
+    220          }
+    221          /*
+    222          ================================================================================
+    223          Function : CC1101WriteReg( )
+    224              Write a byte to the specified register
+    225          INPUT    : addr, The address of the register
+    226                     value, the byte you want to write
+    227          OUTPUT   : None
+    228          ================================================================================
+    229          */
+    230          void CC1101WriteReg(INT8U addr, INT8U value)
+    231          {
+    232              CC_CSN_LOW();
+    233              SPI_ExchangeByte(addr);
+    234              SPI_ExchangeByte(value);
+    235              CC_CSN_HIGH();
+    236          }
+    237          /*
+    238          ================================================================================
+    239          Function : CC1101WriteMultiReg()
+    240              Write some bytes to the specified register
+    241          INPUT    : addr, The address of the register
+    242                     buff, a buffer stores the values
+    243                     size, How many byte should be written
+    244          OUTPUT   : None
+    245          ================================================================================
+    246          */
+    247          void CC1101WriteMultiReg( INT8U addr, INT8U *buff, INT8U size )
+    248          {
+    249              INT8U i;
+    250              CC_CSN_LOW( );
+    251              SPI_ExchangeByte( addr | WRITE_BURST );
+    252              for( i = 0; i < size; i ++ )
+    253              {
+    254                  SPI_ExchangeByte( *( buff + i ) );
+    255              }
+    256              CC_CSN_HIGH( );
+    257          }
+    258          /*
+    259          ================================================================================
+    260          Function : CC1101WriteCmd( )
+    261              Write a command byte to the device
+    262          INPUT    : command, the byte you want to write
+    263          OUTPUT   : None
+    264          ================================================================================
+    265          */
+    266          void CC1101WriteCmd( INT8U command )
+    267          {
+    268              CC_CSN_LOW( );
+    269              SPI_ExchangeByte( command );
+    270              CC_CSN_HIGH( );
+    271          }
+    272          /*
+    273          ================================================================================
+    274          Function : CC1101Reset( )
+    275              Reset the CC1101 device
+    276          INPUT    : None
+    277          OUTPUT   : None
+    278          ================================================================================
+    279          */
+    280          void CC1101Reset( void )
+    281          {
+    282              INT8U x;
+    283          
+    284              CC_CSN_HIGH( );
+    285              CC_CSN_LOW( );
+    286              CC_CSN_HIGH( );
+    287              for( x = 0; x < 100; x ++ );        // 至少40us
+    288              CC1101WriteCmd(CC1101_SRES);
+    289          }
+    290          /*
+    291          ================================================================================
+    292          Function : CC1101SetIdle( )
+    293              Set the CC1101 into IDLE mode
+    294          INPUT    : None
+    295          OUTPUT   : None
+    296          ================================================================================
+    297          */
+    298          void CC1101SetIdle( void )
+    299          {
+    300              CC1101WriteCmd(CC1101_SIDLE);
+    301          }
+    302          /*
+    303          ================================================================================
+    304          Function : CC1101ClrTXBuff( )
+    305              Flush the TX buffer of CC1101
+    306          INPUT    : None
+    307          OUTPUT   : None
+    308          ================================================================================
+    309          */
+    310          void CC1101ClrTXBuff( void )
+    311          {
+    312              CC1101SetIdle();//MUST BE IDLE MODE
+    313              CC1101WriteCmd( CC1101_SFTX );
+    314          }
+    315          /*
+    316          ================================================================================
+    317          Function : CC1101ClrRXBuff( )
+    318              Flush the RX buffer of CC1101
+    319          INPUT    : None
+    320          OUTPUT   : None
+    321          ================================================================================
+    322          */
+    323          void CC1101ClrRXBuff( void )
+    324          {
+    325              CC1101SetIdle();//MUST BE IDLE MODE
+    326              CC1101WriteCmd( CC1101_SFRX );
+    327          }
+    328          /*
+    329          ================================================================================
+    330          Function : CC1101SendPacket( )
+    331              Send a packet
+    332          INPUT    : txbuffer, The buffer stores data to be sent
+    333                     size, How many bytes should be sent
+    334                     mode, Broadcast or address check packet
+    335          OUTPUT   : None
+    336          ================================================================================
+    337          */
+    338          void CC1101SendPacket( INT8U *txbuffer, INT8U size, TX_DATA_MODE mode )
+    339          {
+    340              uint8_t address;
+    341              static uint8_t flag = 0;
+    342          	
+    343              if(mode == BROADCAST)          address = 0;
+    344              else if(mode == ADDRESS_CHECK) address = CC1101ReadReg(CC1101_ADDR);  // 本机地址
+    345          
+    346              if(flag == 0)    // 仅第一次打印
+    347              {
+    348                  printf("local_address:%d\r\n", (int)address);
+    349                  flag = 1;
+    350              }
+    351              CC1101ClrTXBuff();
+    352              
+    353              if((CC1101ReadReg(CC1101_PKTCTRL1)& ~0x03)!= 0)
+    354              { 
+    355                  address = RX_Address;
+    356                  CC1101WriteReg(CC1101_TXFIFO, size + 1);
+    357                  CC1101WriteReg(CC1101_TXFIFO, address);
+    358              }
+    359              else
+    360              {
+    361                  CC1101WriteReg(CC1101_TXFIFO, size);
+    362              }
+    363          
+    364              CC1101WriteMultiReg(CC1101_TXFIFO, txbuffer, size);
+    365              CC1101SetTRMode(TX_MODE);
+    366              while(CC_IRQ_READ()!= 0);
+    367              while(CC_IRQ_READ()== 0);
+    368          
+    369              CC1101ClrTXBuff();
+    370          }
+    371          /*
+    372          ================================================================================
+    373          Function : CC1101GetRXCnt( )
+    374              Get received count of CC1101
+    375          INPUT    : None
+    376          OUTPUT   : How many bytes hae been received
+    377          ================================================================================
+    378          */
+    379          INT8U CC1101GetRXCnt( void )
+    380          {
+    381              return ( CC1101ReadStatus( CC1101_RXBYTES )  & BYTES_IN_RXFIFO );
+    382          }
+    383          /*
+    384          ================================================================================
+    385          Function : CC1101SetAddress( )
+    386              Set the address and address mode of the CC1101
+    387          INPUT    : address, The address byte
+    388                     AddressMode, the address check mode
+    389          OUTPUT   : None
+    390          ================================================================================
+    391          */
+    392          void CC1101SetAddress( INT8U address, ADDR_MODE AddressMode)
+    393          {
+    394              INT8U btmp = CC1101ReadReg( CC1101_PKTCTRL1 ) & ~0x03;
+    395              CC1101WriteReg(CC1101_ADDR, address);
+    396              if     ( AddressMode == BROAD_ALL )     {}
+    397              else if( AddressMode == BROAD_NO  )     { btmp |= 0x01; }
+    398              else if( AddressMode == BROAD_0   )     { btmp |= 0x02; }
+    399              else if( AddressMode == BROAD_0AND255 ) { btmp |= 0x03; }   
+    400          }
+    401          /*
+    402          ================================================================================
+    403          Function : CC1101SetSYNC( )
+    404              Set the SYNC bytes of the CC1101
+    405          INPUT    : sync, 16bit sync 
+    406          OUTPUT   : None
+    407          ================================================================================
+    408          */
+    409          void CC1101SetSYNC( INT16U sync )
+    410          {
+    411              CC1101WriteReg(CC1101_SYNC1, 0xFF & ( sync>>8 ) );
+    412              CC1101WriteReg(CC1101_SYNC0, 0xFF & sync ); 
+    413          }
+    414          /*
+    415          ================================================================================
+    416          Function : CC1101RecPacket( )
+    417              Receive a packet
+    418          INPUT    : rxBuffer, A buffer store the received data
+    419          OUTPUT   : 1:received count, 0:no data
+    420          ================================================================================
+    421          */
+    422          INT8U CC1101RecPacket(INT8U *rxBuffer)
+    423          {
+    424              uint8_t status[2], pktLen;
+    425          
+    426              if(CC1101GetRXCnt()!= 0)
+    427              {
+    428                  pktLen = CC1101ReadReg(CC1101_RXFIFO) & 0xff;        // Read length byte
+    429                  if((CC1101ReadReg(CC1101_PKTCTRL1) & ~0x03)!= 0)
+    430                  {
+    431                      CC1101ReadReg(CC1101_RXFIFO);
+    432                  }
+    433                  if(pktLen <= 0 || pktLen > 15) return 0;
+    434                  else                           pktLen --;
+    435                  CC1101ReadMultiReg(CC1101_RXFIFO, rxBuffer, pktLen); // Pull data
+    436                  CC1101ReadMultiReg(CC1101_RXFIFO, status, 2);        // Read  status bytes
+    437          
+    438                  CC1101ClrRXBuff();
+    439          
+    440                  if(status[1] & CRC_OK) return pktLen; 
+    441                  else                   return 0; 
+    442              }
+    443              else return 0;                               // Error
+    444          }
+    445          /*
+    446          ================================================================================
+    447          Function : CC1101Init( )
+    448              Initialize the CC1101, User can modify it
+    449          INPUT    : None
+    450          OUTPUT   : None
+    451          ================================================================================
+    452          */
+    453          void CC1101Init( void )
+    454          {
+    455              volatile INT8U i, j;
+    456              CC1101Reset();    
+    457              
+    458              for(i = 0; i < 23; i++)
+    459              {
+    460                  CC1101WriteReg(CC1101InitData[i][0], CC1101InitData[i][1]);
+    461              }
+    462           
+    463              for(i = 0; i < 23; i++)
+    464              {
+    465                  j = CC1101ReadReg(CC1101InitData[i][0]);
+    466                  printf("%d  ", (int)j);
+    467              }
+    468              
+    469              CC1101SetAddress(TX_Address, BROAD_0AND255);  // 从机地址
+    470              CC1101SetSYNC(0xD391);                        // 8799
+    471              CC1101WriteReg(CC1101_MDMCFG1, 0x22);         // Modem Configuration      
+    472              CC1101WriteReg(CC1101_MDMCFG0, 0xF8);
+    473          
+    474          //    CC1101WriteMultiReg(CC1101_PATABLE, PaTabel+1, 1);  // 发射功率
+    475              CC1101WriteMultiReg(CC1101_PATABLE, PaTabel, 8);
+    476          
+    477          //    i = CC1101ReadStatus(CC1101_PARTNUM);//for test, must be 0x80
+    478          //    i = CC1101ReadStatus(CC1101_VERSION);//for test, refer to the datasheet
+    479          //    CC1101SetTRMode(TX_MODE);                      // 发送模式 
+    480              printf("Mode:TX\r\n");
+    481          }
+    482          
+    483          
+    484          /*
+    485          ================================================================================
+    486          ------------------------------------THE END-------------------------------------
+    487          ================================================================================
+    488          */
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      19  ?_0
+       5  ?_1
+      10  ?_2
+      10  CC1101ClrRXBuff
+      10  CC1101ClrTXBuff
+       9  CC1101GetRXCnt
+     151  CC1101Init
+      46  CC1101InitData
+     103  CC1101ReadMultiReg
+      58  CC1101ReadReg
+      58  CC1101ReadStatus
+     118  CC1101RecPacket
+      51  CC1101Reset
+     157  CC1101SendPacket
+      82  CC1101SetAddress
+       6  CC1101SetIdle
+      33  CC1101SetSYNC
+      40  CC1101SetTRMode
+      54  CC1101WORInit
+      46  CC1101WriteCmd
+      84  CC1101WriteMultiReg
+      56  CC1101WriteReg
+       8  PaTabel
+       1  flag
+
+ 
+ 1 126 bytes in section .far_func.text
+     1 byte  in section .near.bss
+     8 bytes in section .near.data
+    80 bytes in section .near.rodata
+ 
+ 1 126 bytes of CODE  memory
+    80 bytes of CONST memory
+     9 bytes of DATA  memory
+
+Errors: none
+Warnings: 1

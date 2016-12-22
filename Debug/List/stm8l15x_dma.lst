@@ -1,0 +1,548 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:28
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_dma.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_dma.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_dma.lst
+#    Object file  =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_dma.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_dma.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_dma.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the DMA firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "stm8l15x_dma.h"
+     23          
+     24          /** @addtogroup STM8L15x_StdPeriph_Driver
+     25            * @{
+     26            */
+     27          
+     28          /* Private typedef -----------------------------------------------------------*/
+     29          /* Private define ------------------------------------------------------------*/
+     30          /* Private macro -------------------------------------------------------------*/
+     31          /* Private variables ---------------------------------------------------------*/
+     32          /* Private function prototypes -----------------------------------------------*/
+     33          /* Private functions ---------------------------------------------------------*/
+     34          
+     35          /**
+     36              * @addtogroup DMA_Public_Functions
+     37              * @{
+     38              */
+     39          
+     40          /**
+     41            * @brief  Deinitializes the DMA Global & Status register to its default reset
+     42            *         values.
+     43            * @param  None
+     44            * @retval None
+     45            */
+     46          void DMA_GlobalDeInit(void)
+     47          {
+     48            /* Disable the  DMA    */
+     49            DMA1->GCSR &= (uint8_t)~(DMA_GCSR_GE);
+     50          
+     51            /* Reset DMA Channelx control register */
+     52            DMA1->GCSR  = (uint8_t)DMA_GCSR_RESET_VALUE;
+     53          }
+     54          
+     55          /**
+     56            * @brief  Deinitializes the DMA Channelx registers to their default reset values.
+     57            * @param  DMA_Channelx : selects the DMA Channelx where x can be 0 to 3
+     58            * @retval None
+     59            */
+     60          void DMA_DeInit(DMA_Channel_TypeDef* DMA_Channelx)
+     61          {
+     62            /* Check the parameters */
+     63            assert_param(IS_DMA_CHANNEL(DMA_Channelx));
+     64          
+     65            /* Disable the selected DMA Channelx */
+     66            DMA_Channelx->CCR &= (uint8_t)~(DMA_CCR_CE);
+     67          
+     68            /* Reset DMA Channelx control register */
+     69            DMA_Channelx->CCR  = DMA_CCR_RESET_VALUE;
+     70          
+     71            /* Reset DMA Channelx remaining bytes register */
+     72            DMA_Channelx->CNBTR = DMA_CNBTR_RESET_VALUE;
+     73          
+     74            /* Reset DMA Channelx peripheral address register */
+     75            if (DMA_Channelx == DMA1_Channel3)
+     76            {
+     77              DMA_Channelx->CPARH  = DMA_C3PARH_RESET_VALUE;
+     78              DMA_Channelx->CM0EAR = DMA_C3M0EAR_RESET_VALUE;
+     79            }
+     80            else
+     81            {
+     82              DMA_Channelx->CPARH  = DMA_CPARH_RESET_VALUE;
+     83            }
+     84            DMA_Channelx->CPARL  = DMA_CPARL_RESET_VALUE;
+     85          
+     86            /* Reset DMA Channelx memory address register */
+     87            DMA_Channelx->CM0ARH = DMA_CM0ARH_RESET_VALUE;
+     88            DMA_Channelx->CM0ARL = DMA_CM0ARL_RESET_VALUE;
+     89          
+     90            /* Reset interrupt pending bits for DMA Channel */
+     91            DMA_Channelx->CSPR = DMA_CSPR_RESET_VALUE;
+     92          }
+     93          
+     94          
+     95          /**
+     96            * @brief  Initializes the DMA Channelx according to the specified parameters.
+     97            * @param  DMA_Channelx : selects the DMA Channelx where x can be 0 to 3
+     98            * @param  DMA_Memory0BaseAddr : Specifies  Memory 0 Base Address
+     99            * @param  DMA_PeripheralMemory1BaseAddr : Specifies DMA channelx Peripheral Base
+    100            *         Address (if data is from/to  peripheral) or DMA channelx Memory1 Base
+    101            *         Address (if data is from Memory0 to Memory1).
+    102            * @param  DMA_BufferSize : Specifies the size of the DMA channelx Buffer.
+    103            *         This parameter must be a value greater than 0.
+    104            * @param  DMA_DIR : Specifies the DMA channelx transfer direction.
+    105            *         This parameter can be a value of @ref DMA_DIR_TypeDef.
+    106            * @param  DMA_Mode : Specifies the DMA channelx mode.
+    107            *         This parameter can be a value of @ref DMA_Mode_TypeDef
+    108            * @param  DMA_MemoryIncMode : Specifies the DMA channelx memory
+    109            *         Incrementation/Decrementation mode, this parameter can be a value of
+    110            *         @ref DMA_MemoryIncMode_TypeDef.
+    111            * @param  DMA_Priority : Specifies the DMA channelx priority.
+    112            *         This parameter can be a value of @ref  DMA_Priority_TypeDef
+    113            * @param  DMA_MemoryDataSize : Specifies the DMA channelx transfer Data size.
+    114            *         This parameter can be a value of @ref DMA_MemoryDataSize_TypeDef.
+    115            * @retval None
+    116            */
+    117          void DMA_Init(DMA_Channel_TypeDef* DMA_Channelx,
+    118                        uint32_t DMA_Memory0BaseAddr,
+    119                        uint16_t DMA_PeripheralMemory1BaseAddr,
+    120                        uint8_t DMA_BufferSize,
+    121                        DMA_DIR_TypeDef DMA_DIR,
+    122                        DMA_Mode_TypeDef DMA_Mode,
+    123                        DMA_MemoryIncMode_TypeDef DMA_MemoryIncMode,
+    124                        DMA_Priority_TypeDef DMA_Priority,
+    125                        DMA_MemoryDataSize_TypeDef DMA_MemoryDataSize )
+    126          {
+    127            /* Check the parameters */
+    128            assert_param(IS_DMA_CHANNEL(DMA_Channelx));
+    129            assert_param(IS_DMA_DIR(DMA_DIR));
+    130            assert_param(IS_DMA_BUFFER_SIZE(DMA_BufferSize));
+    131            assert_param(IS_DMA_MODE(DMA_Mode));
+    132            assert_param(IS_DMA_MEMORY_INC_MODE(DMA_MemoryIncMode));
+    133            assert_param(IS_DMA_PRIORITY(DMA_Priority));
+    134          
+    135            /*--------------------------- DMA Channelx CCR Configuration -----------------*/
+    136            /* Disable the selected DMA Channelx */
+    137            DMA_Channelx->CCR &= (uint8_t)~(DMA_CCR_CE);
+    138          
+    139            /* Reset DMA Channelx control register */
+    140            DMA_Channelx->CCR  = DMA_CCR_RESET_VALUE;
+    141          
+    142            /* Set DMA direction & Mode & Incremantal Memory mode */
+    143            DMA_Channelx->CCR |= (uint8_t)((uint8_t)((uint8_t)DMA_DIR | (uint8_t)DMA_Mode) | (uint8_t)DMA_MemoryIncMode);
+    144          
+    145            /*Clear old priority and memory data size  option */
+    146            DMA_Channelx->CSPR &= (uint8_t)(~(uint8_t)(DMA_CSPR_PL | DMA_CSPR_16BM));
+    147          
+    148            /* Set old priority and memory data size  option */
+    149            DMA_Channelx->CSPR |= (uint8_t)((uint8_t)DMA_Priority | (uint8_t)DMA_MemoryDataSize);
+    150          
+    151            /*--------------------------- DMA Channelx CNDTR Configuration ---------------*/
+    152            /* Write to DMA Channelx CNDTR */
+    153            DMA_Channelx->CNBTR = (uint8_t)DMA_BufferSize;
+    154          
+    155            /*--------------------------- DMA Channelx CPAR Configuration ----------------*/
+    156            /* Write to DMA Channelx (0, 1 or 2)  Peripheral address  or  Write to DMA Channel 3 Memory 1 address  */
+    157            DMA_Channelx->CPARH = (uint8_t)(DMA_PeripheralMemory1BaseAddr >> (uint8_t)8);
+    158            DMA_Channelx->CPARL = (uint8_t)(DMA_PeripheralMemory1BaseAddr);
+    159          
+    160            /*--------------------------- DMA Channelx CMAR Configuration ----------------*/
+    161            /* Write to DMA Channelx Memory address */
+    162            if (DMA_Channelx == DMA1_Channel3)
+    163            {
+    164              DMA_Channelx->CM0EAR = (uint8_t)(DMA_Memory0BaseAddr >> (uint8_t)16);
+    165            }
+    166            DMA_Channelx->CM0ARH = (uint8_t)(DMA_Memory0BaseAddr >> (uint8_t)8);
+    167            DMA_Channelx->CM0ARL = (uint8_t)(DMA_Memory0BaseAddr);
+    168          
+    169          }
+    170          
+    171          /**
+    172            * @brief  Enables or disables All the DMA.
+    173            * @param  NewState: new state of the DMA. This parameter can be: ENABLE or DISABLE.
+    174            * @retval None
+    175            */
+    176          void DMA_GlobalCmd(FunctionalState NewState)
+    177          {
+    178            /* Check the parameters */
+    179            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    180          
+    181            if (NewState != DISABLE)
+    182            {
+    183              /* Enable the  DMA      */
+    184              DMA1->GCSR |= (uint8_t)DMA_GCSR_GE;
+    185            }
+    186            else
+    187            {
+    188              /* Disable the DMA */
+    189              DMA1->GCSR &= (uint8_t)(~DMA_GCSR_GE);
+    190            }
+    191          }
+    192          
+    193          /**
+    194            * @brief  Enables or disables the specified DMA Channelx.
+    195            * @note   DMA_GlobalCmd function must be called first to enable or disable
+    196            *         the global DMA.
+    197            * @param  DMA_Channelx : selects the DMA Channelx where x can be 0 to 3
+    198            * @param  NewState: new state of the DMA Channelx.
+    199            *         This parameter can be: ENABLE or DISABLE.
+    200            * @retval None
+    201            */
+    202          void DMA_Cmd(DMA_Channel_TypeDef* DMA_Channelx, FunctionalState NewState)
+    203          {
+    204            /* Check the parameters */
+    205            assert_param(IS_DMA_CHANNEL(DMA_Channelx));
+    206            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    207          
+    208            if (NewState != DISABLE)
+    209            {
+    210              /* Enable the selected DMA Channelx */
+    211              DMA_Channelx->CCR |= DMA_CCR_CE;
+    212            }
+    213            else
+    214            {
+    215              /* Disable the selected DMA Channelx */
+    216              DMA_Channelx->CCR &= (uint8_t)(~DMA_CCR_CE);
+    217            }
+    218          }
+    219          
+    220          /**
+    221            * @brief  Enables or disables the specified DMA Channelx interrupts.
+    222            * @param  DMA_Channelx : selects the DMA Channelx where x can be 0 to 3
+    223            * @param  DMA_ITx: specifies the DMA interrupts sources to be enabled or disabled.
+    224            *         This parameter can be any combination of values of @ref DMA_ITx_TypeDef.
+    225            * @param  NewState: new state of the specified DMA interrupts.
+    226              *       This parameter can be: ENABLE or DISABLE.
+    227            * @retval None
+    228            */
+    229          void DMA_ITConfig(DMA_Channel_TypeDef* DMA_Channelx, DMA_ITx_TypeDef DMA_ITx,
+    230                            FunctionalState NewState)
+    231          {
+    232            /* Check the parameters */
+    233            assert_param(IS_DMA_CHANNEL(DMA_Channelx));
+    234            assert_param(IS_DMA_CONFIG_ITX(DMA_ITx));
+    235            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    236          
+    237            if (NewState != DISABLE)
+    238            {
+    239              /* Enable the selected DMA interrupts */
+    240              DMA_Channelx->CCR |= (uint8_t)(DMA_ITx);
+    241            }
+    242            else
+    243            {
+    244              /* Disable the selected DMA interrupts */
+    245              DMA_Channelx->CCR &= (uint8_t)~(DMA_ITx);
+    246            }
+    247          }
+    248          
+    249          /**
+    250            * @brief  Sets the Time out Value.
+    251            * @param  DMA_TimeOut: an integer from 0 to 63
+    252            *         If DMA_TimeOut = 0, TimeOut functionnality is disactived
+    253            * @retval None
+    254            */
+    255          void DMA_SetTimeOut(uint8_t DMA_TimeOut)
+    256          {
+    257            /* Check the parameters */
+    258            assert_param(IS_DMA_TIMEOUT(DMA_TimeOut));
+    259          
+    260            /* set the time out ,  GB and GE must be = 0 */
+    261            DMA1->GCSR = 0;
+    262            DMA1->GCSR = (uint8_t)(DMA_TimeOut << (uint8_t)2);
+    263          }
+    264          /**
+    265            * @brief  Set the number of data units to transfer for DMA Channelx.
+    266            * @param  DMA_Channelx : selects the DMA Channelx where x can be 0 to 3
+    267            * @param  DMA_Counter :  The number of  data units to transfer,
+    268            *         it can be any value from 0 to 255
+    269            * @retval None
+    270            */
+    271          void DMA_SetCurrDataCounter(DMA_Channel_TypeDef* DMA_Channelx, uint8_t DMA_Counter)
+    272          {
+    273            /* Check the parameters */
+    274            assert_param(IS_DMA_CHANNEL(DMA_Channelx));
+    275          
+    276            /*Set the number of data units for DMA Channelx */
+    277            DMA_Channelx->CNBTR = DMA_Counter;
+    278          }
+    279          
+    280          /**
+    281            * @brief  Returns the number of remaining data units in the current DMA
+    282            *         Channelx transfer.
+    283            * @param  DMA_Channelx : selects the DMA Channelx where x can be 0 to 3
+    284            * @retval The number of remaining data units in the current DMA Channelx
+    285            */
+    286          uint8_t DMA_GetCurrDataCounter(DMA_Channel_TypeDef* DMA_Channelx)
+    287          {
+    288            /* Check the parameters */
+    289            assert_param(IS_DMA_CHANNEL(DMA_Channelx));
+    290          
+    291            /* Return the number of remaining data units for DMA Channelx */
+    292            return ((uint8_t)(DMA_Channelx->CNBTR));
+    293          }
+    294          
+    295          /**
+    296            * @brief  Checks whether the specified DMA Channelx flag is set or not.
+    297            * @param  DMA_FLAG: specifies the flag to check.
+    298            *         This parameter can be a value of @ref DMA_FLAG_TypeDef
+    299            * @retval FlagStatus: The status of DMA_FLAG (SET or RESET).
+    300            */
+    301          FlagStatus DMA_GetFlagStatus(DMA_FLAG_TypeDef DMA_FLAG)
+    302          {
+    303            FlagStatus flagstatus = RESET;
+    304            DMA_Channel_TypeDef* DMA_Channelx =  DMA1_Channel0;
+    305            uint8_t tmpgir1 = 0;
+    306            uint8_t tmpgcsr = 0;
+    307          
+    308            /* Check the parameters */
+    309            assert_param(IS_DMA_GET_FLAG(DMA_FLAG));
+    310          
+    311            /* Get flags registers values*/
+    312            tmpgcsr = DMA1->GCSR;
+    313            tmpgir1 = DMA1->GIR1;
+    314          
+    315            if (((uint16_t)DMA_FLAG & (uint16_t)0x0F00) != (uint16_t)RESET)
+    316            {
+    317              /* find  the used DMA  channel */
+    318              if (((uint16_t)DMA_FLAG & 0x0100) != (uint16_t)RESET)
+    319              {
+    320                DMA_Channelx = DMA1_Channel0;
+    321              }
+    322              else if  (((uint16_t)DMA_FLAG & 0x0200) != (uint16_t)RESET)
+    323              {
+    324                DMA_Channelx = DMA1_Channel1;
+    325              }
+    326              else if  (((uint16_t)DMA_FLAG & 0x0400) != (uint16_t)RESET)
+    327              {
+    328                DMA_Channelx = DMA1_Channel2;
+    329              }
+    330              else
+    331              {
+    332                DMA_Channelx = DMA1_Channel3;
+    333              }
+    334          
+    335              /*   Get the specified DMA Channelx flag status. */
+    336              flagstatus = (FlagStatus)((uint8_t)(DMA_Channelx->CSPR) & (uint8_t)DMA_FLAG);
+    337            }
+    338            else if (((uint16_t)DMA_FLAG & 0x1000) != (uint16_t)RESET)
+    339            {
+    340              /*   Get the specified DMA Channelx flag status. */
+    341              flagstatus = (FlagStatus)(tmpgir1 & (uint8_t)DMA_FLAG);
+    342            }
+    343            else /*if ((DMA_FLAG & DMA_FLAG_GB) != (uint16_t)RESET)*/
+    344            {
+    345              /*   Get the specified DMA Channelx flag status. */
+    346              flagstatus = (FlagStatus)(tmpgcsr & DMA_GCSR_GB);
+    347            }
+    348          
+    349            /*  Return the specified DMA Channelx flag status. */
+    350            return (flagstatus);
+    351          }
+    352          
+    353          /**
+    354            * @brief  Clears the DMA Channels selected flags.
+    355            * @param  DMA_FLAG: specifies the flag to clear.
+    356            *         This parameter can be a value of (or a combination for the same DMA
+    357            *         channel) of @ref DMA_FLAG_TypeDef
+    358            * @retval None
+    359            */
+    360          void DMA_ClearFlag(DMA_FLAG_TypeDef DMA_FLAG)
+    361          {
+    362            DMA_Channel_TypeDef* DMA_Channelx =  DMA1_Channel0;
+    363          
+    364            /* Check the parameters */
+    365            assert_param(IS_DMA_CLEAR_FLAG(DMA_FLAG));
+    366          
+    367            /* Identify  the used DMA  channel */
+    368            if (((uint16_t)DMA_FLAG & (uint16_t)0x0100) != (uint16_t)RESET)
+    369            {
+    370              DMA_Channelx = DMA1_Channel0;
+    371            }
+    372            else
+    373            {
+    374              if (((uint16_t)DMA_FLAG & (uint16_t)0x0200) != (uint16_t)RESET)
+    375              {
+    376                DMA_Channelx = DMA1_Channel1;
+    377              }
+    378              else
+    379              {
+    380                if (((uint16_t)DMA_FLAG & (uint16_t)0x0400) != (uint16_t)RESET)
+    381                {
+    382                  DMA_Channelx = DMA1_Channel2;
+    383                }
+    384                else
+    385                {
+    386                  DMA_Channelx = DMA1_Channel3;
+    387                }
+    388              }
+    389            }
+    390          
+    391            /*Clears the DMA flags.*/
+    392            DMA_Channelx->CSPR &= (uint8_t)~(uint8_t)((uint8_t)DMA_FLAG & (uint8_t)0x06);
+    393          }
+    394          
+    395          /**
+    396            * @brief  Checks whether the specified DMA Channelx interrupt has occurred or not.
+    397            * @param  DMA_IT: specifies the DMA interrupt source to check.
+    398            *         This parameter can be a value of @ref DMA_IT_TypeDef
+    399            * @retval ITStatus: The status of DMA_IT (SET or RESET).
+    400            */
+    401          ITStatus DMA_GetITStatus(DMA_IT_TypeDef DMA_IT)
+    402          {
+    403            ITStatus itstatus = RESET;
+    404            uint8_t tmpreg = 0;
+    405            uint8_t tmp2 = 0;
+    406            DMA_Channel_TypeDef* DMA_Channelx =  DMA1_Channel0;
+    407          
+    408            /* Check the parameters */
+    409            assert_param(IS_DMA_GET_IT(DMA_IT));
+    410          
+    411            /* Identify  the used DMA  channel */
+    412            if ((DMA_IT & 0x10) != (uint8_t)RESET)
+    413            {
+    414              DMA_Channelx = DMA1_Channel0;
+    415            }
+    416            else
+    417            {
+    418              if  ((DMA_IT & 0x20) != (uint8_t)RESET)
+    419              {
+    420                DMA_Channelx = DMA1_Channel1;
+    421              }
+    422              else
+    423              {
+    424                if  ((DMA_IT & 0x40) != (uint8_t)RESET)
+    425                {
+    426                  DMA_Channelx = DMA1_Channel2;
+    427                }
+    428                else
+    429                {
+    430                  DMA_Channelx = DMA1_Channel3;
+    431                }
+    432              }
+    433            }
+    434            /*   Get the specified DMA Channelx interrupt status. */
+    435            tmpreg =  DMA_Channelx->CSPR ;
+    436            tmpreg &= DMA_Channelx->CCR ;
+    437            tmp2 = (uint8_t)(DMA_IT & (uint8_t)(DMA_CCR_TCIE | DMA_CCR_HTIE));
+    438            itstatus = (ITStatus)((uint8_t)tmpreg & (uint8_t)tmp2);
+    439          
+    440            /*   Return the specified DMA Channelx interrupt status. */
+    441            return (itstatus);
+    442          }
+    443          
+    444          /**
+    445            * @brief  Clears the DMA Channelx’s interrupt pending bits.
+    446            * @param  DMA_IT: specifies the DMA interrupt pending bit to clear.
+    447            *         This parameter can be a value of (or a combination for the same
+    448            *         DMA channel) of @ref DMA_IT_TypeDef
+    449            * @retval None
+    450            */
+    451          void DMA_ClearITPendingBit(DMA_IT_TypeDef DMA_IT)
+    452          {
+    453            DMA_Channel_TypeDef* DMA_Channelx =  DMA1_Channel0;
+    454          
+    455            /* Check the parameters */
+    456            assert_param(IS_DMA_CLEAR_IT(DMA_IT));
+    457            /* Identify  the used DMA  channel */
+    458            if ((DMA_IT & 0x10) != (uint8_t)RESET)
+    459            {
+    460              DMA_Channelx = DMA1_Channel0;
+    461            }
+    462            else
+    463            {
+    464              if ((DMA_IT & 0x20) != (uint8_t)RESET)
+    465              {
+    466                DMA_Channelx = DMA1_Channel1;
+    467              }
+    468              else
+    469              {
+    470                if ((DMA_IT & 0x40) != (uint8_t)RESET)
+    471                {
+    472                  DMA_Channelx = DMA1_Channel2;
+    473                }
+    474                else
+    475                {
+    476                  DMA_Channelx = DMA1_Channel3;
+    477                }
+    478              }
+    479            }
+    480            /*Clears the DMA Channelx’s interrupt pending bits*/
+    481            DMA_Channelx->CSPR &= (uint8_t)~(uint8_t)(DMA_IT & (uint8_t)0x06);
+    482          }
+    483          
+    484          /**
+    485              * @}
+    486              */
+    487          
+    488          /**
+    489            * @}
+    490            */
+    491          
+    492          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      77  DMA_ClearFlag
+      61  DMA_ClearITPendingBit
+      13  DMA_Cmd
+      82  DMA_DeInit
+       5  DMA_GetCurrDataCounter
+     128  DMA_GetFlagStatus
+      81  DMA_GetITStatus
+      13  DMA_GlobalCmd
+       9  DMA_GlobalDeInit
+      11  DMA_ITConfig
+     136  DMA_Init
+       5  DMA_SetCurrDataCounter
+      10  DMA_SetTimeOut
+
+ 
+ 631 bytes in section .far_func.text
+ 
+ 631 bytes of CODE memory
+
+Errors: none
+Warnings: none

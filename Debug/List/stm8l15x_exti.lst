@@ -1,0 +1,428 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:28
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_exti.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_exti.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_exti.lst
+#    Object file  =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_exti.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_exti.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_exti.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the EXTI firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "stm8l15x_exti.h"
+     23          
+     24          /** @addtogroup STM8L15x_StdPeriph_Driver
+     25            * @{
+     26            */
+     27          
+     28          /* Private typedef -----------------------------------------------------------*/
+     29          /* Private define ------------------------------------------------------------*/
+     30          /* Private macro -------------------------------------------------------------*/
+     31          /* Private variables ---------------------------------------------------------*/
+     32          /* Private function prototypes -----------------------------------------------*/
+     33          /* Private functions ---------------------------------------------------------*/
+     34          
+     35          
+     36          /**
+     37            * @addtogroup EXTI_Public_Functions
+     38            * @{
+     39            */
+     40          
+     41          /**
+     42            * @brief  Deinitializes the EXTI registers to their default reset value.
+     43            * @param  None
+     44            * @retval None
+     45            */
+     46          void EXTI_DeInit(void)
+     47          {
+     48            EXTI->CR1 = EXTI_CR1_RESET_VALUE;
+     49            EXTI->CR2 = EXTI_CR2_RESET_VALUE;
+     50            EXTI->CR3 = EXTI_CR3_RESET_VALUE;
+     51            EXTI->CR4 = EXTI_CR4_RESET_VALUE;
+     52            EXTI->SR1 = 0xFF; /* Setting SR1 bits in order to clear flags */
+     53            EXTI->SR2 = 0xFF; /* Setting SR2 bits in order to clear flags */
+     54            EXTI->CONF1 = EXTI_CONF1_RESET_VALUE;
+     55            EXTI->CONF2 = EXTI_CONF2_RESET_VALUE;
+     56          }
+     57          
+     58          /**
+     59            * @brief  Sets the external interrupt sensitivity of the selected port.
+     60            * @note   - Global interrupts must be disabled before calling this function.
+     61            * @note   - The modification of external interrupt sensitivity is only possible
+     62            *         when the interrupts are disabled.
+     63            *         - The normal behavior is to disable the interrupts before calling this
+     64            *         function, and re-enable them after.
+     65            * @param  EXTI_Port : The port number to access.
+     66            *         This parameter can be a value of @ref EXTI_Port_TypeDef
+     67            * @param  EXTI_Trigger : The external interrupt sensitivity value to set.
+     68            *         This parameter can be a value of @ref EXTI_Trigger_TypeDef
+     69            * @retval None
+     70            */
+     71          void EXTI_SetPortSensitivity(EXTI_Port_TypeDef EXTI_Port,
+     72                                       EXTI_Trigger_TypeDef EXTI_Trigger)
+     73          {
+     74            /* Check function parameters */
+     75            assert_param(IS_EXTI_PORT(EXTI_Port));
+     76            assert_param(IS_EXTI_TRIGGER(EXTI_Trigger));
+     77          
+     78            /* Ceck if selected port is in EXTI_CR3 register */
+     79            if ((EXTI_Port & 0xF0) == 0x00)
+     80            {
+     81              /* Reset the trigger bits corresponding to EXTI_Port */
+     82              EXTI->CR3 &= (uint8_t) (~(uint8_t)((uint8_t)0x03 << EXTI_Port));
+     83              /* Write EXTI port trigger */
+     84              EXTI->CR3 |= (uint8_t)((uint8_t)(EXTI_Trigger) << EXTI_Port);
+     85            }
+     86            else /* selected port is in EXTI_CR4 register */
+     87            {
+     88              /* Reset the trigger bits corresponding to EXTI_Port */
+     89              EXTI->CR4 &= (uint8_t) (~(uint8_t)((uint8_t)0x03 << (EXTI_Port & 0x0F)));
+     90              /* Write EXTI port trigger */
+     91              EXTI->CR4 |= (uint8_t)(EXTI_Trigger << (EXTI_Port & 0x0F));
+     92            }
+     93          }
+     94          
+     95          /**
+     96            * @brief  Sets the external interrupt sensitivity of the selected pin.
+     97            * @note   - Global interrupts must be disabled before calling this function.
+     98            * @note   - The modification of external interrupt sensitivity is only possible
+     99            *         when he interrupts are disabled.
+    100            *         - The normal behavior is to disable the interrupts before calling this
+    101            *         function, and re-enable them after.
+    102            * @param  EXTI_Pin : The pin to configure.
+    103            *         This parameter can be a value of @ref EXTI_Pin_TypeDef
+    104            * @param  EXTI_Trigger : The external interrupt sensitivity value to set.
+    105            *         This parameter can be a value of @ref EXTI_Trigger_TypeDef
+    106            * @retval None
+    107            */
+    108          void EXTI_SetPinSensitivity(EXTI_Pin_TypeDef EXTI_Pin,
+    109                                      EXTI_Trigger_TypeDef EXTI_Trigger)
+    110          {
+    111          
+    112            /* Check function parameters */
+    113            assert_param(IS_EXTI_PINNUM(EXTI_Pin));
+    114            assert_param(IS_EXTI_TRIGGER(EXTI_Trigger));
+    115          
+    116            /* Clear port sensitivity bits */
+    117            switch (EXTI_Pin)
+    118            {
+    119              case EXTI_Pin_0:
+    120                EXTI->CR1 &=  (uint8_t)(~EXTI_CR1_P0IS);
+    121                EXTI->CR1 |= (uint8_t)((uint8_t)(EXTI_Trigger) << EXTI_Pin);
+    122                break;
+    123              case EXTI_Pin_1:
+    124                EXTI->CR1 &=  (uint8_t)(~EXTI_CR1_P1IS);
+    125                EXTI->CR1 |= (uint8_t)((uint8_t)(EXTI_Trigger) << EXTI_Pin);
+    126                break;
+    127              case EXTI_Pin_2:
+    128                EXTI->CR1 &=  (uint8_t)(~EXTI_CR1_P2IS);
+    129                EXTI->CR1 |= (uint8_t)((uint8_t)(EXTI_Trigger) << EXTI_Pin);
+    130                break;
+    131              case EXTI_Pin_3:
+    132                EXTI->CR1 &=  (uint8_t)(~EXTI_CR1_P3IS);
+    133                EXTI->CR1 |= (uint8_t)((uint8_t)(EXTI_Trigger) << EXTI_Pin);
+    134                break;
+    135              case EXTI_Pin_4:
+    136                EXTI->CR2 &=  (uint8_t)(~EXTI_CR2_P4IS);
+    137                EXTI->CR2 |= (uint8_t)((uint8_t)(EXTI_Trigger) << ((uint8_t)EXTI_Pin & (uint8_t)0xEF));
+    138                break;
+    139              case EXTI_Pin_5:
+    140                EXTI->CR2 &=  (uint8_t)(~EXTI_CR2_P5IS);
+    141                EXTI->CR2 |= (uint8_t)((uint8_t)(EXTI_Trigger) << ((uint8_t)EXTI_Pin & (uint8_t)0xEF));
+    142                break;
+    143              case EXTI_Pin_6:
+    144                EXTI->CR2 &=  (uint8_t)(~EXTI_CR2_P6IS);
+    145                EXTI->CR2 |= (uint8_t)((uint8_t)(EXTI_Trigger) << ((uint8_t)EXTI_Pin & (uint8_t)0xEF));
+    146                break;
+    147              case EXTI_Pin_7:
+    148                EXTI->CR2 &=  (uint8_t)(~EXTI_CR2_P7IS);
+    149                EXTI->CR2 |= (uint8_t)((uint8_t)(EXTI_Trigger) << ((uint8_t)EXTI_Pin & (uint8_t)0xEF));
+    150                break;
+    151              default:
+    152                break;
+    153            }
+    154          }
+    155          
+    156          /**
+    157            * @brief  Selects the port interrupt selection.
+    158            * @param  EXTI_Port : The port number to access.
+    159            *         This parameter can be a value of @ref EXTI_Port_TypeDef
+    160            * @retval None
+    161            */
+    162          void EXTI_SelectPort(EXTI_Port_TypeDef EXTI_Port)
+    163          {
+    164            /* Check function parameter */
+    165            assert_param(IS_EXTI_PORT(EXTI_Port));
+    166          
+    167            if (EXTI_Port == EXTI_Port_B)
+    168            {
+    169              /* Select Port B by resetting PGBS bit in CONF2 register */
+    170              EXTI->CONF2 &= (uint8_t) (~EXTI_CONF2_PGBS);
+    171            }
+    172            else if (EXTI_Port == EXTI_Port_D)
+    173            {
+    174              /* Select Port D by resetting PHDS bit in CONF2 register */
+    175              EXTI->CONF2 &= (uint8_t) (~EXTI_CONF2_PHDS);
+    176            }
+    177            else if (EXTI_Port == EXTI_Port_E)
+    178            {
+    179              /* Select Port E by resetting PFES bit in CONF1 register */
+    180              EXTI->CONF1 &= (uint8_t) (~EXTI_CONF1_PFES);
+    181            }
+    182            else if (EXTI_Port == EXTI_Port_F)
+    183            {
+    184              /* Select Port F by setting PFES bit in CONF1 register */
+    185              EXTI->CONF1 |= (uint8_t) (EXTI_CONF1_PFES);
+    186            }
+    187            else if (EXTI_Port == EXTI_Port_G)
+    188            {
+    189              /* Select Port G by setting PGBS bit in CONF2 register */
+    190              EXTI->CONF2 |= (uint8_t) (EXTI_CONF2_PGBS);
+    191            }
+    192            else /* EXTI_Port is EXTI_Port_H */
+    193            {
+    194              /* Select Port H by setting PHDS bit in CONF2 register */
+    195              EXTI->CONF2 |= (uint8_t) (EXTI_CONF2_PHDS);
+    196            }
+    197          }
+    198          
+    199          /**
+    200            * @brief  Configures the half port interrupt selection.
+    201            * @note   - This function should be called once the port sensitivity configured,
+    202            *         otherwise it will not have any effect on the port external interrupt.
+    203            *         - This function should be called after EXTI_SelectPort() function which
+    204            *         selects the port to be used otherwise ports are selected by default
+    205            * @param  EXTI_HalfPort : The port part to access (MSB or LSB).
+    206            *         This parameter can be a value of @ref EXTI_HalfPort_TypeDef
+    207            * @param  NewState : The external interrupt new state.
+    208            *         This parameter can be a value of @ref FunctionalState.
+    209            * @retval None
+    210            */
+    211          void EXTI_SetHalfPortSelection(EXTI_HalfPort_TypeDef EXTI_HalfPort,
+    212                                         FunctionalState NewState)
+    213          {
+    214            /* Check function parameters */
+    215            assert_param(IS_EXTI_HALFPORT(EXTI_HalfPort));
+    216            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    217          
+    218            if ((EXTI_HalfPort & 0x80) == 0x00)
+    219            {
+    220              if (NewState != DISABLE)
+    221              {
+    222                /* Enable port interrupt selector */
+    223                EXTI->CONF1 |= (uint8_t)EXTI_HalfPort;
+    224              }
+    225              else /*NewState == DISABLE */
+    226              {
+    227                /* Disable port interrupt selector */
+    228                EXTI->CONF1 &= (uint8_t)(~(uint8_t)EXTI_HalfPort);
+    229              }
+    230            }
+    231            else
+    232            {
+    233              if (NewState != DISABLE)
+    234              {
+    235                /* Enable port interrupt selector */
+    236                EXTI->CONF2 |= (uint8_t)(EXTI_HalfPort & (uint8_t)0x7F);
+    237              }
+    238              else /*NewState == DISABLE */
+    239              {
+    240                /* Disable port interrupt selector */
+    241                EXTI->CONF2 &= (uint8_t)(~(uint8_t) (EXTI_HalfPort & (uint8_t)0x7F));
+    242              }
+    243            }
+    244          }
+    245          
+    246          /**
+    247            * @brief  Gets the external interrupt sensitivity of the selected port.
+    248            * @param  EXTI_Port : The port number to access.
+    249            *         This parameter can be a value of @ref EXTI_Port_TypeDef
+    250            * @retval EXTI_Trigger_TypeDef : The external interrupt sensitivity of the selected port.
+    251            */
+    252          EXTI_Trigger_TypeDef EXTI_GetPortSensitivity(EXTI_Port_TypeDef EXTI_Port)
+    253          {
+    254            uint8_t portsensitivity = 0;
+    255          
+    256            /* Check function parameters */
+    257            assert_param(IS_EXTI_PORT(EXTI_Port));
+    258          
+    259            /* Check if selected port is in EXTI_CR3 */
+    260            if ((EXTI_Port & 0xF0) == 0x00)
+    261            {
+    262              /* Get port sensitivity */
+    263              portsensitivity = (uint8_t)((uint8_t)0x03 & (uint8_t)(EXTI->CR3 >> EXTI_Port));
+    264            }
+    265            /* selected port is in EXTI_CR4 */
+    266            else
+    267            {
+    268              /* Get port sensitivity */
+    269              portsensitivity = (uint8_t)((uint8_t)0x03 & (uint8_t)(EXTI->CR4 >> (EXTI_Port & 0x0F)));
+    270            }
+    271          
+    272            return((EXTI_Trigger_TypeDef)portsensitivity);
+    273          }
+    274          
+    275          /**
+    276            * @brief  Gets the external interrupt sensitivity of the selected pin.
+    277            * @param  EXTI_Pin : The pin number to access.
+    278            *         This parameter can be a value of @ref EXTI_Pin_TypeDef
+    279            * @retval EXTI_Trigger_TypeDef : The external interrupt sensitivity of the selected port.
+    280            */
+    281          EXTI_Trigger_TypeDef EXTI_GetPinSensitivity(EXTI_Pin_TypeDef EXTI_Pin)
+    282          {
+    283            uint8_t value = 0;
+    284          
+    285            /* Check function parameters */
+    286            assert_param(IS_EXTI_PINNUM(EXTI_Pin));
+    287          
+    288            switch (EXTI_Pin)
+    289            {
+    290              case EXTI_Pin_0:
+    291                value = (uint8_t)(EXTI->CR1 & EXTI_CR1_P0IS);
+    292                break;
+    293              case EXTI_Pin_1:
+    294                value = (uint8_t)((uint8_t)(EXTI->CR1 & EXTI_CR1_P1IS) >> EXTI_Pin_1);
+    295                break;
+    296              case EXTI_Pin_2:
+    297                value = (uint8_t)((uint8_t)(EXTI->CR1 & EXTI_CR1_P2IS) >> EXTI_Pin_2);
+    298                break;
+    299              case EXTI_Pin_3:
+    300                value = (uint8_t)((uint8_t)(EXTI->CR1 & EXTI_CR1_P3IS) >> EXTI_Pin_3);
+    301                break;
+    302              case EXTI_Pin_4:
+    303                value = (uint8_t)(EXTI->CR2 & EXTI_CR2_P4IS);
+    304                break;
+    305              case EXTI_Pin_5:
+    306                value = (uint8_t)((uint8_t)(EXTI->CR2 & EXTI_CR2_P5IS) >> ((uint8_t)EXTI_Pin_5 & (uint8_t)0x0F));
+    307                break;
+    308              case EXTI_Pin_6:
+    309                value = (uint8_t)((uint8_t)(EXTI->CR2 & EXTI_CR2_P6IS) >> ((uint8_t)EXTI_Pin_6 & (uint8_t)0x0F));
+    310                break;
+    311              case EXTI_Pin_7:
+    312                value = (uint8_t)((uint8_t)(EXTI->CR2 & EXTI_CR2_P7IS) >> ((uint8_t)EXTI_Pin_7 & (uint8_t)0x0F));
+    313                break;
+    314              default:
+    315                break;
+    316            }
+    317            return((EXTI_Trigger_TypeDef)value);
+    318          }
+    319          
+    320          /**
+    321            * @brief  Gets the external interrupt status.
+    322            * @param  EXTI_IT : Specifies the interrupt to read.
+    323            *         This parameter can be a value of @ref EXTI_IT_TypeDef
+    324            * @retval ITStatus : The status of the specified interrupt.
+    325            *         This parameter can be a value of @ref ITStatus.
+    326            */
+    327          ITStatus EXTI_GetITStatus(EXTI_IT_TypeDef EXTI_IT)
+    328          {
+    329            ITStatus status = RESET;
+    330            /* Check function parameters */
+    331            assert_param(IS_EXTI_ITPENDINGBIT(EXTI_IT));
+    332          
+    333            if (((uint16_t)EXTI_IT & (uint16_t)0xFF00) == 0x0100)
+    334            {
+    335              status = (ITStatus)(EXTI->SR2 & (uint8_t)((uint16_t)EXTI_IT & (uint16_t)0x00FF));
+    336            }
+    337            else
+    338            {
+    339              status = (ITStatus)(EXTI->SR1 & ((uint8_t)((uint16_t)EXTI_IT & (uint16_t)0x00FF)));
+    340            }
+    341            return((ITStatus)status);
+    342          }
+    343          
+    344          /**
+    345            * @brief  Clears the specified interrupt pending bit
+    346            * @param  EXTI_IT : Specifies the interrupt to clear
+    347            *         This parameter can be a value of @ref EXTI_IT_TypeDef
+    348            * @retval None
+    349            */
+    350          void EXTI_ClearITPendingBit(EXTI_IT_TypeDef EXTI_IT)
+    351          {
+    352            uint16_t tempvalue = 0;
+    353          
+    354            /* Check function parameters */
+    355            assert_param(IS_EXTI_ITPENDINGBIT(EXTI_IT));
+    356          
+    357            tempvalue = ((uint16_t)EXTI_IT & (uint16_t)0xFF00);
+    358          
+    359            if ( tempvalue == 0x0100)
+    360            {
+    361              EXTI->SR2 = (uint8_t)((uint16_t)EXTI_IT & (uint16_t)0x00FF);
+    362            }
+    363            else
+    364            {
+    365              EXTI->SR1 = (uint8_t) (EXTI_IT);
+    366            }
+    367          }
+    368          /**
+    369            * @}
+    370            */
+    371          
+    372          /**
+    373            * @}
+    374            */
+    375          
+    376          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      33  EXTI_ClearITPendingBit
+      33  EXTI_DeInit
+      28  EXTI_GetITStatus
+     122  EXTI_GetPinSensitivity
+      55  EXTI_GetPortSensitivity
+      49  EXTI_SelectPort
+      61  EXTI_SetHalfPortSelection
+     272  EXTI_SetPinSensitivity
+      86  EXTI_SetPortSensitivity
+
+ 
+ 739 bytes in section .far_func.text
+ 
+ 739 bytes of CODE memory
+
+Errors: none
+Warnings: none

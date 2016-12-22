@@ -1,0 +1,629 @@
+###############################################################################
+#
+# IAR ELF Linker V2.10.4.157 for STM8                     22/Dec/2016  20:03:32
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Output file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Exe\XiangRui_STM8L15x_Library.out
+#    Map file     =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\XiangRui_STM8L15x_Library.map
+#    Command line =  
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\bsp.o"
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\CC1101.o"
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\main.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_adc.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_aes.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_beep.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_clk.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_comp.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_dac.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_dma.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_exti.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_flash.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_gpio.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_i2c.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_irtim.o"
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_it.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_itc.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_iwdg.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_lcd.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_pwr.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_rst.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_rtc.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_spi.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_syscfg.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_tim1.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_tim2.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_tim3.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_tim4.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_tim5.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_usart.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_wfe.o"
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_wwdg.o" -o
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\Exe\XiangRui_STM8L15x_Library.out"
+#        --map "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\XiangRui_STM8L15x_Library.map"
+#        --config "E:\My Program\IAR_STM8-7.0\stm8\config\lnkstm8l151k4.icf"
+#        --config_def _CSTACK_SIZE=0x100 --config_def _HEAP_SIZE=0x100 --entry
+#        __iar_program_start --debug_lib
+#
+###############################################################################
+
+*******************************************************************************
+*** RUNTIME MODEL ATTRIBUTES
+***
+
+__Heap_Handler             = Basic
+__SystemLibrary            = DLib
+__code_model               = medium_or_large
+__core                     = stm8
+__data_model               = medium
+__dlib_file_descriptor     = 1
+__dlib_full_locale_support = 1
+__rt_version               = 4
+
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"A1":  place at start of [0x000000-0x0000ff] { rw section .vregs };
+"A2":  place at end of [0x000000-0x0007ff] { block CSTACK };
+"P2":  place in [from 0x000000 to 0x0007ff] {
+          block HEAP, rw section __DLIB_PERTHREAD, rw section .far.bss,
+          rw section .far.data, rw section .far.noinit,
+          rw section .far_func.textrw, rw section .huge.bss,
+          rw section .huge.data, rw section .huge.noinit,
+          rw section .huge_func.textrw, rw section .iar.dynexit,
+          rw section .near.bss, rw section .near.data, rw section .near.noinit,
+          rw section .near_func.textrw };
+"A3":  place at start of [0x008000-0x00bfff] { block INTVEC };
+"P3":  place in [from 0x008000 to 0x00bfff] {
+          ro section __DLIB_PERTHREAD_init, ro section .far.data_init,
+          ro section .far_func.textrw_init, ro section .huge.data_init,
+          ro section .huge_func.textrw_init, ro section .iar.init_table,
+          ro section .init_array, ro section .near.data_init,
+          ro section .near.rodata, ro section .near_func.text,
+          ro section .near_func.textrw_init, ro section .tiny.data_init,
+          ro section .tiny.rodata_init };
+"P4":  place in [from 0x008000 to 0x00bfff] {
+          ro section .far.rodata, ro section .far_func.text };
+
+  Section            Kind      Address    Size  Object
+  -------            ----      -------    ----  ------
+"A1":                                     0x10
+  .vregs             uninit   0x000000    0x10  vregs.o [4]
+                            - 0x000010    0x10
+
+"P2":                                     0x15
+  P2 s0                       0x000010    0x15  <Init block>
+    .near.data       inited   0x000010     0x8  CC1101.o [1]
+    .near.data       inited   0x000018     0x6  main.o [1]
+    .near.bss        inited   0x00001e     0x2  main.o [1]
+    .near.bss        inited   0x000020     0x2  main.o [1]
+    .near.bss        inited   0x000022     0x2  stm8l15x_it.o [1]
+    .near.bss        inited   0x000024     0x1  CC1101.o [1]
+                            - 0x000025    0x15
+
+"A2":                                    0x100
+  CSTACK                      0x000700   0x100  <Block>
+    CSTACK           uninit   0x000700   0x100  <Block tail>
+                            - 0x000800   0x100
+
+"A3":                                     0x80
+  INTVEC                      0x008000    0x80  <Block>
+    .intvec          const    0x008000    0x80  interrupt.o [4]
+                            - 0x008080    0x80
+
+"P3":                                    0x14a
+  .near.rodata       const    0x008080    0x2e  CC1101.o [1]
+  .iar.init_table    const    0x0080ae     0xb  - Linker created -
+  .near.rodata       const    0x0080b9    0x1e  main.o [1]
+  .near.rodata       const    0x0080d7    0x17  main.o [1]
+  .near.rodata       const    0x0080ee    0x15  main.o [1]
+  .near.rodata       const    0x008103    0x13  CC1101.o [1]
+  .near.rodata       const    0x008116    0x13  main.o [1]
+  .near.rodata       const    0x008129    0x13  main.o [1]
+  .near.rodata       const    0x00813c    0x13  main.o [1]
+  .near.rodata       const    0x00814f    0x10  main.o [1]
+  .near.rodata       const    0x00815f     0xf  main.o [1]
+  .near.rodata       const    0x00816e     0xf  main.o [1]
+  .near.rodata       const    0x00817d     0xe  main.o [1]
+  .near.rodata       const    0x00818b     0xb  main.o [1]
+  .near.rodata       const    0x008196     0xa  CC1101.o [1]
+  .near.rodata       const    0x0081a0     0x5  CC1101.o [1]
+  .near.rodata       const    0x0081a5     0x5  stm8l15x_clk.o [1]
+  .near.rodata       const    0x0081aa     0x4  main.o [1]
+  .near.rodata       const    0x0081ae     0x3  main.o [1]
+  .near.rodata       const    0x0081b1     0x2  xprintftiny.o [4]
+  .near.rodata       const    0x0081b3     0x2  xprintftiny.o [4]
+  Initializer bytes  const    0x0081b5    0x15  <for P2 s0>
+                            - 0x0081ca   0x14a
+
+"P4":                                   0x16ae
+  .far_func.text     ro code  0x0081ca   0x20a  CC1101.o [1]
+  .far_func.text     ro code  0x0083d4   0x191  xprintftiny.o [4]
+  .far_func.text     ro code  0x008565   0x18d  main.o [1]
+  .far_func.text     ro code  0x0086f2   0x12f  vreg_util.o [4]
+  .far_func.text     ro code  0x008821    0xee  stm8l15x_rtc.o [1]
+  .far_func.text     ro code  0x00890f    0xe4  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x0089f3    0xae  stm8l15x_gpio.o [1]
+  .far_func.text     ro code  0x008aa1    0xad  main.o [1]
+  .far_func.text     ro code  0x008b4e    0xab  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x008bf9    0x9d  CC1101.o [1]
+  .far_func.text     ro code  0x008c96    0x97  CC1101.o [1]
+  .far_func.text     ro code  0x008d2d    0x94  stm8l15x_rtc.o [1]
+  .far_func.text     ro code  0x008dc1    0x8f  stm8l15x_clk.o [1]
+  .far_func.text     ro code  0x008e50    0x7e  stm8l15x_clk.o [1]
+  .far_func.text     ro code  0x008ece    0x76  CC1101.o [1]
+  .far_func.text     ro code  0x008f44    0x72  bsp.o [1]
+  .far_func.text     ro code  0x008fb6    0x6d  long.o [4]
+  .far_func.text     ro code  0x009023    0x65  stm8l15x_tim3.o [1]
+  .far_func.text     ro code  0x009088    0x5d  bsp.o [1]
+  .far_func.text     ro code  0x0090e5    0x54  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009139    0x52  CC1101.o [1]
+  .far_func.text     ro code  0x00918b    0x4f  stm8l15x_rtc.o [1]
+  .far_func.text     ro code  0x0091da    0x4b  stm8l15x_adc.o [1]
+  .far_func.text     ro code  0x009225    0x4a  stm8l15x_spi.o [1]
+  .far_func.text     ro code  0x00926f    0x3f  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x0092ae    0x3c  main.o [1]
+  .far_func.text     ro code  0x0092ea    0x3c  stm8l15x_tim3.o [1]
+  .far_func.text     ro code  0x009326    0x39  bsp.o [1]
+  .far_func.text     ro code  0x00935f    0x37  xprintftiny.o [4]
+  .far_func.text     ro code  0x009396    0x31  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x0093c7    0x2f  stm8l15x_pwr.o [1]
+  .far_func.text     ro code  0x0093f6    0x2c  bsp.o [1]
+  .far_func.text     ro code  0x009422    0x2a  stm8l15x_tim3.o [1]
+  .far_func.text     ro code  0x00944c    0x28  bsp.o [1]
+  .far_func.text     ro code  0x009474    0x28  stm8l15x_rtc.o [1]
+  .far_func.text     ro code  0x00949c    0x28  printf.o [4]
+  .far_func.text     ro code  0x0094c4    0x28  init_small.o [4]
+  .far_func.text     ro code  0x0094ec    0x27  stm8l15x_pwr.o [1]
+  .far_func.text     ro code  0x009513    0x26  stm8l15x_rtc.o [1]
+  .far_func.text     ro code  0x009539    0x25  main.o [1]
+  .far_func.text     ro code  0x00955e    0x25  stm8l15x_adc.o [1]
+  .far_func.text     ro code  0x009583    0x24  bsp.o [1]
+  .far_func.text     ro code  0x0095a7    0x24  main.o [1]
+  .far_func.text     ro code  0x0095cb    0x23  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x0095ee    0x23  stm8l15x_spi.o [1]
+  .far_func.text     ro code  0x009611    0x22  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x009633    0x21  CC1101.o [1]
+  .far_func.text     ro code  0x009654    0x21  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009675    0x21  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x009696    0x20  main.o [1]
+  .far_func.text     ro code  0x0096b6    0x20  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x0096d6    0x1e  init.o [4]
+  .far_func.text     ro code  0x0096f4    0x1d  main.o [1]
+  .far_func.text     ro code  0x009711    0x1d  xprout.o [4]
+  .far_func.text     ro code  0x00972e    0x18  long_util.o [4]
+  .far_func.text     ro code  0x009746    0x17  main.o [1]
+  .far_func.text     ro code  0x00975d    0x17  cstartup.o [4]
+  .far_func.text     ro code  0x009774    0x16  __dbg_xxexit.o [3]
+  .far_func.text     ro code  0x00978a    0x15  stm8l15x_spi.o [1]
+  .far_func.text     ro code  0x00979f    0x12  strlen.o [4]
+  .far_func.text     ro code  0x0097b1     0xe  far_util.o [4]
+  .far_func.text     ro code  0x0097bf     0xd  stm8l15x_adc.o [1]
+  .far_func.text     ro code  0x0097cc     0xd  stm8l15x_spi.o [1]
+  .far_func.text     ro code  0x0097d9     0xd  move.o [4]
+  .far_func.text     ro code  0x0097e6     0xa  stm8l15x_clk.o [1]
+  .far_func.text     ro code  0x0097f0     0xa  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x0097fa     0xa  stm8l15x_rtc.o [1]
+  .far_func.text     ro code  0x009804     0x9  CC1101.o [1]
+  .far_func.text     ro code  0x00980d     0x8  short.o [4]
+  .far_func.text     ro code  0x009815     0x6  bsp.o [1]
+  .far_func.text     ro code  0x00981b     0x6  cexit.o [4]
+  .far_func.text     ro code  0x009821     0x5  stm8l15x_pwr.o [1]
+  .far_func.text     ro code  0x009826     0x5  stm8l15x_spi.o [1]
+  .far_func.text     ro code  0x00982b     0x5  stm8l15x_spi.o [1]
+  .far_func.text     ro code  0x009830     0x5  stm8l15x_tim2.o [1]
+  .far_func.text     ro code  0x009835     0x5  stm8l15x_tim3.o [1]
+  .far_func.text     ro code  0x00983a     0x4  stm8l15x_clk.o [1]
+  .far_func.text     ro code  0x00983e     0x4  stm8l15x_gpio.o [1]
+  .far_func.text     ro code  0x009842     0x4  interrupt.o [4]
+  .far_func.text     ro code  0x009846     0x4  exit.o [4]
+  .far_func.text     ro code  0x00984a     0x3  stm8l15x_gpio.o [1]
+  .far_func.text     ro code  0x00984d     0x3  stm8l15x_gpio.o [1]
+  .far_func.text     ro code  0x009850     0x3  stm8l15x_gpio.o [1]
+  .far_func.text     ro code  0x009853     0x3  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x009856     0x3  stm8l15x_usart.o [1]
+  .far_func.text     ro code  0x009859     0x3  low_level_init.o [4]
+  .far_func.text     ro code  0x00985c     0x3  unhandled_exception.o [4]
+  .far_func.text     ro code  0x00985f     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009860     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009861     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009862     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009863     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009864     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009865     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009866     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009867     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009868     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009869     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x00986a     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x00986b     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x00986c     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x00986d     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x00986e     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x00986f     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009870     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009871     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009872     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009873     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009874     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009875     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009876     0x1  stm8l15x_it.o [1]
+  .far_func.text     ro code  0x009877     0x1  __dbg_break.o [3]
+                            - 0x009878  0x16ae
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address   Size
+          -------   ----
+Copy (__iar_copy_init2)
+    1 source range, total size 0x15:
+          0x0081b5  0x15
+    1 destination range, total size 0x15:
+          0x000010  0x15
+
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module                 ro code  ro data  rw data
+    ------                 -------  -------  -------
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj: [1]
+    CC1101.o                 1 072       89        9
+    bsp.o                      390
+    main.o                     787      219       10
+    stm8l15x_adc.o             125
+    stm8l15x_clk.o             283        5
+    stm8l15x_gpio.o            187
+    stm8l15x_it.o              298        2        2
+    stm8l15x_pwr.o              91
+    stm8l15x_rtc.o             553
+    stm8l15x_spi.o             153
+    stm8l15x_tim2.o              5
+    stm8l15x_tim3.o            208
+    stm8l15x_usart.o           504
+    ------------------------------------------------
+    Total:                   4 656      315       21
+
+command line: [2]
+    ------------------------------------------------
+    Total:
+
+dbgstm8mmd.a: [3]
+    __dbg_break.o                1
+    __dbg_xxexit.o              22
+    ------------------------------------------------
+    Total:                      23
+
+dlstm8mmf.a: [4]
+    cexit.o                      6
+    cstartup.o                  23
+    exit.o                       4
+    far_util.o                  14
+    init.o                      30
+    init_small.o                40
+    interrupt.o                  4      128
+    long.o                     109
+    long_util.o                 24
+    low_level_init.o             3
+    move.o                      13
+    printf.o                    40
+    short.o                      8
+    strlen.o                    18
+    unhandled_exception.o        3
+    vreg_util.o                303
+    vregs.o                                       16
+    xprintftiny.o              456        4
+    xprout.o                    29
+    ------------------------------------------------
+    Total:                   1 127      132       16
+
+    Linker created                       11      256
+----------------------------------------------------
+    Grand Total:             5 806      458      293
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                    Address   Size  Type      Object
+-----                    -------   ----  ----      ------
+.iar.init_table$$Base   0x0080ae          --   Gb  - Linker created -
+.iar.init_table$$Limit  0x0080b9          --   Gb  - Linker created -
+?b0                     0x000000         Data  Gb  vregs.o [4]
+?b1                     0x000001         Data  Gb  vregs.o [4]
+?b10                    0x00000a         Data  Gb  vregs.o [4]
+?b11                    0x00000b         Data  Gb  vregs.o [4]
+?b12                    0x00000c         Data  Gb  vregs.o [4]
+?b13                    0x00000d         Data  Gb  vregs.o [4]
+?b14                    0x00000e         Data  Gb  vregs.o [4]
+?b15                    0x00000f         Data  Gb  vregs.o [4]
+?b2                     0x000002         Data  Gb  vregs.o [4]
+?b3                     0x000003         Data  Gb  vregs.o [4]
+?b4                     0x000004         Data  Gb  vregs.o [4]
+?b5                     0x000005         Data  Gb  vregs.o [4]
+?b6                     0x000006         Data  Gb  vregs.o [4]
+?b7                     0x000007         Data  Gb  vregs.o [4]
+?b8                     0x000008         Data  Gb  vregs.o [4]
+?b9                     0x000009         Data  Gb  vregs.o [4]
+?e0                     0x000001         Data  Gb  vregs.o [4]
+?e1                     0x000005         Data  Gb  vregs.o [4]
+?e2                     0x000009         Data  Gb  vregs.o [4]
+?e3                     0x00000d         Data  Gb  vregs.o [4]
+?epilogue_l2            0x0087dd         Code  Gb  vreg_util.o [4]
+?epilogue_l2_l3         0x0087d9         Code  Gb  vreg_util.o [4]
+?epilogue_l2_w6         0x0087e2         Code  Gb  vreg_util.o [4]
+?epilogue_w4            0x0087eb         Code  Gb  vreg_util.o [4]
+?l0                     0x000000         Data  Gb  vregs.o [4]
+?l1                     0x000004         Data  Gb  vregs.o [4]
+?l2                     0x000008         Data  Gb  vregs.o [4]
+?l3                     0x00000c         Data  Gb  vregs.o [4]
+?load24_e1_0x           0x0097b1         Code  Gb  far_util.o [4]
+?load32_0x_l0           0x009738         Code  Gb  long_util.o [4]
+?load32_xsp_l0          0x00972e         Code  Gb  long_util.o [4]
+?mov_e0_e2              0x0087f3         Code  Gb  vreg_util.o [4]
+?mov_e1_e3              0x008800         Code  Gb  vreg_util.o [4]
+?mov_e2_e0              0x00880a         Code  Gb  vreg_util.o [4]
+?mov_e3_e0              0x008817         Code  Gb  vreg_util.o [4]
+?mov_l0_l2              0x0087f0         Code  Gb  vreg_util.o [4]
+?mov_l1_l3              0x0087fd         Code  Gb  vreg_util.o [4]
+?mov_l3_l0              0x008814         Code  Gb  vreg_util.o [4]
+?mov_w1_w5              0x0087f6         Code  Gb  vreg_util.o [4]
+?mov_w3_w7              0x008803         Code  Gb  vreg_util.o [4]
+?mov_w5_w1              0x00880d         Code  Gb  vreg_util.o [4]
+?mov_w7_w1              0x00881a         Code  Gb  vreg_util.o [4]
+?move1616_v_x_y_a       0x0097d9         Code  Gb  move.o [4]
+?pop_e2                 0x00874e         Code  Gb  vreg_util.o [4]
+?pop_l0                 0x0087a1         Code  Gb  vreg_util.o [4]
+?pop_l1                 0x0087ac         Code  Gb  vreg_util.o [4]
+?pop_l2                 0x0087b7         Code  Gb  vreg_util.o [4]
+?pop_l3                 0x0087c2         Code  Gb  vreg_util.o [4]
+?pop_w4                 0x008718         Code  Gb  vreg_util.o [4]
+?pop_w6                 0x00871f         Code  Gb  vreg_util.o [4]
+?push_e2                0x008732         Code  Gb  vreg_util.o [4]
+?push_l0                0x00876c         Code  Gb  vreg_util.o [4]
+?push_l1                0x008771         Code  Gb  vreg_util.o [4]
+?push_l2                0x008776         Code  Gb  vreg_util.o [4]
+?push_l3                0x00877b         Code  Gb  vreg_util.o [4]
+?push_w2                0x0086f2         Code  Gb  vreg_util.o [4]
+?push_w4                0x0086f7         Code  Gb  vreg_util.o [4]
+?push_w6                0x0086fc         Code  Gb  vreg_util.o [4]
+?sll16_x_x_a            0x00980d         Code  Gb  short.o [4]
+?udiv32_l0_l0_l1        0x008fb6         Code  Gb  long.o [4]
+?umod32_l1_l0_l1        0x008fb6         Code  Gb  long.o [4]
+?w0                     0x000000         Data  Gb  vregs.o [4]
+?w1                     0x000002         Data  Gb  vregs.o [4]
+?w2                     0x000004         Data  Gb  vregs.o [4]
+?w3                     0x000006         Data  Gb  vregs.o [4]
+?w4                     0x000008         Data  Gb  vregs.o [4]
+?w5                     0x00000a         Data  Gb  vregs.o [4]
+?w6                     0x00000c         Data  Gb  vregs.o [4]
+?w7                     0x00000e         Data  Gb  vregs.o [4]
+ADC1_COMP_IRQHandler    0x00986e    0x1  Code  Gb  stm8l15x_it.o [1]
+ADC_ChannelCmd          0x0091da   0x4b  Code  Gb  stm8l15x_adc.o [1]
+ADC_Cmd                 0x0097bf    0xd  Code  Gb  stm8l15x_adc.o [1]
+ADC_Init                0x00955e   0x25  Code  Gb  stm8l15x_adc.o [1]
+ADC_Initial             0x009326   0x39  Code  Gb  bsp.o [1]
+CC1101ClrRXBuff         0x0081ca    0xa  Code  Gb  CC1101.o [1]
+CC1101ClrTXBuff         0x0081d4    0xa  Code  Gb  CC1101.o [1]
+CC1101GetRXCnt          0x009804    0x9  Code  Gb  CC1101.o [1]
+CC1101Init              0x008c96   0x97  Code  Gb  CC1101.o [1]
+CC1101InitData          0x008080   0x2e  Data  Lc  CC1101.o [1]
+CC1101ReadMultiReg      0x008333   0x67  Code  Gb  CC1101.o [1]
+CC1101ReadReg           0x00839a   0x3a  Code  Gb  CC1101.o [1]
+CC1101ReadStatus        0x0082f9   0x3a  Code  Gb  CC1101.o [1]
+CC1101RecPacket         0x008ece   0x76  Code  Gb  CC1101.o [1]
+CC1101Reset             0x0081e4   0x33  Code  Gb  CC1101.o [1]
+CC1101SendPacket        0x008bf9   0x9d  Code  Gb  CC1101.o [1]
+CC1101SetAddress        0x009139   0x52  Code  Gb  CC1101.o [1]
+CC1101SetIdle           0x0081de    0x6  Code  Gb  CC1101.o [1]
+CC1101SetSYNC           0x009633   0x21  Code  Gb  CC1101.o [1]
+CC1101SetTRMode         0x0082d1   0x28  Code  Gb  CC1101.o [1]
+CC1101WriteCmd          0x008217   0x2e  Code  Gb  CC1101.o [1]
+CC1101WriteMultiReg     0x008245   0x54  Code  Gb  CC1101.o [1]
+CC1101WriteReg          0x008299   0x38  Code  Gb  CC1101.o [1]
+CLK_GetClockFreq        0x008e50   0x7e  Code  Gb  stm8l15x_clk.o [1]
+CLK_PeripheralClockConfig
+                        0x008dc1   0x8f  Code  Gb  stm8l15x_clk.o [1]
+CLK_RTCClockConfig      0x0097e6    0xa  Code  Gb  stm8l15x_clk.o [1]
+CLK_SYSCLKDivConfig     0x00983a    0x4  Code  Gb  stm8l15x_clk.o [1]
+CSTACK$$Base            0x000700          --   Gb  - Linker created -
+CSTACK$$Limit           0x000800          --   Gb  - Linker created -
+Cnt1ms                  0x00001e    0x2  Data  Gb  main.o [1]
+DMA1_CHANNEL0_1_IRQHandler
+                        0x009861    0x1  Code  Gb  stm8l15x_it.o [1]
+DMA1_CHANNEL2_3_IRQHandler
+                        0x009862    0x1  Code  Gb  stm8l15x_it.o [1]
+DelayMs                 0x0096f4   0x1d  Code  Gb  main.o [1]
+EXTI0_IRQHandler        0x009865    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI1_IRQHandler        0x009866    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI2_IRQHandler        0x009867    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI3_IRQHandler        0x009868    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI4_IRQHandler        0x009869    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI5_IRQHandler        0x00986a    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI6_IRQHandler        0x00986b    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTI7_IRQHandler        0x00986c    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTIB_IRQHandler        0x009863    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTID_IRQHandler        0x009864    0x1  Code  Gb  stm8l15x_it.o [1]
+EXTIE_F_PVD_IRQHandler  0x009396   0x31  Code  Gb  stm8l15x_it.o [1]
+FLASH_IRQHandler        0x009860    0x1  Code  Gb  stm8l15x_it.o [1]
+GPIO_Init               0x0089f3   0xae  Code  Gb  stm8l15x_gpio.o [1]
+GPIO_Initial            0x008f44   0x72  Code  Gb  bsp.o [1]
+GPIO_ReadInputDataBit   0x009850    0x3  Code  Gb  stm8l15x_gpio.o [1]
+GPIO_ResetBits          0x00983e    0x4  Code  Gb  stm8l15x_gpio.o [1]
+GPIO_SetBits            0x00984a    0x3  Code  Gb  stm8l15x_gpio.o [1]
+GPIO_ToggleBits         0x00984d    0x3  Code  Gb  stm8l15x_gpio.o [1]
+I2C1_IRQHandler         0x009876    0x1  Code  Gb  stm8l15x_it.o [1]
+INTVEC$$Base            0x008000          --   Gb  - Linker created -
+INTVEC$$Limit           0x008080          --   Gb  - Linker created -
+LCD_IRQHandler          0x00986d    0x1  Code  Gb  stm8l15x_it.o [1]
+PWR_GetFlagStatus       0x0093c7   0x2f  Code  Gb  stm8l15x_pwr.o [1]
+PWR_PVDClearFlag        0x009821    0x5  Code  Gb  stm8l15x_pwr.o [1]
+PWR_PVDGetITStatus      0x0094ec   0x27  Code  Gb  stm8l15x_pwr.o [1]
+PaTabel                 0x000010    0x8  Data  Gb  CC1101.o [1]
+RF_SendPacket           0x008565  0x18d  Code  Gb  main.o [1]
+RTC_AWU_Initial         0x0092ae   0x3c  Code  Gb  main.o [1]
+RTC_ClearITPendingBit   0x0097fa    0xa  Code  Gb  stm8l15x_rtc.o [1]
+RTC_DeInit              0x008821   0xee  Code  Gb  stm8l15x_rtc.o [1]
+RTC_EnterInitMode       0x008d66   0x22  Code  Gb  stm8l15x_rtc.o [1]
+RTC_IRQHandler          0x0095cb   0x23  Code  Gb  stm8l15x_it.o [1]
+RTC_ITConfig            0x008d88   0x39  Code  Gb  stm8l15x_rtc.o [1]
+RTC_SetWakeUpCounter    0x009513   0x26  Code  Gb  stm8l15x_rtc.o [1]
+RTC_WaitForSynchro      0x008d3e   0x28  Code  Gb  stm8l15x_rtc.o [1]
+RTC_WakeUpClockConfig   0x009474   0x28  Code  Gb  stm8l15x_rtc.o [1]
+RTC_WakeUpCmd           0x00918b   0x4f  Code  Gb  stm8l15x_rtc.o [1]
+RTC_WriteProtectionCmd  0x008d2d   0x11  Code  Gb  stm8l15x_rtc.o [1]
+RecvWaitTime            0x000020    0x2  Data  Gb  main.o [1]
+Region$$Table$$Base     0x0080ae          --   Gb  - Linker created -
+Region$$Table$$Limit    0x0080b9          --   Gb  - Linker created -
+SClK_Initial            0x009815    0x6  Code  Gb  bsp.o [1]
+SPI1_IRQHandler         0x009874    0x1  Code  Gb  stm8l15x_it.o [1]
+SPI_Cmd                 0x0097cc    0xd  Code  Gb  stm8l15x_spi.o [1]
+SPI_DeInit              0x0095ee   0x23  Code  Gb  stm8l15x_spi.o [1]
+SPI_ExchangeByte        0x00944c   0x28  Code  Gb  bsp.o [1]
+SPI_GetFlagStatus       0x00978a   0x15  Code  Gb  stm8l15x_spi.o [1]
+SPI_Init                0x009225   0x4a  Code  Gb  stm8l15x_spi.o [1]
+SPI_Initial             0x009088   0x5d  Code  Gb  bsp.o [1]
+SPI_ReceiveData         0x00982b    0x5  Code  Gb  stm8l15x_spi.o [1]
+SPI_SendData            0x009826    0x5  Code  Gb  stm8l15x_spi.o [1]
+SWITCH_CSS_BREAK_DAC_IRQHandler
+                        0x0097f0    0xa  Code  Gb  stm8l15x_it.o [1]
+SYSDivFactor            0x0081a5    0x5  Data  Gb  stm8l15x_clk.o [1]
+SendBuffer              0x000018    0x6  Data  Gb  main.o [1]
+System_Initial          0x009696   0x20  Code  Gb  main.o [1]
+TIM1_CAP_IRQHandler     0x009872    0x1  Code  Gb  stm8l15x_it.o [1]
+TIM1_UPD_OVF_TRG_COM_IRQHandler
+                        0x009871    0x1  Code  Gb  stm8l15x_it.o [1]
+TIM2_CAP_IRQHandler     0x00986f    0x1  Code  Gb  stm8l15x_it.o [1]
+TIM2_ClearITPendingBit  0x009830    0x5  Code  Gb  stm8l15x_tim2.o [1]
+TIM2_Conut              0x000022    0x2  Data  Gb  stm8l15x_it.o [1]
+TIM2_UPD_OVF_TRG_BRK_IRQHandler
+                        0x0090e5   0x54  Code  Gb  stm8l15x_it.o [1]
+TIM3_1MS_ISR            0x009746   0x17  Code  Gb  main.o [1]
+TIM3_ARRPreloadConfig   0x0092f9    0xd  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_CAP_IRQHandler     0x009870    0x1  Code  Gb  stm8l15x_it.o [1]
+TIM3_ClearITPendingBit  0x009835    0x5  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_Cmd                0x009319    0xd  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_DeInit             0x009023   0x65  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_ITConfig           0x009306   0x13  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_Initial            0x009583   0x24  Code  Gb  bsp.o [1]
+TIM3_Set                0x009539   0x25  Code  Gb  main.o [1]
+TIM3_SetCounter         0x0092ea    0xf  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_TimeBaseInit       0x009422   0x2a  Code  Gb  stm8l15x_tim3.o [1]
+TIM3_UPD_OVF_TRG_BRK_IRQHandler
+                        0x009654   0x21  Code  Gb  stm8l15x_it.o [1]
+TIM4_UPD_OVF_TRG_IRQHandler
+                        0x009873    0x1  Code  Gb  stm8l15x_it.o [1]
+TRAP_IRQHandler         0x00985f    0x1  Code  Gb  stm8l15x_it.o [1]
+USART1_Initial          0x0093f6   0x2c  Code  Gb  bsp.o [1]
+USART1_RX_IRQHandler    0x00926f   0x3f  Code  Gb  stm8l15x_it.o [1]
+USART1_TX_IRQHandler    0x009875    0x1  Code  Gb  stm8l15x_it.o [1]
+USART_ClearITPendingBit
+                        0x0096b6   0x20  Code  Gb  stm8l15x_usart.o [1]
+USART_Cmd               0x009675   0x21  Code  Gb  stm8l15x_usart.o [1]
+USART_GetFlagStatus     0x009611   0x22  Code  Gb  stm8l15x_usart.o [1]
+USART_GetITStatus       0x008b4e   0xab  Code  Gb  stm8l15x_usart.o [1]
+USART_Init              0x00890f   0xe4  Code  Gb  stm8l15x_usart.o [1]
+USART_ReceiveData8      0x009853    0x3  Code  Gb  stm8l15x_usart.o [1]
+USART_SendData8         0x009856    0x3  Code  Gb  stm8l15x_usart.o [1]
+_PrintfTiny             0x0083d4  0x191  Code  Gb  xprintftiny.o [4]
+_Prout                  0x009711   0x1d  Code  Gb  xprout.o [4]
+__DebugBreak            0x009877    0x1  Code  Gb  __dbg_break.o [3]
+__exit                  0x009774   0x16  Code  Gb  __dbg_xxexit.o [3]
+__iar_copy_init2        0x0094c4         Code  Gb  init_small.o [4]
+__iar_data_init2        0x0096d6   0x1e  Code  Gb  init.o [4]
+__iar_program_start     0x00975d         Code  Gb  cstartup.o [4]
+__iar_unhandled_exception
+                        0x00985c         Code  Gb  unhandled_exception.o [4]
+__intvec                0x008000         Data  Gb  interrupt.o [4]
+__low_level_init        0x009859    0x3  Code  Gb  low_level_init.o [4]
+_exit                   0x00981b         Code  Gb  cexit.o [4]
+_interrupt_1            0x00985f         Code  Gb  stm8l15x_it.o [1]
+_interrupt_10           0x009865         Code  Gb  stm8l15x_it.o [1]
+_interrupt_11           0x009866         Code  Gb  stm8l15x_it.o [1]
+_interrupt_12           0x009867         Code  Gb  stm8l15x_it.o [1]
+_interrupt_13           0x009868         Code  Gb  stm8l15x_it.o [1]
+_interrupt_14           0x009869         Code  Gb  stm8l15x_it.o [1]
+_interrupt_15           0x00986a         Code  Gb  stm8l15x_it.o [1]
+_interrupt_16           0x00986b         Code  Gb  stm8l15x_it.o [1]
+_interrupt_17           0x00986c         Code  Gb  stm8l15x_it.o [1]
+_interrupt_18           0x00986d         Code  Gb  stm8l15x_it.o [1]
+_interrupt_19           0x0097f0         Code  Gb  stm8l15x_it.o [1]
+_interrupt_20           0x00986e         Code  Gb  stm8l15x_it.o [1]
+_interrupt_21           0x0090e5         Code  Gb  stm8l15x_it.o [1]
+_interrupt_22           0x00986f         Code  Gb  stm8l15x_it.o [1]
+_interrupt_23           0x009654         Code  Gb  stm8l15x_it.o [1]
+_interrupt_24           0x009870         Code  Gb  stm8l15x_it.o [1]
+_interrupt_25           0x009871         Code  Gb  stm8l15x_it.o [1]
+_interrupt_26           0x009872         Code  Gb  stm8l15x_it.o [1]
+_interrupt_27           0x009873         Code  Gb  stm8l15x_it.o [1]
+_interrupt_28           0x009874         Code  Gb  stm8l15x_it.o [1]
+_interrupt_29           0x009875         Code  Gb  stm8l15x_it.o [1]
+_interrupt_3            0x009860         Code  Gb  stm8l15x_it.o [1]
+_interrupt_30           0x00926f         Code  Gb  stm8l15x_it.o [1]
+_interrupt_31           0x009876         Code  Gb  stm8l15x_it.o [1]
+_interrupt_4            0x009861         Code  Gb  stm8l15x_it.o [1]
+_interrupt_5            0x009862         Code  Gb  stm8l15x_it.o [1]
+_interrupt_6            0x0095cb         Code  Gb  stm8l15x_it.o [1]
+_interrupt_7            0x009396         Code  Gb  stm8l15x_it.o [1]
+_interrupt_8            0x009863         Code  Gb  stm8l15x_it.o [1]
+_interrupt_9            0x009864         Code  Gb  stm8l15x_it.o [1]
+exit                    0x009846    0x4  Code  Gb  exit.o [4]
+main                    0x008aa1   0xad  Code  Gb  main.o [1]
+out                     0x009367   0x2f  Code  Lc  xprintftiny.o [4]
+printf                  0x00949c   0x28  Code  Gb  printf.o [4]
+putchar                 0x0095a7   0x24  Code  Gb  main.o [1]
+strlen                  0x00979f   0x12  Code  Gb  strlen.o [4]
+
+
+[1] = E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj
+[2] = command line
+[3] = dbgstm8mmd.a
+[4] = dlstm8mmf.a
+
+  5 806 bytes of readonly  code memory
+    458 bytes of readonly  data memory
+    293 bytes of readwrite data memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,307 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:30
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_pwr.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_pwr.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_pwr.lst
+#    Object file  =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_pwr.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_pwr.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_pwr.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the PWR firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "stm8l15x_pwr.h"
+     23          
+     24          /** @addtogroup STM8L15x_StdPeriph_Driver
+     25            * @{
+     26            */
+     27          
+     28          /* Private typedef -----------------------------------------------------------*/
+     29          /* Private define ------------------------------------------------------------*/
+     30          /* Private macro -------------------------------------------------------------*/
+     31          /* Private variables ---------------------------------------------------------*/
+     32          /* Private function prototypes -----------------------------------------------*/
+     33          /* Private functions ---------------------------------------------------------*/
+     34          /* Public functions ----------------------------------------------------------*/
+     35          
+     36          /**
+     37            * @addtogroup PWR_Public_Functions
+     38            * @{
+     39            */
+     40          
+     41          /**
+     42            * @brief  Deinitializes the PWR peripheral registers to their default reset values.
+     43            * @param  None
+     44            * @retval None
+     45            */
+     46          void PWR_DeInit(void)
+     47          {
+     48            PWR->CSR1 = PWR_CSR1_PVDIF;
+     49            PWR->CSR2 = PWR_CSR2_RESET_VALUE;
+     50          }
+     51          
+     52          /**
+     53            * @brief  Enable or disable the PWR fast wake up function.
+     54            * @param  NewState : Indicates the new state of the PWR fast wake up .
+     55            * @retval None
+     56            */
+     57          void PWR_FastWakeUpCmd(FunctionalState NewState)
+     58          {
+     59            /* Check the parameters */
+     60            assert_param(IS_FUNCTIONAL_STATE(NewState));
+     61          
+     62            if (NewState != DISABLE)
+     63            {
+     64              /* Enable the PWR FWU */
+     65              PWR->CSR2 |= PWR_CSR2_FWU;
+     66            }
+     67            else
+     68            {
+     69              /* Disable the PWR FWU */
+     70              PWR->CSR2 &= (uint8_t)(~PWR_CSR2_FWU);
+     71            }
+     72          }
+     73          
+     74          /**
+     75            * @brief  Enable or disable the PWR Ultra Low Power (ULP) function.
+     76            * @param  NewState :  Indicates the new state of the PWR ULP.
+     77            * @retval None
+     78            */
+     79          void PWR_UltraLowPowerCmd(FunctionalState NewState)
+     80          {
+     81            /* Check the parameters */
+     82            assert_param(IS_FUNCTIONAL_STATE(NewState));
+     83          
+     84            if (NewState != DISABLE)
+     85            {
+     86              /* Enable the PWR ULP */
+     87              PWR->CSR2 |= PWR_CSR2_ULP;
+     88            }
+     89            else
+     90            {
+     91              /* Disable the PWR ULP */
+     92              PWR->CSR2 &= (uint8_t)(~PWR_CSR2_ULP);
+     93            }
+     94          }
+     95          
+     96          /**
+     97            * @brief  Enable or disable the PWR Programmable Voltage Detector (PVD) function.
+     98            * @param  NewState : Indicates the new state of the PWR PVD.
+     99            * @retval None
+    100            */
+    101          void PWR_PVDCmd(FunctionalState NewState)
+    102          {
+    103            /* Check the parameters */
+    104            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    105          
+    106            if (NewState != DISABLE)
+    107            {
+    108              /* Enable the PWR PVD */
+    109              PWR->CSR1 |= PWR_CSR1_PVDE;
+    110            }
+    111            else
+    112            {
+    113              /* Disable the PWR PVD */
+    114              PWR->CSR1 &= (uint8_t)(~PWR_CSR1_PVDE);
+    115            }
+    116          }
+    117          
+    118          /**
+    119            * @brief  Configures the Programmable Voltage Detector (PVD) Interrupt .
+    120            * @param  NewState : Indicates the new state of the PVD interrupt.
+    121            * @retval None
+    122            */
+    123          void PWR_PVDITConfig(FunctionalState NewState)
+    124          {
+    125            /* Check the parameters */
+    126            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    127          
+    128            if (NewState != DISABLE)
+    129            {
+    130              /* Enable the PVD interrupt */
+    131              PWR->CSR1 |= PWR_CSR1_PVDIEN;
+    132            }
+    133            else
+    134            {
+    135              /* Disable the PVD interrupt */
+    136              PWR->CSR1 &= (uint8_t)(~PWR_CSR1_PVDIEN);
+    137            }
+    138          }
+    139          
+    140          /**
+    141            * @brief  Configures the Programmable Voltage Detector (PVD)  levels .
+    142            * @param  PWR_PVDLevel : Indicates the new level of the PWR PVD.
+    143            *         This paramter can be value of @ref PWR_PVDLevel_TypeDef
+    144            * @retval None
+    145            */
+    146          void PWR_PVDLevelConfig(PWR_PVDLevel_TypeDef PWR_PVDLevel)
+    147          {
+    148            /* Check the parameters */
+    149            assert_param(IS_PWR_PVD_LEVEL(PWR_PVDLevel));
+    150          
+    151            /* Clear the PVD level */
+    152            PWR->CSR1 &= (uint8_t)(~PWR_CSR1_PLS);
+    153          
+    154            /* Configure the PVD level */
+    155            PWR->CSR1 |= PWR_PVDLevel;
+    156          
+    157          }
+    158          
+    159          /**
+    160            * @brief  Checks whether the specified PWR flag is set or not.
+    161            * @param  PWR_FLAG : Flag to check.
+    162            *         This paramter can be value of @ref PWR_Flag_TypeDef
+    163            * @retval FlagStatus: status of the checked flag
+    164            */
+    165          FlagStatus PWR_GetFlagStatus(PWR_FLAG_TypeDef PWR_FLAG)
+    166          {
+    167            FlagStatus bitstatus = RESET;
+    168          
+    169            /* Check the parameters */
+    170            assert_param(IS_PWR_FLAG(PWR_FLAG));
+    171          
+    172            if ((PWR_FLAG & PWR_FLAG_VREFINTF) != 0)
+    173            {
+    174              if ((PWR->CSR2 & PWR_CR2_VREFINTF) != (uint8_t)RESET )
+    175              {
+    176                bitstatus = SET;
+    177              }
+    178              else
+    179              {
+    180                bitstatus = RESET;
+    181              }
+    182            }
+    183            else
+    184            {
+    185              if ((PWR->CSR1 & PWR_FLAG) != (uint8_t)RESET )
+    186              {
+    187                bitstatus = SET;
+    188              }
+    189              else
+    190              {
+    191                bitstatus = RESET;
+    192              }
+    193            }
+    194          
+    195            /* Return the flag status */
+    196            return((FlagStatus)bitstatus);
+    197          }
+    198          /**
+    199            * @brief  Clears the PWR PVDIF Flag.
+    200            * @param  None
+    201            * @retval None
+    202            */
+    203          void PWR_PVDClearFlag(void)
+    204          {
+    205            /* Set the PVDIF to clear it */
+    206            PWR->CSR1 |= PWR_CSR1_PVDIF;
+    207             
+    208          }
+    209          
+    210          /**
+    211            * @brief  Checks whether the PVD interrupt has occurred or not.
+    212            * @param  None
+    213            * @retval ITStatus : The new state of the PVD Interrupt.
+    214            */
+    215          ITStatus PWR_PVDGetITStatus(void)
+    216          {
+    217            ITStatus bitstatus = RESET;
+    218          
+    219            uint8_t PVD_itStatus = 0x0, PVD_itEnable = 0x0;
+    220          
+    221            PVD_itStatus = (uint8_t)(PWR->CSR1 & (uint8_t)PWR_CSR1_PVDIF);
+    222            PVD_itEnable = (uint8_t)(PWR->CSR1 & (uint8_t)PWR_CSR1_PVDIEN);
+    223          
+    224            if ((PVD_itStatus != (uint8_t)RESET ) && (PVD_itEnable != (uint8_t)RESET))
+    225            {
+    226              bitstatus = (ITStatus)SET;
+    227            }
+    228            else
+    229            {
+    230              bitstatus = (ITStatus)RESET;
+    231            }
+    232            return ((ITStatus)bitstatus);
+    233          }
+    234          
+    235          /**
+    236            * @brief  Clears the PWR interrupt pending bit.
+    237            * @param  None
+    238            * @retval None
+    239            */
+    240          void PWR_PVDClearITPendingBit(void)
+    241          {
+    242            /* Set the PVDIF to clear it */
+    243            PWR->CSR1 |= PWR_CSR1_PVDIF;
+    244          }
+    245          
+    246          /**
+    247            * @}
+    248            */
+    249          
+    250          /**
+    251            * @}
+    252            */
+    253          
+    254          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       9  PWR_DeInit
+      13  PWR_FastWakeUpCmd
+      47  PWR_GetFlagStatus
+       5  PWR_PVDClearFlag
+       5  PWR_PVDClearITPendingBit
+      13  PWR_PVDCmd
+      39  PWR_PVDGetITStatus
+      13  PWR_PVDITConfig
+      19  PWR_PVDLevelConfig
+      13  PWR_UltraLowPowerCmd
+
+ 
+ 176 bytes in section .far_func.text
+ 
+ 176 bytes of CODE memory
+
+Errors: none
+Warnings: none

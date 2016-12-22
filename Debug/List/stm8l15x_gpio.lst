@@ -1,0 +1,329 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:29
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_gpio.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_gpio.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_gpio.lst
+#    Object file  =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_gpio.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_gpio.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_gpio.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the GPIO firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "stm8l15x_gpio.h"
+     23          
+     24          /** @addtogroup STM8L15x_StdPeriph_Driver
+     25            * @{
+     26            */
+     27          
+     28          /* Private typedef -----------------------------------------------------------*/
+     29          /* Private define ------------------------------------------------------------*/
+     30          /* Private macro -------------------------------------------------------------*/
+     31          /* Private variables ---------------------------------------------------------*/
+     32          /* Private function prototypes -----------------------------------------------*/
+     33          /* Private functions ---------------------------------------------------------*/
+     34          
+     35          /**
+     36            * @addtogroup GPIO_Public_Functions
+     37            * @{
+     38            */
+     39          
+     40          /**
+     41            * @brief  Deinitializes the GPIOx peripheral registers to their default reset values.
+     42            * @param  GPIOx: Select the GPIO peripheral number (x = A to I).
+     43            * @retval None
+     44            */
+     45          void GPIO_DeInit(GPIO_TypeDef* GPIOx)
+     46          {
+     47            GPIOx->CR2 = GPIO_CR2_RESET_VALUE; /* Reset Control Register 2 */
+     48            GPIOx->ODR = GPIO_ODR_RESET_VALUE; /* Reset Output Data Register */
+     49            GPIOx->DDR = GPIO_DDR_RESET_VALUE; /* Reset Data Direction Register */
+     50            GPIOx->CR1 = GPIO_CR1_RESET_VALUE; /* Reset Control Register 1 */
+     51          }
+     52          
+     53          /**
+     54            * @brief  Initializes the GPIOx according to the specified parameters.
+     55            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+     56            * @param  GPIO_Pin : This parameter contains the pin number, it can be any value
+     57            *         of the @ref GPIO_Pin_TypeDef enumeration.
+     58            * @param  GPIO_Mode : This parameter can be a value of the
+     59            *         @Ref GPIO_Mode_TypeDef enumeration.
+     60            * @retval None
+     61            */
+     62          
+     63          void GPIO_Init(GPIO_TypeDef* GPIOx,
+     64                         uint8_t GPIO_Pin,
+     65                         GPIO_Mode_TypeDef GPIO_Mode)
+     66          {
+     67            /*----------------------*/
+     68            /* Check the parameters */
+     69            /*----------------------*/
+     70          
+     71            assert_param(IS_GPIO_MODE(GPIO_Mode));
+     72            assert_param(IS_GPIO_PIN(GPIO_Pin));
+     73          
+     74            /* Reset crresponding bit to GPIO_Pin in CR2 register */
+     75            GPIOx->CR2 &= (uint8_t)(~(GPIO_Pin));
+     76          
+     77            /*-----------------------------*/
+     78            /* Input/Output mode selection */
+     79            /*-----------------------------*/
+     80          
+     81            if ((((uint8_t)(GPIO_Mode)) & (uint8_t)0x80) != (uint8_t)0x00) /* Output mode */
+     82            {
+     83              if ((((uint8_t)(GPIO_Mode)) & (uint8_t)0x10) != (uint8_t)0x00) /* High level */
+     84              {
+     85                GPIOx->ODR |= GPIO_Pin;
+     86              } else /* Low level */
+     87              {
+     88                GPIOx->ODR &= (uint8_t)(~(GPIO_Pin));
+     89              }
+     90              /* Set Output mode */
+     91              GPIOx->DDR |= GPIO_Pin;
+     92            } else /* Input mode */
+     93            {
+     94              /* Set Input mode */
+     95              GPIOx->DDR &= (uint8_t)(~(GPIO_Pin));
+     96            }
+     97          
+     98            /*------------------------------------------------------------------------*/
+     99            /* Pull-Up/Float (Input) or Push-Pull/Open-Drain (Output) modes selection */
+    100            /*------------------------------------------------------------------------*/
+    101          
+    102            if ((((uint8_t)(GPIO_Mode)) & (uint8_t)0x40) != (uint8_t)0x00) /* Pull-Up or Push-Pull */
+    103            {
+    104              GPIOx->CR1 |= GPIO_Pin;
+    105            } else /* Float or Open-Drain */
+    106            {
+    107              GPIOx->CR1 &= (uint8_t)(~(GPIO_Pin));
+    108            }
+    109          
+    110            /*-----------------------------------------------------*/
+    111            /* Interrupt (Input) or Slope (Output) modes selection */
+    112            /*-----------------------------------------------------*/
+    113          
+    114            if ((((uint8_t)(GPIO_Mode)) & (uint8_t)0x20) != (uint8_t)0x00) /* Interrupt or Slow slope */
+    115            {
+    116              GPIOx->CR2 |= GPIO_Pin;
+    117            } else /* No external interrupt or No slope control */
+    118            {
+    119              GPIOx->CR2 &= (uint8_t)(~(GPIO_Pin));
+    120            }
+    121          
+    122          }
+    123          
+    124          /**
+    125            * @brief  Writes data to the specified GPIO data port.
+    126            * @note   The port must be configured in output mode.
+    127            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    128            * @param  GPIO_PortVal : Specifies the value to be written to the port output
+    129            *         data register.
+    130            * @retval None
+    131            */
+    132          void GPIO_Write(GPIO_TypeDef* GPIOx, uint8_t GPIO_PortVal)
+    133          {
+    134            GPIOx->ODR = GPIO_PortVal;
+    135          }
+    136          
+    137          /**
+    138            * @brief  Sets or clears the selected data port bit.
+    139            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    140            * @param  GPIO_Pin: Specifies the port bit to be written.
+    141            *         This parameter can be a value of GPIO_Pin_TypeDef enumeration.
+    142            * @param  GPIO_BitVal: specifies the desired status to be written.
+    143            *         This parameter can be a value of @ref BitAction enumeration.
+    144            * @retval None
+    145            */
+    146          void GPIO_WriteBit(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin, BitAction GPIO_BitVal)
+    147          {
+    148            /* Check the parameters */
+    149            assert_param(IS_GPIO_PIN(GPIO_Pin));
+    150            assert_param(IS_STATE_VALUE(GPIO_BitVal));
+    151          
+    152            if (GPIO_BitVal != RESET)
+    153            {
+    154              GPIOx->ODR |= GPIO_Pin;
+    155          
+    156            }
+    157            else
+    158            {
+    159              GPIOx->ODR &= (uint8_t)(~GPIO_Pin);
+    160            }
+    161          }
+    162          
+    163          /**
+    164            * @brief  Writes high level to the specified GPIO pins.
+    165            * @note   The port must be configured in output mode.
+    166            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    167            * @param  GPIO_Pin : Specifies the pins to be turned high.
+    168            * @retval None
+    169            */
+    170          void GPIO_SetBits(GPIO_TypeDef* GPIOx, uint8_t GPIO_Pin)
+    171          {
+    172            GPIOx->ODR |= GPIO_Pin;
+    173          }
+    174          
+    175          /**
+    176            * @brief  Writes low level to the specified GPIO pins.
+    177            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    178            * @param  GPIO_Pin : Specifies the pins to be turned low
+    179            * @retval None
+    180            * @par    Required preconditions:
+    181            *   The port must be configured in output mode.
+    182            */
+    183          void GPIO_ResetBits(GPIO_TypeDef* GPIOx, uint8_t GPIO_Pin)
+    184          {
+    185            GPIOx->ODR &= (uint8_t)(~GPIO_Pin);
+    186          }
+    187          
+    188          /**
+    189            * @brief  Toggles the specified GPIO pins.
+    190            * @note   The port must be configured in output mode.
+    191            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    192            * @param  GPIO_Pin : Specifies the pins to be toggled.
+    193            * @retval None
+    194            */
+    195          void GPIO_ToggleBits(GPIO_TypeDef* GPIOx, uint8_t GPIO_Pin)
+    196          {
+    197            GPIOx->ODR ^= GPIO_Pin;
+    198          }
+    199          
+    200          /**
+    201            * @brief  Reads the specified GPIO input data port.
+    202            * @note   The port must be configured in input mode.
+    203            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    204            * @retval The GPIOx input data port value.
+    205            */
+    206          uint8_t GPIO_ReadInputData(GPIO_TypeDef* GPIOx)
+    207          {
+    208            return ((uint8_t)GPIOx->IDR);
+    209          }
+    210          
+    211          /**
+    212            * @brief  Reads the specified GPIO output data port.
+    213            * @note   The port must be configured in input mode.
+    214            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    215            * @retval The GPIOx  output data port value.
+    216            */
+    217          uint8_t GPIO_ReadOutputData(GPIO_TypeDef* GPIOx)
+    218          {
+    219            return ((uint8_t)GPIOx->ODR);
+    220          }
+    221          
+    222          /**
+    223            * @brief  Reads the specified GPIO input data pin.
+    224            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    225            * @param  GPIO_Pin : Specifies the pin number.
+    226            * @retval BitStatus : GPIO input pin status.
+    227            */
+    228          BitStatus GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin)
+    229          {
+    230            return ((BitStatus)(GPIOx->IDR & (uint8_t)GPIO_Pin));
+    231          }
+    232          
+    233          /**
+    234            * @brief  Reads the specified GPIO Output data pin.
+    235            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    236            * @param  GPIO_Pin : Specifies the pin number
+    237            * @retval BitStatus : GPIO output pin status.
+    238            */
+    239          BitStatus GPIO_ReadOutputDataBit(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin)
+    240          {
+    241            return ((BitStatus)(GPIOx->ODR & (uint8_t)GPIO_Pin));
+    242          }
+    243          
+    244          /**
+    245            * @brief  Configures the external pull-up on GPIOx pins.
+    246            * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+    247            * @param  GPIO_Pin : Specifies the pin number
+    248            * @param  NewState : The new state of the pull up pin.
+    249            * @retval None
+    250            */
+    251          void GPIO_ExternalPullUpConfig(GPIO_TypeDef* GPIOx, uint8_t GPIO_Pin, FunctionalState NewState)
+    252          {
+    253            /* Check the parameters */
+    254            assert_param(IS_GPIO_PIN(GPIO_Pin));
+    255            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    256          
+    257            if (NewState != DISABLE) /* External Pull-Up Set*/
+    258            {
+    259              GPIOx->CR1 |= GPIO_Pin;
+    260            } else /* External Pull-Up Reset*/
+    261            {
+    262              GPIOx->CR1 &= (uint8_t)(~(GPIO_Pin));
+    263            }
+    264          }
+    265          
+    266          /**
+    267            * @}
+    268            */
+    269          
+    270          /**
+    271            * @}
+    272            */
+    273          
+    274          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      26  GPIO_DeInit
+      31  GPIO_ExternalPullUpConfig
+     174  GPIO_Init
+       3  GPIO_ReadInputData
+       3  GPIO_ReadInputDataBit
+       2  GPIO_ReadOutputData
+       2  GPIO_ReadOutputDataBit
+       4  GPIO_ResetBits
+       3  GPIO_SetBits
+       3  GPIO_ToggleBits
+       2  GPIO_Write
+      11  GPIO_WriteBit
+
+ 
+ 264 bytes in section .far_func.text
+ 
+ 264 bytes of CODE memory
+
+Errors: none
+Warnings: none

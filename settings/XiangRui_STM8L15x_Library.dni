@@ -1,0 +1,77 @@
+[InterruptLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+SumSortOrder=0
+[Interrupts]
+Enabled=1
+[MemoryMap]
+Enabled=0
+Base=0
+UseAuto=0
+TypeViolation=1
+UnspecRange=1
+ActionState=1
+[TraceHelper]
+Enabled=0
+ShowSource=1
+[DebugChecksum]
+Checksum=-485833679
+[DisAssemblyWindow]
+NumStates=_ 1
+State 1=_ 1
+[InstructionProfiling]
+Enabled=_ 0
+[CodeCoverage]
+Enabled=_ 0
+[StackPlugin]
+Enabled=1
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnHow=0
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[CallStack]
+ShowArgs=0
+[Disassembly]
+MixedMode=1
+[DataSample]
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[Breakpoints]
+Bp0=_ "STD_DATA" "TIM3_OC1Init" 0 0 0 3 0 "" 0 ""
+Count=1
+[Aliases]
+A0=_ "F:\BaiduYunDownload\STM8L\STM8L101K3T6\STM8L151K4T6_Oil_Can_Drone\APP\main.c" ""
+A1=_ "F:\BaiduYunDownload\STM8L\STM8L101K3T6\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_gpio.c" ""
+A2=_ "F:\BaiduYunDownload\STM8L\STM8L101K3T6\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_usart.c" ""
+A3=_ "F:\淘宝网店\工程项目\祥瑞科技\项目26_STM8L152_\STM8L15x开发板库函数版本\祥瑞实体电子EasySTM8L152开发板_实验6_定时器2周期中断【库函数】\APP\stm8l15x_it.c" ""
+A4=_ "F:\淘宝网店\工程项目\祥瑞科技\项目26_STM8L152_\STM8L15x开发板库函数版本\祥瑞实体电子EasySTM8L152开发板_实验7_定时器2_PWM输出【库函数】\APP\main.c" ""
+Count=5
+SuppressDialog=0
+[DebuggerSettings]
+DisableInterruptsWhenStepping=0

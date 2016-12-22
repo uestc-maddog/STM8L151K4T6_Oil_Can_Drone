@@ -1,0 +1,1877 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:30
+# Copyright 2010-2015 IAR Systems AB.
+#
+#    Source file  =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_rtc.c
+#    Command line =  
+#        "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_rtc.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        --no_cross_call --debug --code_model medium --data_model medium -o
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
+#        STM8L15X_MD -lcN "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#    List file    =  
+#        E:\Github
+#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_rtc.lst
+#    Object file  =  
+#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_rtc.o
+#
+###############################################################################
+
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_rtc.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm8l15x_rtc.c
+      4            * @author  MCD Application Team
+      5            * @version V1.4.0
+      6            * @date    09/24/2010
+      7            * @brief   This file provides all the RTC firmware functions.
+      8            ******************************************************************************
+      9            * @copy
+     10            *
+     11            * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+     12            * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+     13            * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+     14            * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+     15            * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+     16            * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+     17            *
+     18            * <h2><center>&copy; COPYRIGHT 2010 STMicroelectronics</center></h2>
+     19            */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "stm8l15x_rtc.h"
+     23          
+     24          /** @addtogroup STM8L15x_StdPeriph_Driver
+     25          * @{
+     26          */
+     27          
+     28          /* Private typedef -----------------------------------------------------------*/
+     29          /* Private define ------------------------------------------------------------*/
+     30          #define INIT_TIMEOUT       ((uint16_t)0xFFFF)
+     31          #define RSF_TIMEOUT        ((uint16_t)0xFFFF)
+     32          #define INITF_TIMEOUT      ((uint16_t)0xFFFF)
+     33          #define WUTWF_TIMEOUT      ((uint16_t)0xFFFF)
+     34          #define ALRAWF_TIMEOUT     ((uint16_t)0xFFFF)
+     35          #define RECALPF_TIMEOUT    ((uint16_t)0xFFFF)
+     36          #define SHPF_TIMEOUT       ((uint16_t)0xFFFF)
+     37          
+     38          #define TEN_VALUE_BCD      ((uint8_t)0x10)
+     39          #define TEN_VALUE_BIN      ((uint8_t)0x0A)
+     40          
+     41          /* Private macro -------------------------------------------------------------*/
+     42          /* Private variables ---------------------------------------------------------*/
+     43          /**
+     44           * @addtogroup RTC_Private_Functions_Prototype
+     45           * @{
+     46           */
+     47          static uint8_t ByteToBcd2(uint8_t Value);
+     48          static uint8_t Bcd2ToByte(uint8_t Value);
+     49          
+     50          /**
+     51           * @}
+     52           */
+     53          
+     54          
+     55          /**
+     56           * @addtogroup RTC_Public_Functions
+     57           * @{
+     58           */
+     59          
+     60          /**
+     61          * @brief  Deinitializes the RTC registers to their default reset values.
+     62          * @param  None
+     63          * @retval An ErrorStatus enumeration value:
+     64          *          - SUCCESS: RTC registers are deinitialized
+     65          *          - ERROR: RTC registers are not deinitialized
+     66          */
+     67          ErrorStatus RTC_DeInit(void)
+     68          {
+     69            ErrorStatus status = ERROR;
+     70            uint16_t wutwfcount = 0;
+     71            uint16_t recalpfcount = 0;
+     72          
+     73            /* Disable the write protection for RTC registers */
+     74            RTC_WriteProtectionCmd(DISABLE);
+     75          
+     76            /* Set Initialization mode */
+     77            if (RTC_EnterInitMode() == ERROR)
+     78            {
+     79              status = ERROR;
+     80              /* Enable the write protection for RTC registers */
+     81              RTC_WriteProtectionCmd(ENABLE);
+     82            }
+     83            else
+     84            {
+     85              /* Reset TR registers */
+     86              RTC->TR1 = RTC_TR1_RESET_VALUE;
+     87              RTC->TR2 = RTC_TR2_RESET_VALUE;
+     88              RTC->TR3 = RTC_TR3_RESET_VALUE;
+     89          
+     90              /* Reset DR registers */
+     91              RTC->DR1 = RTC_DR1_RESET_VALUE;
+     92              RTC->DR2 = RTC_DR2_RESET_VALUE;
+     93              RTC->DR3 = RTC_DR3_RESET_VALUE;
+     94          
+     95              /* Reset SPER & ARPER registers */
+     96              RTC->SPRERH = RTC_SPRERH_RESET_VALUE;
+     97              RTC->SPRERL = RTC_SPRERL_RESET_VALUE;
+     98              RTC->APRER  = RTC_APRER_RESET_VALUE;
+     99          
+    100              RTC->TCR1 = RTC_TCR1_RESET_VALUE;
+    101              RTC->TCR2 = RTC_TCR2_RESET_VALUE;
+    102          
+    103              /* Reset All CR1 bits except CR1[2:0] */
+    104          
+    105              RTC->CR1 = RTC_CR1_RESET_VALUE;
+    106              RTC->CR2 = RTC_CR2_RESET_VALUE;
+    107              RTC->CR3 = RTC_CR3_RESET_VALUE;
+    108          
+    109              /* Wait till RTC WUTWF flag is set or if Time out is reached exit */
+    110              while (((RTC->ISR1 & RTC_ISR1_WUTWF) == RESET) && ( wutwfcount != WUTWF_TIMEOUT))
+    111              {
+    112                wutwfcount++;
+    113                RTC->ISR1 = 0;
+    114              }
+    115          
+    116              if ((RTC->ISR1 & RTC_ISR1_WUTWF) == RESET)
+    117              {
+    118                status = ERROR;
+    119                /* Enable the write protection for RTC registers */
+    120                RTC_WriteProtectionCmd(ENABLE);
+    121              }
+    122              else
+    123              {
+    124                /* Reset All CR1 bits */
+    125                RTC->CR1 = RTC_CR1_RESET_VALUE;
+    126          
+    127                /* Reset WUTR registers */
+    128                RTC->WUTRH = RTC_WUTRH_RESET_VALUE;
+    129                RTC->WUTRL = RTC_WUTRL_RESET_VALUE;
+    130          
+    131                /* Reset ALARM registers */
+    132                RTC->ALRMAR1 = RTC_ALRMAR1_RESET_VALUE;
+    133                RTC->ALRMAR2 = RTC_ALRMAR2_RESET_VALUE;
+    134                RTC->ALRMAR3 = RTC_ALRMAR3_RESET_VALUE;
+    135                RTC->ALRMAR4 = RTC_ALRMAR4_RESET_VALUE;
+    136          
+    137                RTC->ALRMASSRH = RTC_ALRMASSRH_RESET_VALUE;
+    138                RTC->ALRMASSRL = RTC_ALRMASSRL_RESET_VALUE;
+    139                RTC->ALRMASSMSKR = RTC_ALRMASSMSKR_RESET_VALUE;
+    140          
+    141                /* Reset ISR register and exit initialization mode */
+    142                RTC->ISR1 = (uint8_t)0x00;
+    143                RTC->ISR2 = RTC_ISR2_RESET_VALUE;
+    144          
+    145                if ((RTC->ISR1 & RTC_ISR1_RECALPF) != RESET)
+    146                {
+    147                  while (((RTC->ISR1 & RTC_ISR1_RECALPF) != RESET) && (recalpfcount != RECALPF_TIMEOUT))
+    148                  {
+    149                    recalpfcount++;
+    150                  }
+    151                }
+    152                if ((RTC->ISR1 & RTC_ISR1_RECALPF) == RESET)
+    153                {
+    154                  RTC->CALRH = RTC_CALRH_RESET_VALUE;
+    155                  RTC->CALRL = RTC_CALRL_RESET_VALUE;
+    156          
+    157                  if (RTC_WaitForSynchro() == ERROR)
+    158                  {
+    159                    status = ERROR;
+    160                  }
+    161                  else
+    162                  {
+    163                    status = SUCCESS;
+    164                  }
+    165                }
+    166                else
+    167                {
+    168                  status = ERROR;
+    169                }
+    170          
+    171                /* Enable the write protection for RTC registers */
+    172                RTC_WriteProtectionCmd(ENABLE);
+    173              }
+    174            }
+    175          
+    176            /* return Deinitialize RTC registers status*/
+    177            return (ErrorStatus)status;
+    178          }
+    179          
+    180          /**
+    181          * @brief  Initializes the RTC registers according to the specified parameters
+    182          *         in RTC_InitStruct.
+    183          * @param  RTC_InitStruct: pointer to a RTC_InitTypeDef structure that contains
+    184          *         the configuration information for the RTC peripheral.
+    185          * @retval An ErrorStatus enumeration value:
+    186          *          - SUCCESS: RTC registers are initialized
+    187          *          - ERROR: RTC registers are not initialized
+    188          */
+    189          ErrorStatus RTC_Init(RTC_InitTypeDef* RTC_InitStruct)
+    190          {
+    191            ErrorStatus status = ERROR;
+    192          
+    193            /* Check the parameters */
+    194            assert_param(IS_RTC_HOUR_FORMAT(RTC_InitStruct->RTC_HourFormat));
+    195            assert_param(IS_RTC_ASYNCH_PREDIV(RTC_InitStruct->RTC_AsynchPrediv));
+    196            assert_param(IS_RTC_SYNCH_PREDIV(RTC_InitStruct->RTC_SynchPrediv));
+    197          
+    198            /* Disable the write protection for RTC registers */
+    199            RTC_WriteProtectionCmd(DISABLE);
+    200          
+    201            /* Set Initialization mode */
+    202            if (RTC_EnterInitMode() == ERROR)
+    203            {
+    204              status = ERROR;
+    205            }
+    206            else
+    207            {
+    208              /* Clear the bits to be configured first */
+    209              RTC->CR1 &= ((uint8_t)~( RTC_CR1_FMT ));
+    210          
+    211              /* Set RTC_CR1 register */
+    212              RTC->CR1 |=  ((uint8_t)(RTC_InitStruct->RTC_HourFormat));
+    213          
+    214              /* Set Prescalers registers */
+    215              RTC->SPRERH = (uint8_t)(RTC_InitStruct->RTC_SynchPrediv >> 8);
+    216              RTC->SPRERL = (uint8_t)(RTC_InitStruct->RTC_SynchPrediv);
+    217              RTC->APRER =  (uint8_t)(RTC_InitStruct->RTC_AsynchPrediv);
+    218          
+    219              /* Exit Initialization mode */
+    220              RTC_ExitInitMode();
+    221          
+    222              status = SUCCESS;
+    223            }
+    224          
+    225            /* Enable the write protection for RTC registers */
+    226            RTC_WriteProtectionCmd(ENABLE);
+    227          
+    228            /* return Initialize the RTC registers status*/
+    229            return (ErrorStatus)(status);
+    230          }
+    231          
+    232          /**
+    233          * @brief  Fills each RTC_InitStruct member with its default value
+    234          *         Hour format = 24h / Prescalers configured to their reset values.
+    235          * @param  RTC_InitStruct: pointer to a RTC_InitTypeDef structure which will be
+    236          *         initialized.
+    237          * @retval None
+    238          */
+    239          void RTC_StructInit(RTC_InitTypeDef* RTC_InitStruct)
+    240          {
+    241            /* Initialize the RTC_HourFormat member */
+    242            RTC_InitStruct->RTC_HourFormat = RTC_HourFormat_24;
+    243          
+    244            /* Initialize the RTC_AsynchPrediv member */
+    245            RTC_InitStruct->RTC_AsynchPrediv = RTC_APRER_RESET_VALUE;
+    246          
+    247            /* Initialize the RTC_SynchPrediv member */
+    248            RTC_InitStruct->RTC_SynchPrediv = RTC_SPRERL_RESET_VALUE;
+    249          }
+    250          /**
+    251          * @brief  Fills each RTC_TimeStruct member with its default value
+    252          *         (Time = 00h:00min:00sec).
+    253          * @param  RTC_TimeStruct: pointer to a @ref RTC_TimeTypeDef structure which will be
+    254          *         initialized.
+    255          * @retval None
+    256          */
+    257          void RTC_TimeStructInit(RTC_TimeTypeDef* RTC_TimeStruct)
+    258          {
+    259            /* Time = 00h:00min:00sec*/
+    260            RTC_TimeStruct->RTC_H12 = RTC_H12_AM;
+    261            RTC_TimeStruct->RTC_Hours = 0;
+    262            RTC_TimeStruct->RTC_Minutes = 0;
+    263            RTC_TimeStruct->RTC_Seconds = 0;
+    264          }
+    265          /**
+    266          * @brief  Fills each RTC_DateStruct member with its default value
+    267          *         (Monday 01 January xx00).
+    268          * @param  RTC_DateStruct: pointer to a @ref RTC_DateTypeDef structure which will be
+    269          *         initialized.
+    270          * @retval None
+    271          */
+    272          void RTC_DateStructInit(RTC_DateTypeDef* RTC_DateStruct)
+    273          {
+    274            /* * (Monday 01 January xx00)*/
+    275            RTC_DateStruct->RTC_WeekDay = RTC_Weekday_Monday;
+    276            RTC_DateStruct->RTC_Date = 1;
+    277            RTC_DateStruct->RTC_Month = RTC_Month_January;
+    278            RTC_DateStruct->RTC_Year = 0;
+    279          }
+    280          /**
+    281          * @brief  Fills each RTC_AlarmStruct member with its default value
+    282          *         (Time = 00h:00mn:00sec / Date = 1st day of the month/Mask =
+    283          *         all fields are masked).
+    284          * @param  RTC_AlarmStruct: pointer to a @ref RTC_AlarmTypeDef structure which
+    285          *         will be initialized.
+    286          * @retval None
+    287          */
+    288          void RTC_AlarmStructInit(RTC_AlarmTypeDef* RTC_AlarmStruct)
+    289          {
+    290            /* Alarm Time Settings : Time = 00h:00mn:00sec */
+    291            RTC_AlarmStruct->RTC_AlarmTime.RTC_H12 = RTC_H12_AM;
+    292            RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours = 0;
+    293            RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes = 0;
+    294            RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds = 0;
+    295          
+    296            /* Alarm Date Settings : Date = 1st day of the month*/
+    297            RTC_AlarmStruct->RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date;
+    298            RTC_AlarmStruct->RTC_AlarmDateWeekDay = 1;
+    299          
+    300            /* Alarm Masks Settings : Mask =  all fields are masked*/
+    301            RTC_AlarmStruct->RTC_AlarmMask = RTC_AlarmMask_All;
+    302          }
+    303          /**
+    304          * @brief  Enables or Disables the specified RTC interrupts.
+    305          * @param  RTC_IT: specifies the RTC interrupt sources to be enabled or disabled.
+    306          *         This parameter can be any combination of the following values:
+    307          *         @arg RTC_IT_ALRA:  Alarm A interrupt
+    308          *         @arg RTC_IT_TAMP:  Tampers interrupt
+    309          *         @arg RTC_IT_WUT:   WakeUp Timer interrupt
+    310          * @param  NewState: new state of the specified RTC interrupts.
+    311          *         This parameter can be: ENABLE or DISABLE.
+    312          * @retval None
+    313          */
+    314          void RTC_ITConfig(RTC_IT_TypeDef RTC_IT, FunctionalState NewState)
+    315          {
+    316            /* Check the parameters */
+    317            assert_param(IS_RTC_CONFIG_IT(RTC_IT));
+    318            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    319          
+    320            /* Disable the write protection for RTC registers */
+    321            RTC_WriteProtectionCmd(DISABLE);
+    322          
+    323            if (NewState != DISABLE)
+    324            {
+    325              /* Enable the Interrupts */
+    326              RTC->CR2 |= (uint8_t)((uint16_t)RTC_IT & (uint16_t)0x00F0);
+    327              RTC->TCR1 |= (uint8_t)((uint16_t)RTC_IT & RTC_TCR1_TAMPIE);
+    328            }
+    329            else
+    330            {
+    331              /* Disable the Interrupts */
+    332              RTC->CR2  &= (uint8_t)~(uint8_t)((uint16_t)RTC_IT & (uint16_t)0x00F0);
+    333              RTC->TCR1 &= (uint8_t)~(uint8_t)((uint16_t)RTC_IT & (uint16_t)RTC_TCR1_TAMPIE);
+    334            }
+    335          
+    336            /* Enable the write protection for RTC registers */
+    337            RTC_WriteProtectionCmd(ENABLE);
+    338          }
+    339          
+    340          /**
+    341          * @brief  Enters the RTC Initialization mode.
+    342          * @param  None
+    343          * @retval An ErrorStatus enumeration value:
+    344          *          - SUCCESS: RTC is in Init mode
+    345          *          - ERROR: RTC is not in Init mode
+    346          */
+    347          ErrorStatus RTC_EnterInitMode(void)
+    348          {
+    349            ErrorStatus status = ERROR;
+    350            uint16_t initfcount = 0;
+    351          
+    352            /* Check if the Initialization mode is set */
+    353            if ((RTC->ISR1 & RTC_ISR1_INITF) == RESET)
+    354            {
+    355              /* Set the Initialization mode */
+    356              RTC->ISR1 = (uint8_t)RTC_ISR1_INIT;
+    357          
+    358              /* Wait until INITF flag is set */
+    359              while (((RTC->ISR1 & RTC_ISR1_INITF) == RESET) && ( initfcount != INITF_TIMEOUT))
+    360              {
+    361                initfcount++;
+    362              }
+    363            }
+    364          
+    365            if ((RTC->ISR1 & RTC_ISR1_INITF) == RESET)
+    366            {
+    367              status = ERROR;
+    368            }
+    369            else
+    370            {
+    371              status = SUCCESS;
+    372            }
+    373          
+    374            return (ErrorStatus)status;
+    375          }
+    376          
+    377          /**
+    378          * @brief  Exits the RTC Initialization mode.
+    379          * @param  None
+    380          * @retval None
+    381          */
+    382          void RTC_ExitInitMode(void)
+    383          {
+    384            /* Exit Initialization mode */
+    385            RTC->ISR1 &= (uint8_t)~RTC_ISR1_INIT;
+    386          }
+    387          
+    388          /**
+    389          * @brief  Waits until the RTC Calendar registers (Time and Date)
+    390          *         are synchronized with RTC clock.
+    391          * @note   This function must be called before any read operation.
+    392          * @param  None
+    393          * @retval An ErrorStatus enumeration value:
+    394          *          - SUCCESS: RTC registers are synchronized
+    395          *          - ERROR: RTC registers are not synchronized
+    396          */
+    397          ErrorStatus RTC_WaitForSynchro(void)
+    398          {
+    399            uint16_t rsfcount = 0;
+    400            ErrorStatus status = ERROR;
+    401          
+    402            /* Clear RSF flag by writing 0 in RSF bit  */
+    403            RTC->ISR1 &= (uint8_t)~(RTC_ISR1_RSF | RTC_ISR1_INIT);
+    404          
+    405            /* Wait the registers to be synchronised */
+    406            while (((RTC->ISR1 & RTC_ISR1_RSF) == RESET) && ( rsfcount != RSF_TIMEOUT))
+    407            {
+    408              rsfcount++;
+    409            }
+    410          
+    411            /* Check if RSF flag occurs*/
+    412            if ((RTC->ISR1 & RTC_ISR1_RSF) != RESET)
+    413            {
+    414              status = SUCCESS;
+    415            }
+    416            else
+    417            {
+    418              status = ERROR;
+    419            }
+    420          
+    421            return (ErrorStatus)status;
+    422          }
+    423          
+    424          /**
+    425          * @brief  Enables or disables the RTC registers write protection.
+    426          * @param  NewState: new state of the write protection.
+    427          *         This parameter can be: ENABLE or DISABLE.
+    428          * @retval None
+    429          */
+    430          void RTC_WriteProtectionCmd(FunctionalState NewState)
+    431          {
+    432            /* Check the parameters */
+    433            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    434          
+    435            if (NewState != DISABLE)
+    436            {
+    437              /* Enable the write protection for RTC registers */
+    438              RTC->WPR = RTC_WPR_EnableKey;
+    439            }
+    440            else
+    441            {
+    442              /* Disable the write protection for RTC registers */
+    443              RTC->WPR = RTC_WPR_DisableKey1;
+    444              RTC->WPR = RTC_WPR_DisableKey2;
+    445            }
+    446          }
+    447          
+    448          /**
+    449          * @brief  Enables or Disables the Bypass Shadow feature.
+    450          * @param  NewState: new state of the Bypass Shadow feature.
+    451          *         This parameter can be: ENABLE or DISABLE.
+    452          * @retval None
+    453          */
+    454          void RTC_BypassShadowCmd(FunctionalState NewState)
+    455          {
+    456            /* Check the parameters */
+    457            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    458          
+    459            /* Disable the write protection for RTC registers */
+    460            RTC_WriteProtectionCmd(DISABLE);
+    461          
+    462            if (NewState != DISABLE)
+    463            {
+    464              /* Set the BYPSHAD bit */
+    465              RTC->CR1 |= (uint8_t)RTC_CR1_BYPSHAD;
+    466            }
+    467            else
+    468            {
+    469              /* Reset the BYPSHAD bit */
+    470              RTC->CR1 &= (uint8_t)~RTC_CR1_BYPSHAD;
+    471            }
+    472          
+    473            /* Enable the write protection for RTC registers */
+    474            RTC_WriteProtectionCmd(ENABLE);
+    475          }
+    476          
+    477          /**
+    478          * @brief  Enables or Disables the RTC Ratio.
+    479          * @param  NewState: new state of the Ratio feature.
+    480          *         This parameter can be: ENABLE or DISABLE.
+    481          * @retval None
+    482          */
+    483          void RTC_RatioCmd(FunctionalState NewState)
+    484          {
+    485            /* Check the parameters */
+    486            assert_param(IS_FUNCTIONAL_STATE(NewState));
+    487          
+    488            /* Disable the write protection for RTC registers */
+    489            RTC_WriteProtectionCmd(DISABLE);
+    490          
+    491            if (NewState != DISABLE)
+    492            {
+    493              /* Set the RATIO bit */
+    494              RTC->CR1 |= (uint8_t)RTC_CR1_RATIO;
+    495            }
+    496            else
+    497            {
+    498              /* Reset the RATIO bit */
+    499              RTC->CR1 &= (uint8_t)~RTC_CR1_RATIO;
+    500            }
+    501          
+    502            /* Enable the write protection for RTC registers */
+    503            RTC_WriteProtectionCmd(ENABLE);
+    504          }
+    505          
+    506          /**
+    507          * @brief Sets the RTC current time.
+    508          * @param  RTC_Format: specifies the format of the entered parameters.
+    509          *         This parameter can be one of the @ref RTC_Format_TypeDef enumeration.
+    510          * @param  RTC_TimeStruct:  pointer to a  @ref RTC_TimeTypeDef structure that
+    511          *         contains the time configuration information for the RTC
+    512          * @retval An ErrorStatus enumeration value:
+    513          *          - SUCCESS: RTC Time register is configured
+    514          *          - ERROR: RTC Time register is not configured
+    515          */
+    516          ErrorStatus RTC_SetTime(RTC_Format_TypeDef RTC_Format,
+    517                                  RTC_TimeTypeDef* RTC_TimeStruct)
+    518          {
+    519            ErrorStatus status = ERROR;
+    520            uint8_t temp = 0;
+    521          
+    522            /* Check the parameters */
+    523            assert_param(IS_RTC_FORMAT(RTC_Format));
+    524          
+    525            if (RTC_Format == RTC_Format_BIN)
+    526            {
+    527              /* Ckeck Hour Format (24h or 12h)*/
+    528              if ((RTC->CR1 & RTC_CR1_FMT) != RESET)
+    529              {
+    530                assert_param(IS_RTC_HOUR12_MAX(RTC_TimeStruct->RTC_Hours));
+    531                assert_param(IS_RTC_HOUR12_MIN(RTC_TimeStruct->RTC_Hours));
+    532              }
+    533              else
+    534              {
+    535                assert_param(IS_RTC_HOUR24(RTC_TimeStruct->RTC_Hours));
+    536              }
+    537              assert_param(IS_RTC_MINUTES(RTC_TimeStruct->RTC_Minutes));
+    538              assert_param(IS_RTC_SECONDS(RTC_TimeStruct->RTC_Seconds));
+    539            }
+    540            else
+    541            {
+    542              /* Ckeck Hour Format (24h or 12h)*/
+    543              if ((RTC->CR1 & RTC_CR1_FMT) != RESET)
+    544              {
+    545                assert_param(IS_RTC_HOUR12_MAX(Bcd2ToByte(RTC_TimeStruct->RTC_Hours)));
+    546                assert_param(IS_RTC_HOUR12_MIN(Bcd2ToByte(RTC_TimeStruct->RTC_Hours)));
+    547              }
+    548              else
+    549              {
+    550                assert_param(IS_RTC_HOUR24(Bcd2ToByte(RTC_TimeStruct->RTC_Hours)));
+    551              }
+    552              assert_param(IS_RTC_MINUTES(Bcd2ToByte(RTC_TimeStruct->RTC_Minutes)));
+    553              assert_param(IS_RTC_SECONDS(Bcd2ToByte(RTC_TimeStruct->RTC_Seconds)));
+    554            }
+    555          
+    556          
+    557            /* Disable the write protection for RTC registers */
+    558            RTC_WriteProtectionCmd(DISABLE);
+    559          
+    560            /* Set Initialization mode */
+    561            if (RTC_EnterInitMode() == ERROR)
+    562            {
+    563              status = ERROR;
+    564              /* Enable the write protection for RTC registers */
+    565              RTC_WriteProtectionCmd(ENABLE);
+    566            }
+    567            else
+    568            {
+    569              /* Ckeck Hour Format is 12h)*/
+    570              if ((RTC->CR1 & RTC_CR1_FMT) != RESET)
+    571              {
+    572                assert_param(IS_RTC_H12(RTC_TimeStruct->RTC_H12));
+    573                temp = RTC_TimeStruct->RTC_H12;
+    574              }
+    575              else
+    576              {
+    577                temp = 0;
+    578              }
+    579              /* Check the input parameters format */
+    580              if (RTC_Format != RTC_Format_BIN)
+    581              {
+    582                RTC->TR1 = (uint8_t)(RTC_TimeStruct->RTC_Seconds);
+    583                RTC->TR2 = (uint8_t)(RTC_TimeStruct->RTC_Minutes) ;
+    584                RTC->TR3 = (uint8_t)( temp | RTC_TimeStruct->RTC_Hours) ;
+    585              }
+    586              else
+    587              {
+    588                RTC->TR1 = (uint8_t)(ByteToBcd2(RTC_TimeStruct->RTC_Seconds));
+    589                RTC->TR2 = (uint8_t)(ByteToBcd2(RTC_TimeStruct->RTC_Minutes)) ;
+    590                RTC->TR3 = (uint8_t)( temp | ByteToBcd2(RTC_TimeStruct->RTC_Hours));
+    591              }
+    592              /*read DR3 register to unfroze calender registers */
+    593              (void)(RTC->DR3);
+    594          
+    595              /* Exit Initialization mode */
+    596              RTC_ExitInitMode();
+    597          
+    598              /* Enable the write protection for RTC registers */
+    599              RTC_WriteProtectionCmd(ENABLE);
+    600          
+    601              /* if  RTC_CR1_BYPSHAD bit = 0, wait for synchro else this check is not needed */
+    602              if ((RTC->CR1 & RTC_CR1_BYPSHAD) == RESET)
+    603              {
+    604                if (RTC_WaitForSynchro() == ERROR)
+    605                {
+    606                  status = ERROR;
+    607                }
+    608                else
+    609                {
+    610                  status = SUCCESS;
+    611                }
+    612              }
+    613              else
+    614              {
+    615                status = SUCCESS;
+    616              }
+    617            }
+    618          
+    619            return (ErrorStatus)status;
+    620          }
+    621          
+    622          /**
+    623          * @brief  Gets the RTC current Time.
+    624          * @note   To read the calendar, user software must first check that the
+    625          *         RSF flag is set in RTC_ISR1, using RTC_WaitForSynchro() function,
+    626          *         which means that the calendar registers have been correctly copied
+    627          *         into the shadow registers (RTC_TRx and RTC_DRx).
+    628          * @param  RTC_Format: specifies the format of the returned parameters.
+    629          *         This parameter can be one of the @ref RTC_Format_TypeDef enumeration.
+    630          * @param  RTC_TimeStruct: pointer to a @ref RTC_TimeTypeDef structure that
+    631          *         will contain the returned current time configuration.
+    632          * @retval None
+    633          
+    634          */
+    635          void RTC_GetTime(RTC_Format_TypeDef RTC_Format,
+    636                           RTC_TimeTypeDef* RTC_TimeStruct)
+    637          {
+    638            uint8_t  tmpreg = 0;
+    639          
+    640            /* Check the parameters */
+    641            assert_param(IS_RTC_FORMAT(RTC_Format));
+    642          
+    643            /* Fill the structure fields with the read parameters */
+    644            /* Get RTC seconds */
+    645            RTC_TimeStruct->RTC_Seconds = RTC->TR1;
+    646          
+    647            /* Get RTC Minutes */
+    648            RTC_TimeStruct->RTC_Minutes = RTC->TR2;
+    649          
+    650            /* Get the RTC_TR3 register */
+    651            tmpreg = (uint8_t)RTC->TR3;
+    652          
+    653            /* Read DR3 register to unfreeze calender registers */
+    654            (void) (RTC->DR3) ;
+    655          
+    656            /* Clear RSF flag by writing 0 in RSF bit */
+    657            RTC->ISR1 &= (uint8_t)~(RTC_ISR1_RSF);
+    658          
+    659          
+    660            /* Get RTC Hours */
+    661            RTC_TimeStruct->RTC_Hours = (uint8_t)(tmpreg & (uint8_t)~(RTC_TR3_PM));
+    662          
+    663            /* Get RTC H12 state */
+    664            RTC_TimeStruct->RTC_H12 = (RTC_H12_TypeDef)(tmpreg & RTC_TR3_PM);
+    665          
+    666            /* Check the input parameters format */
+    667            if (RTC_Format == RTC_Format_BIN)
+    668            {
+    669              /* Convert the structure parameters to Binary format */
+    670              RTC_TimeStruct->RTC_Hours = (uint8_t)Bcd2ToByte(RTC_TimeStruct->RTC_Hours);
+    671              RTC_TimeStruct->RTC_Minutes = (uint8_t)Bcd2ToByte(RTC_TimeStruct->RTC_Minutes);
+    672              RTC_TimeStruct->RTC_Seconds = (uint8_t)Bcd2ToByte(RTC_TimeStruct->RTC_Seconds);
+    673            }
+    674          }
+    675          
+    676          /**
+    677          * @brief  Gets the RTC current Calendar Subseconds value.
+    678          * @note   To read the calendar, user software must first check that the
+    679          *         RSF flag is set in RTC_ISR1, using RTC_WaitForSynchro() function,
+    680          *         which means that the calendar registers have been correctly copied
+    681          *         into the shadow registers (RTC_TRx and RTC_DRx).
+    682          * @param  None
+    683          * @retval RTC current Calendar Subseconds value.
+    684          */
+    685          uint16_t RTC_GetSubSecond(void)
+    686          {
+    687            uint8_t ssrhreg = 0, ssrlreg = 0;
+    688            uint16_t ssrreg = 0;
+    689          
+    690            /* Get subseconds values from the correspondent registers*/
+    691            ssrhreg = RTC->SSRH;
+    692            ssrlreg = RTC->SSRL;
+    693          
+    694            /*read DR3 register to unfroze calender registers */
+    695            (void) (RTC->DR3);
+    696          
+    697            /* Clear RSF flag by writing 0 in RSF bit */
+    698            RTC->ISR1 &= (uint8_t)~(RTC_ISR1_RSF);
+    699          
+    700            ssrreg = (uint16_t)((uint16_t)((uint16_t)ssrhreg << 8) | (uint16_t)(ssrlreg));
+    701            return (uint16_t)(ssrreg);
+    702          }
+    703          
+    704          /**
+    705          * @brief  Set the RTC current date.
+    706          * @param  RTC_Format: specifies the format of the entered parameters.
+    707          *         This parameter can be one of the @ref RTC_Format_TypeDef enumeration.
+    708          * @param  RTC_DateStruct:  pointer to a  @ref RTC_TimeTypeDef structure that
+    709          *         contains the date configuration information for the RTC.
+    710          * @retval An ErrorStatus enumeration value:
+    711          *          - SUCCESS: RTC Date register is configured
+    712          *          - ERROR: RTC Date register is not configured
+    713          */
+    714          ErrorStatus RTC_SetDate(RTC_Format_TypeDef RTC_Format,
+    715                                  RTC_DateTypeDef* RTC_DateStruct)
+    716          {
+    717            ErrorStatus status = ERROR;
+    718          
+    719            if ((RTC_Format == RTC_Format_BIN) && ((RTC_DateStruct->RTC_Month & TEN_VALUE_BCD) == TEN_VALUE_BCD))
+    720            {
+    721              RTC_DateStruct->RTC_Month = (RTC_Month_TypeDef)((RTC_DateStruct->RTC_Month & (uint8_t)~(TEN_VALUE_BCD)) + TEN_VALUE_BIN);
+    722            }
+    723          
+    724            /* Check the parameters */
+    725            assert_param(IS_RTC_FORMAT(RTC_Format));
+    726            if (RTC_Format == RTC_Format_BIN)
+    727            {
+    728              assert_param(IS_RTC_YEAR(RTC_DateStruct->RTC_Year));
+    729              assert_param(IS_RTC_MONTH_MIN(RTC_DateStruct->RTC_Month));
+    730              assert_param(IS_RTC_MONTH_MAX(RTC_DateStruct->RTC_Month));
+    731              assert_param(IS_RTC_DATE_MIN(RTC_DateStruct->RTC_Date));
+    732              assert_param(IS_RTC_DATE_MAX(RTC_DateStruct->RTC_Date));
+    733            }
+    734            else
+    735            {
+    736              assert_param(IS_RTC_YEAR(Bcd2ToByte(RTC_DateStruct->RTC_Year)));
+    737              assert_param(IS_RTC_MONTH_MAX(Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Month)));
+    738              assert_param(IS_RTC_MONTH_MIN(Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Month)));
+    739              assert_param(IS_RTC_DATE_MIN(Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Date)));
+    740              assert_param(IS_RTC_DATE_MAX(Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Date)));
+    741            }
+    742            assert_param(IS_RTC_WEEKDAY(RTC_DateStruct->RTC_WeekDay));
+    743          
+    744            /* Disable the write protection for RTC registers */
+    745            RTC_WriteProtectionCmd(DISABLE);
+    746          
+    747            /* Set Initialization mode */
+    748            if (RTC_EnterInitMode() == ERROR)
+    749            {
+    750              status = ERROR;
+    751              /* Enable the write protection for RTC registers */
+    752              RTC_WriteProtectionCmd(ENABLE);
+    753            }
+    754            else
+    755            {
+    756              (void)(RTC->TR1);
+    757              /* Set the RTC_DR registers */
+    758              /* Check the input parameters format */
+    759              if (RTC_Format != RTC_Format_BIN)
+    760              {
+    761                RTC->DR1 = (uint8_t)(RTC_DateStruct->RTC_Date);
+    762                RTC->DR2 = (uint8_t)((RTC_DateStruct->RTC_Month) | (uint8_t)((RTC_DateStruct->RTC_WeekDay) << 5));
+    763                RTC->DR3 = (uint8_t)((RTC_DateStruct->RTC_Year));
+    764              }
+    765              else
+    766              {
+    767                RTC->DR1 = (uint8_t)(ByteToBcd2 ((uint8_t)RTC_DateStruct->RTC_Date));
+    768                RTC->DR2 = (uint8_t)((ByteToBcd2((uint8_t)RTC_DateStruct->RTC_Month)) | (uint8_t)((RTC_DateStruct->RTC_WeekDay) << 5));
+    769                RTC->DR3 = (uint8_t)(ByteToBcd2((uint8_t)RTC_DateStruct->RTC_Year));
+    770              }
+    771          
+    772              /* Exit Initialization mode */
+    773              RTC_ExitInitMode();
+    774          
+    775              /* Enable the write protection for RTC registers */
+    776              RTC_WriteProtectionCmd(ENABLE);
+    777          
+    778              /* if  RTC_CR1_BYPSHAD bit = 0, wait for synchro else this check is not needed */
+    779              if ((RTC->CR1 & RTC_CR1_BYPSHAD) == RESET)
+    780              {
+    781                if (RTC_WaitForSynchro() == ERROR)
+    782                {
+    783                  status = ERROR;
+    784                }
+    785                else
+    786                {
+    787                  status = SUCCESS;
+    788                }
+    789              }
+    790              else
+    791              {
+    792                status = SUCCESS;
+    793              }
+    794            }
+    795          
+    796            return (ErrorStatus)status;
+    797          }
+    798          
+    799          /**
+    800          * @brief  Get the RTC current date.
+    801          * @note   To read the calendar, user software must first check that the
+    802          *         RSF flag is set in RTC_ISR1, using RTC_WaitForSynchro() function,
+    803          *         which means that the calendar registers have been correctly copied
+    804          *         into the shadow registers (RTC_TRx and RTC_DRx).
+    805          * @param  RTC_Format: specifies the format of the returned parameters.
+    806          *         This parameter can be one of the @ref RTC_Format_TypeDef enumeration.
+    807          * @param  RTC_DateStruct: pointer to a @ref RTC_DateTypeDef structure that
+    808          *         will contain the returned current Date configuration.
+    809          * @retval None
+    810          */
+    811          void RTC_GetDate(RTC_Format_TypeDef RTC_Format,
+    812                           RTC_DateTypeDef* RTC_DateStruct)
+    813          {
+    814            uint8_t tmpreg = 0;
+    815          
+    816            /* Check the parameters */
+    817            assert_param(IS_RTC_FORMAT(RTC_Format));
+    818          
+    819            /* Fill the structure fields with the read parameters */
+    820            (void) (RTC->TR1) ;
+    821            RTC_DateStruct->RTC_Date = (uint8_t)(RTC->DR1);
+    822            tmpreg = (uint8_t)RTC->DR2;
+    823            RTC_DateStruct->RTC_Year = (uint8_t)(RTC->DR3);
+    824          
+    825            /* Clear RSF flag by writing 0 in RSF bit */
+    826            RTC->ISR1 &= (uint8_t)~(RTC_ISR1_RSF);
+    827          
+    828            RTC_DateStruct->RTC_Month = (RTC_Month_TypeDef)(tmpreg & (uint8_t)(RTC_DR2_MT | RTC_DR2_MU));
+    829            RTC_DateStruct->RTC_WeekDay = (RTC_Weekday_TypeDef)((uint8_t)((uint8_t)tmpreg & (uint8_t)(RTC_DR2_WDU)) >> (uint8_t)5);
+    830          
+    831            /* Check the input parameters format */
+    832            if (RTC_Format == RTC_Format_BIN)
+    833            {
+    834              /* Convert the structure parameters to Binary format */
+    835              RTC_DateStruct->RTC_Year = (uint8_t)Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Year);
+    836              RTC_DateStruct->RTC_Month = (RTC_Month_TypeDef)Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Month);
+    837              RTC_DateStruct->RTC_Date = (uint8_t)(Bcd2ToByte((uint8_t)RTC_DateStruct->RTC_Date));
+    838            }
+    839          }
+    840          
+    841          /**
+    842          * @brief  Configure the RTC Alarm Subseconds value and mask.
+    843          * @param  RTC_AlarmSubSecondValue: specifies the Subseconds value.
+    844          *         This parameter can be a value from 0 to 0x7FFF.
+    845          * @param  RTC_AlarmSubSecondMask:  specifies the Subseconds Mask.
+    846          *         This parameter can be one of the @ref RTC_AlarmSubSecondMask_TypeDef enumeration.
+    847          * @retval An ErrorStatus enumeration value:
+    848          *          - SUCCESS: Alarm Subseconds value and mask are configured
+    849          *          - ERROR: Alarm Subseconds value and mask are  not configured
+    850          */
+    851          ErrorStatus RTC_AlarmSubSecondConfig(uint16_t RTC_AlarmSubSecondValue,
+    852                                               RTC_AlarmSubSecondMask_TypeDef RTC_AlarmSubSecondMask)
+    853          {
+    854            uint8_t alarmstatus = 0;
+    855            ErrorStatus status = ERROR;
+    856          
+    857            /* Check the parameters */
+    858            assert_param(IS_RTC_ALARM_SS_VALUE(RTC_AlarmSubSecondValue));
+    859            assert_param(IS_RTC_ALARM_SS_MASK(RTC_AlarmSubSecondMask));
+    860          
+    861            /* Disable the write protection for RTC registers */
+    862            RTC_WriteProtectionCmd(DISABLE);
+    863          
+    864            /* Check if the initialiazation mode is not set */
+    865            if ((RTC->ISR1 & RTC_ISR1_INITF) == RESET)
+    866            {
+    867              /* save  Alarm status */
+    868              alarmstatus = (uint8_t)(RTC->CR2 | RTC_CR2_ALRAE);
+    869          
+    870              /* Disable the Alarm */
+    871              RTC->CR2 &= (uint8_t)~(RTC_CR2_ALRAE);
+    872          
+    873              /* Configure the Alarm register */
+    874              RTC->ALRMASSRH = (uint8_t)(RTC_AlarmSubSecondValue >> 8);
+    875              RTC->ALRMASSRL = (uint8_t)(RTC_AlarmSubSecondValue);
+    876              RTC->ALRMASSMSKR = (uint8_t)RTC_AlarmSubSecondMask;
+    877          
+    878              /* restore the saved  Alarm status */
+    879              RTC->CR2 |= alarmstatus;
+    880          
+    881              status = SUCCESS;
+    882            }
+    883            else
+    884            {
+    885              status = ERROR;
+    886            }
+    887          
+    888            /* Enable the write protection for RTC registers */
+    889            RTC_WriteProtectionCmd(ENABLE);
+    890          
+    891            return (ErrorStatus)status;
+    892          }
+    893          
+    894          /**
+    895            * @brief  Sets the RTC Alarm configuration.
+    896            * @note   Before configuring the Alarm sttings, the Alarm Unit must be disabled
+    897            *         (if enabled) using RTC_AlarmCmd() function.
+    898            * @param  RTC_Format: specifies the format of the entered parameters.
+    899            *         This parameter can be one of the @ref RTC_Format_TypeDef enumeration.
+    900            * @param  RTC_AlarmStruct:  pointer to a  @ref RTC_AlarmTypeDef structure that
+    901            *         contains the Alarm configuration information for the RTC.
+    902            * @retval None.
+    903            */
+    904          void RTC_SetAlarm(RTC_Format_TypeDef RTC_Format,
+    905                            RTC_AlarmTypeDef* RTC_AlarmStruct)
+    906          {
+    907            uint8_t tmpreg1 = 0;
+    908            uint8_t tmpreg2 = 0;
+    909            uint8_t tmpreg3 = 0;
+    910            uint8_t tmpreg4 = 0;
+    911          
+    912            /* Check the parameters */
+    913            assert_param(IS_RTC_ALARM_MASK(RTC_AlarmStruct->RTC_AlarmMask));
+    914            assert_param(IS_RTC_FORMAT(RTC_Format));
+    915            assert_param(IS_RTC_H12(RTC_AlarmStruct->RTC_AlarmTime.RTC_H12));
+    916            assert_param(IS_RTC_ALARM_DATEWEEKDAY_SEL(RTC_AlarmStruct->RTC_AlarmDateWeekDaySel));
+    917          
+    918          
+    919            if (RTC_Format == RTC_Format_BIN)
+    920            {
+    921              /* Ckeck Hour Format (24h or 12h)*/
+    922              if ((RTC->CR1 & RTC_CR1_FMT) != RESET)
+    923              {
+    924                assert_param(IS_RTC_HOUR12_MAX(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours));
+    925                assert_param(IS_RTC_HOUR12_MIN(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours));
+    926              }
+    927              else
+    928              {
+    929                assert_param(IS_RTC_HOUR24(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours));
+    930              }
+    931              assert_param(IS_RTC_MINUTES(RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes));
+    932              assert_param(IS_RTC_SECONDS(RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds));
+    933            }
+    934            else
+    935            {
+    936              /* Ckeck Hour Format (24h or 12h)*/
+    937              if ((RTC->CR1 & RTC_CR1_FMT) != RESET)
+    938              {
+    939                assert_param(IS_RTC_HOUR12_MAX(Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours)));
+    940                assert_param(IS_RTC_HOUR12_MIN(Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours)));
+    941              }
+    942              else
+    943              {
+    944                assert_param(IS_RTC_HOUR24(Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours)));
+    945              }
+    946          
+    947              assert_param(IS_RTC_MINUTES(Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes)));
+    948          
+    949              assert_param(IS_RTC_SECONDS(Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds)));
+    950          
+    951            }
+    952          
+    953            /* if Date/Wday field is not masked */
+    954            if ((RTC_AlarmStruct->RTC_AlarmMask & RTC_AlarmMask_DateWeekDay) == RESET )
+    955            {
+    956              if (RTC_AlarmStruct->RTC_AlarmDateWeekDaySel == RTC_AlarmDateWeekDaySel_WeekDay)
+    957              {
+    958                assert_param(IS_RTC_WEEKDAY(RTC_AlarmStruct->RTC_AlarmDateWeekDay));
+    959              }
+    960              else
+    961              {
+    962                assert_param(IS_RTC_DATE_MIN(RTC_AlarmStruct->RTC_AlarmDateWeekDay));
+    963                assert_param(IS_RTC_DATE_MAX(RTC_AlarmStruct->RTC_AlarmDateWeekDay));
+    964              }
+    965            }
+    966          
+    967          
+    968            /* Disable the write protection for RTC registers */
+    969            RTC_WriteProtectionCmd(DISABLE);
+    970          
+    971            /* Disable the Alarm in RTC_CR2 register */
+    972            RTC->CR2 &= (uint8_t)~RTC_CR2_ALRAE;
+    973          
+    974            /* Check the input parameters format & Configure the Alarm register */
+    975            if (RTC_Format != RTC_Format_BIN)
+    976            {
+    977              tmpreg1 = (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds) | \
+    978                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask) & (uint8_t)RTC_ALRMAR1_MSK1));
+    979          
+    980              tmpreg2 = (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes) | \
+    981                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask << 1) & (uint8_t)RTC_ALRMAR2_MSK2));
+    982          
+    983              tmpreg3 = (uint8_t)((uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours) | \
+    984                                            (uint8_t)(RTC_AlarmStruct->RTC_AlarmTime.RTC_H12)) | \
+    985                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask << 2) & (uint8_t)RTC_ALRMAR3_MSK3));
+    986          
+    987              tmpreg4 = (uint8_t)((uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmDateWeekDay) | \
+    988                                            (uint8_t)(RTC_AlarmStruct->RTC_AlarmDateWeekDaySel)) | \
+    989                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask << 3) & (uint8_t)RTC_ALRMAR4_MSK4));
+    990          
+    991            }
+    992            else
+    993            {
+    994              tmpreg1 = (uint8_t)((ByteToBcd2(RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds)) | \
+    995                                  (uint8_t)(RTC_AlarmStruct->RTC_AlarmMask & RTC_ALRMAR1_MSK1));
+    996          
+    997              tmpreg2 = (uint8_t)((ByteToBcd2(RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes)) | \
+    998                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask << 1) & (uint8_t)RTC_ALRMAR2_MSK2));
+    999          
+   1000              tmpreg3 = (uint8_t)((uint8_t)((ByteToBcd2(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours)) | \
+   1001                                            (uint8_t)(RTC_AlarmStruct->RTC_AlarmTime.RTC_H12)) | \
+   1002                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask << 2) & (uint8_t)RTC_ALRMAR3_MSK3));
+   1003          
+   1004              tmpreg4 = (uint8_t)((uint8_t)((ByteToBcd2(RTC_AlarmStruct->RTC_AlarmDateWeekDay)) | \
+   1005                                            (uint8_t)(RTC_AlarmStruct->RTC_AlarmDateWeekDaySel)) | \
+   1006                                  (uint8_t)((uint8_t)(RTC_AlarmStruct->RTC_AlarmMask << 3) & (uint8_t)(RTC_ALRMAR4_MSK4)));
+   1007            }
+   1008          
+   1009            /* Configure the Alarm register */
+   1010            RTC->ALRMAR1 = tmpreg1;
+   1011            RTC->ALRMAR2 = tmpreg2;
+   1012            RTC->ALRMAR3 = tmpreg3;
+   1013            RTC->ALRMAR4 = tmpreg4;
+   1014          
+   1015            /* Enable the write protection for RTC registers */
+   1016            RTC_WriteProtectionCmd(ENABLE);
+   1017          
+   1018          }
+   1019          
+   1020          /**
+   1021            * @brief  Gets the RTC Alarm configuration.
+   1022            * @param  RTC_Format: specifies the format of the entered parameters.
+   1023            *         This parameter can be one of the @ref RTC_Format_TypeDef enumeration.
+   1024            * @param  RTC_AlarmStruct:  pointer to a  @ref RTC_AlarmTypeDef structure that
+   1025            *         will contain the Alarm configuration information of  the RTC.
+   1026            * @retval None
+   1027            */
+   1028          void RTC_GetAlarm(RTC_Format_TypeDef RTC_Format,
+   1029                            RTC_AlarmTypeDef* RTC_AlarmStruct)
+   1030          {
+   1031            uint8_t tmpreg1 = 0;
+   1032            uint8_t tmpreg2 = 0;
+   1033            uint8_t tmpreg3 = 0;
+   1034            uint8_t tmpreg4 = 0;
+   1035            uint8_t alarmmask = 0;
+   1036          
+   1037            /* Check the parameters */
+   1038            assert_param(IS_RTC_FORMAT(RTC_Format));
+   1039          
+   1040            /* Get Alarm registers data */
+   1041            tmpreg1 = (uint8_t)RTC->ALRMAR1;
+   1042            tmpreg2 = (uint8_t)RTC->ALRMAR2;
+   1043            tmpreg3 = (uint8_t)RTC->ALRMAR3;
+   1044            tmpreg4 = (uint8_t)RTC->ALRMAR4;
+   1045          
+   1046            /* Fill the structure with the read parameters */
+   1047            RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds = (uint8_t)((uint8_t)tmpreg1 & (uint8_t)((uint8_t)RTC_ALRMAR1_ST | (uint8_t)RTC_ALRMAR1_SU));
+   1048            alarmmask = (uint8_t)(tmpreg1 & RTC_ALRMAR1_MSK1);
+   1049          
+   1050            /* Fill the structure with the read parameters */
+   1051            RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes = (uint8_t)((uint8_t)tmpreg2 & (uint8_t)((uint8_t)RTC_ALRMAR2_MNT | (uint8_t)RTC_ALRMAR2_MNU));
+   1052            alarmmask = (uint8_t)((alarmmask) | (uint8_t)((uint8_t)(tmpreg2 & RTC_ALRMAR2_MSK2) >> 1));
+   1053          
+   1054            /* Fill the structure with the read parameters */
+   1055            RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours = (uint8_t)((uint8_t)tmpreg3 & (uint8_t)((uint8_t)RTC_ALRMAR3_HT | (uint8_t)RTC_ALRMAR3_HU));
+   1056            RTC_AlarmStruct->RTC_AlarmTime.RTC_H12 = (RTC_H12_TypeDef)((uint8_t)tmpreg3 & (uint8_t)RTC_ALRMAR3_PM);
+   1057            alarmmask = (uint8_t)((alarmmask) | (uint8_t)((uint8_t)((uint8_t)tmpreg3 & (uint8_t)RTC_ALRMAR3_MSK3) >> 2));
+   1058          
+   1059            /* Fill the structure with the read parameters */
+   1060            RTC_AlarmStruct->RTC_AlarmDateWeekDay = (uint8_t)((uint8_t)tmpreg4 & (uint8_t)((uint8_t)RTC_ALRMAR4_DT | (uint8_t)RTC_ALRMAR4_DU));
+   1061            RTC_AlarmStruct->RTC_AlarmDateWeekDaySel = (RTC_AlarmDateWeekDaySel_TypeDef)((uint8_t)tmpreg4 & (uint8_t)RTC_ALRMAR4_WDSEL);
+   1062            alarmmask = (uint8_t)((alarmmask) | (uint8_t)((uint8_t)((uint8_t)tmpreg4 & RTC_ALRMAR4_MSK4) >> 3));
+   1063          
+   1064            RTC_AlarmStruct->RTC_AlarmMask = alarmmask;
+   1065          
+   1066            if (RTC_Format == RTC_Format_BIN)
+   1067            {
+   1068              RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours = Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Hours);
+   1069              RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes = Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Minutes);
+   1070              RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds = Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmTime.RTC_Seconds);
+   1071              RTC_AlarmStruct->RTC_AlarmDateWeekDay = Bcd2ToByte(RTC_AlarmStruct->RTC_AlarmDateWeekDay);
+   1072            }
+   1073          }
+   1074          
+   1075          /**
+   1076            * @brief  Enables or disables the RTC Alarm.
+   1077            * @param  NewState: new state of the alarm. This parameter can be: ENABLE or DISABLE.
+   1078            * @retval An ErrorStatus enumuration value:
+   1079            *          - SUCCESS: RTC Alarm is enabled/disabled
+   1080            *          - ERROR: RTC Alarm is not enabled/disabled
+   1081            */
+   1082          ErrorStatus RTC_AlarmCmd(FunctionalState NewState)
+   1083          {
+   1084            __IO uint16_t alrawfcount = 0;
+   1085            ErrorStatus status = ERROR;
+   1086            uint8_t temp1 = 0;
+   1087          
+   1088            /* Check the parameters */
+   1089            assert_param(IS_FUNCTIONAL_STATE(NewState));
+   1090          
+   1091            /* Disable the write protection for RTC registers */
+   1092            RTC_WriteProtectionCmd(DISABLE);
+   1093          
+   1094            /* Configure the Alarm state */
+   1095            if (NewState != DISABLE)
+   1096            { /*Enable the Alarm*/
+   1097              RTC->CR2 |= (uint8_t)(RTC_CR2_ALRAE);
+   1098              status = SUCCESS;
+   1099            }
+   1100            else
+   1101            {  /* Disable the Alarm */
+   1102              RTC->CR2 &= (uint8_t)~(RTC_CR2_ALRAE) ;
+   1103          
+   1104              /* Wait until ALRxWF flag is set */
+   1105              temp1 = (uint8_t)(RTC->ISR1 & RTC_ISR1_ALRAWF);
+   1106              while ((alrawfcount != ALRAWF_TIMEOUT) && (temp1 == RESET))
+   1107              {
+   1108                alrawfcount++;
+   1109              }
+   1110          
+   1111              if ((RTC->ISR1 &  RTC_ISR1_ALRAWF) == RESET)
+   1112              {
+   1113                status = ERROR;
+   1114              }
+   1115              else
+   1116              {
+   1117                status = SUCCESS;
+   1118              }
+   1119            }
+   1120          
+   1121            /* Enable the write protection for RTC registers */
+   1122            RTC_WriteProtectionCmd(ENABLE);
+   1123          
+   1124            /* Return the status*/
+   1125            return (ErrorStatus)status;
+   1126          }
+   1127          
+   1128          /**
+   1129            * @brief  Configures the RTC Wakeup clock source.
+   1130            * @pre    Before configuring the wakeup unit Clock source, the wake up Unit must
+   1131            *         be disabled (if enabled) using RTC_WakeUpCmd(Disable) .
+   1132            * @param  RTC_WakeupClockSrc: specifies the Wakeup clock source,
+   1133            *         this parameter  can be one of the @ref RTC_WakeupClockSrc_TypeDef enumeration.
+   1134            * @retval None
+   1135            */
+   1136          void RTC_WakeUpClockConfig(RTC_WakeUpClock_TypeDef RTC_WakeUpClock)
+   1137          {
+   1138          
+   1139            /* Check the parameters */
+   1140            assert_param(IS_RTC_WAKEUP_CLOCK(RTC_WakeUpClock));
+   1141          
+   1142            /* Disable the write protection for RTC registers */
+   1143            RTC_WriteProtectionCmd(DISABLE);
+   1144          
+   1145            /* Disable the Wake-up timer in RTC_CR2 register */
+   1146            RTC->CR2 &= (uint8_t)~RTC_CR2_WUTE;
+   1147          
+   1148            /* Clear the Wakeup Timer clock source bits in CR1 register */
+   1149            RTC->CR1 &= (uint8_t)~RTC_CR1_WUCKSEL;
+   1150          
+   1151            /* Configure the clock source */
+   1152            RTC->CR1 |= (uint8_t)RTC_WakeUpClock;
+   1153          
+   1154            /* Enable the write protection for RTC registers */
+   1155            RTC_WriteProtectionCmd(ENABLE);
+   1156          }
+   1157          
+   1158          /**
+   1159            * @brief  Sets the RTC Wakeup counter.
+   1160            * @note   Before configuring the wakeup unit counter, the wake up Unit must be
+   1161            *         disabled (if enabled) using RTC_WakeUpCmd(Disable).
+   1162            * @param  RTC_WakeupCounter: specifies the Wake up counter,
+   1163            *         This parameter can be a value from 0x0000 to 0xFFFF.
+   1164            * @retval None.
+   1165            */
+   1166          void RTC_SetWakeUpCounter(uint16_t RTC_WakeupCounter)
+   1167          {
+   1168            /* Disable the write protection for RTC registers */
+   1169            RTC_WriteProtectionCmd(DISABLE);
+   1170          
+   1171            /* Disable the Wake-up timer in RTC_CR2 register */
+   1172            RTC->CR2 &= (uint8_t)~RTC_CR2_WUTE;
+   1173          
+   1174            /* Configure the Wakeup Timer counter */
+   1175            RTC->WUTRH = (uint8_t)(RTC_WakeupCounter >> 8);
+   1176            RTC->WUTRL = (uint8_t)(RTC_WakeupCounter);
+   1177          
+   1178            /* Enable the write protection for RTC registers */
+   1179            RTC_WriteProtectionCmd(ENABLE);
+   1180          }
+   1181          
+   1182          /**
+   1183            * @brief  Returns the RTC Wakeup timer counter value.
+   1184            * @param  None.
+   1185            * @retval RTC Wakeup Counter value.
+   1186            */
+   1187          uint16_t RTC_GetWakeUpCounter(void)
+   1188          {
+   1189            uint16_t tmpreg = 0;
+   1190          
+   1191            /* Get the counter value */
+   1192            tmpreg = ((uint16_t)RTC->WUTRH) << 8;
+   1193            tmpreg |= RTC->WUTRL;
+   1194          
+   1195            /* return RTC Wakeup Counter value*/
+   1196            return (uint16_t)tmpreg;
+   1197          }
+   1198          
+   1199          /**
+   1200            * @brief  Enables or Disables the RTC Wakeup Unit.
+   1201            * @param  NewState: new state of the Wakeup Unit. This parameter can be: ENABLE or DISABLE.
+   1202            * @retval An ErrorStatus enumuration value:
+   1203            *          - SUCCESS : RTC Wakeup Unit is enabled/disabled
+   1204            *          - ERROR    : RTC Wakeup Unit is not enabled/disabled
+   1205            */
+   1206          ErrorStatus RTC_WakeUpCmd(FunctionalState NewState)
+   1207          {
+   1208            ErrorStatus status = ERROR;
+   1209            uint16_t wutwfcount = 0;
+   1210          
+   1211            /* Check the parameters */
+   1212            assert_param(IS_FUNCTIONAL_STATE(NewState));
+   1213          
+   1214            /* Disable the write protection for RTC registers */
+   1215            RTC_WriteProtectionCmd(DISABLE);
+   1216          
+   1217            if (NewState != DISABLE)
+   1218            {
+   1219              /* Enable the Wakeup Timer */
+   1220              RTC->CR2 |= (uint8_t)RTC_CR2_WUTE;
+   1221          
+   1222              status = SUCCESS;
+   1223            }
+   1224            else
+   1225            {
+   1226              /* Disable the Wakeup Timer */
+   1227              RTC->CR2 &= (uint8_t)~RTC_CR2_WUTE;
+   1228          
+   1229              /* Wait until WUTWF flag is set */
+   1230              while (((RTC->ISR1 & RTC_ISR1_WUTWF) == RESET) && ( wutwfcount != WUTWF_TIMEOUT))
+   1231              {
+   1232                wutwfcount++;
+   1233              }
+   1234          
+   1235              /* Check WUTWF flag is set or not */
+   1236              if ((RTC->ISR1 & RTC_ISR1_WUTWF) == RESET)
+   1237              {
+   1238                status = ERROR;
+   1239              }
+   1240              else
+   1241              {
+   1242                status = SUCCESS;
+   1243              }
+   1244            }
+   1245          
+   1246            /* Enable the write protection for RTC registers */
+   1247            RTC_WriteProtectionCmd(ENABLE);
+   1248          
+   1249            /* Return the status*/
+   1250            return (ErrorStatus)status;
+   1251          }
+   1252          
+   1253          /**
+   1254            * @brief  Configures the RTC output for the output pin (RTC_ALARM output).
+   1255            * @param  RTC_OutputSel: Specifies which signal will be mapped to the output.
+   1256            *         This parameter can be one parameter from the @ref RTC_OutputSel_TypeDef enumeration.
+   1257            * @param  RTC_OutputPolarity: Specifies the polarity of the output signal.
+   1258            *         This parameter can be one parameter from the @ref RTC_OutputPolarity_TypeDef enumeration.
+   1259            * @retval None
+   1260            */
+   1261          void RTC_OutputConfig(RTC_Output_TypeDef RTC_Output,
+   1262                                RTC_OutputPolarity_TypeDef RTC_OutputPolarity)
+   1263          {
+   1264            /* Check the parameters */
+   1265            assert_param(IS_RTC_OUTPUT_SEL(RTC_Output));
+   1266            assert_param(IS_RTC_OUTPUT_POL(RTC_OutputPolarity));
+   1267          
+   1268            /* Disable the write protection for RTC registers */
+   1269            RTC_WriteProtectionCmd(DISABLE);
+   1270          
+   1271            /* Clear the bits to be configured */
+   1272            RTC->CR3 &= (uint8_t)~(RTC_CR3_OSEL | RTC_CR3_POL);
+   1273          
+   1274            /* Configure the output selection and polarity */
+   1275            RTC->CR3 |= (uint8_t)((uint8_t)RTC_Output | (uint8_t)RTC_OutputPolarity);
+   1276          
+   1277            /* Enable the write protection for RTC registers */
+   1278            RTC_WriteProtectionCmd(ENABLE);
+   1279          }
+   1280          
+   1281          /**
+   1282            * @brief  Adds or subtracts one hour from the current time depending on
+   1283            *         the daylight saving parameter.
+   1284            * @param  RTC_DayLightSaving: the day light saving Mode
+   1285            *         This parameter can be one of the @ref RTC_DayLightSaving_TypeDef enumeration.
+   1286            * @param  RTC_StoreOperation: the day light saving store operation
+   1287            *         This parameter can be one of the @ref RTC_StoreOperation_TypeDef enumeration.
+   1288            * @retval None
+   1289            */
+   1290          void RTC_DayLightSavingConfig(RTC_DayLightSaving_TypeDef RTC_DayLightSaving,
+   1291                                        RTC_StoreOperation_TypeDef RTC_StoreOperation)
+   1292          {
+   1293            /* Check the parameters */
+   1294            assert_param(IS_RTC_DAYLIGHT_SAVING(RTC_DayLightSaving));
+   1295            assert_param(IS_RTC_STORE_OPERATION(RTC_StoreOperation));
+   1296          
+   1297            /* Disable the write protection for RTC registers */
+   1298            RTC_WriteProtectionCmd(DISABLE);
+   1299          
+   1300            /* Clear the bits to be configured */
+   1301            RTC->CR3 &= (uint8_t)~(RTC_CR3_BCK);
+   1302          
+   1303            /* Configure the RTC_CR3 register */
+   1304            RTC->CR3 |= (uint8_t)((uint8_t)RTC_DayLightSaving | (uint8_t)RTC_StoreOperation);
+   1305          
+   1306            /* Enable the write protection for RTC registers */
+   1307            RTC_WriteProtectionCmd(ENABLE);
+   1308          }
+   1309          
+   1310          /**
+   1311            * @brief  Returns the stored operation.
+   1312            * @param  None
+   1313            * @retval the store operation, this parameter can be one of
+   1314            * the @ref RTC_StoreOperation_TypeDef enumeration.
+   1315            */
+   1316          RTC_StoreOperation_TypeDef  RTC_GetStoreOperation(void)
+   1317          {
+   1318            /* Return the stored operation*/
+   1319            return (RTC_StoreOperation_TypeDef)(RTC->CR3 & RTC_CR3_BCK);
+   1320          }
+   1321          
+   1322          /**
+   1323            * @brief  Configures the Tampers Filter.
+   1324            * @param  RTC_TamperFilter: Specifies the tampers filter.
+   1325            *         This parameter can be one parameter from the
+   1326            *         @ref RTC_TamperFilter_TypeDef enumeration.
+   1327            * @retval None
+   1328            */
+   1329          void RTC_TamperFilterConfig(RTC_TamperFilter_TypeDef RTC_TamperFilter)
+   1330          {
+   1331          
+   1332            /* Check the parameters */
+   1333            assert_param(IS_RTC_TAMPER_FILTER(RTC_TamperFilter));
+   1334          
+   1335            /* Disable the write protection for RTC registers */
+   1336            RTC_WriteProtectionCmd(DISABLE);
+   1337          
+   1338            /*clear flags before config*/
+   1339            RTC->TCR2 &= (uint8_t)~(RTC_TCR2_TAMPFLT);
+   1340          
+   1341            /* Configure the RTC_TCR register */
+   1342            RTC->TCR2 |= (uint8_t)RTC_TamperFilter;
+   1343          
+   1344            /* Enable the write protection for RTC registers */
+   1345            RTC_WriteProtectionCmd(ENABLE);
+   1346          
+   1347          }
+   1348          
+   1349          /**
+   1350            * @brief  Configures the Tampers Sampling Frequency.
+   1351            * @param  RTC_TamperSamplingFreq: Specifies the tampers Sampling Frequency.
+   1352            *         This parameter can be one parameter from the
+   1353            *         @ref RTC_TamperSamplingFreq_TypeDef enumeration.
+   1354            * @retval None
+   1355            */
+   1356          void RTC_TamperSamplingFreqConfig(RTC_TamperSamplingFreq_TypeDef RTC_TamperSamplingFreq)
+   1357          {
+   1358            /* Check the parameters */
+   1359            assert_param(IS_RTC_TAMPER_SAMPLING_FREQ(RTC_TamperSamplingFreq));
+   1360          
+   1361            /* Disable the write protection for RTC registers */
+   1362            RTC_WriteProtectionCmd(DISABLE);
+   1363          
+   1364            /* Clear flags before config*/
+   1365            RTC->TCR2 &= (uint8_t)~(RTC_TCR2_TAMPFREQ);
+   1366          
+   1367            /* Configure the RTC_TCR register */
+   1368            RTC->TCR2 |= (uint8_t)RTC_TamperSamplingFreq;
+   1369          
+   1370            /* Enable the write protection for RTC registers */
+   1371            RTC_WriteProtectionCmd(ENABLE);
+   1372          }
+   1373          
+   1374          /**
+   1375          * @brief  Configures the Tampers Pins input Precharge Duration.
+   1376          * @param  RTC_TamperPrechargeDuration: Specifies the Tampers Pins input
+   1377          *         Precharge Duration.
+   1378          *         This parameter can be one parameter from the
+   1379          *         @ref RTC_TamperPrechargeDuration_TypeDef enumeration.
+   1380          * @retval None
+   1381          */
+   1382          void RTC_TamperPinsPrechargeDuration(RTC_TamperPrechargeDuration_TypeDef RTC_TamperPrechargeDuration)
+   1383          {
+   1384            /* Check the parameters */
+   1385            assert_param(IS_RTC_TAMPER_PINS_PRECHAR_DURATION(RTC_TamperPrechargeDuration));
+   1386          
+   1387            /* Disable the write protection for RTC registers */
+   1388            RTC_WriteProtectionCmd(DISABLE);
+   1389          
+   1390            /* Clear the tampers  pull-up  and precharge/discharge duration Old settings*/
+   1391            RTC->TCR2 &= (uint8_t)~(RTC_TCR2_TAMPPUDIS | RTC_TCR2_TAMPPRCH);
+   1392          
+   1393            /* Configure the Tampers Precharge Duration  and pull-up New settings*/
+   1394            RTC->TCR2 |= (uint8_t)RTC_TamperPrechargeDuration;
+   1395          
+   1396            /* Enable the write protection for RTC registers */
+   1397            RTC_WriteProtectionCmd(ENABLE);
+   1398          }
+   1399          
+   1400          /**
+   1401          * @brief  Configures the Tamper Sensitive Level.
+   1402          * @param  RTC_Tamper: Select the tamper to configure.
+   1403          *         This parameter can be one parameter from the @ref RTC_Tamper_TypeDef
+   1404          *         enumeration.
+   1405          * @param  RTC_TamperLevel: Select the tamper Sensitive Level.
+   1406          *         This parameter can be one parameter from the @ref RTC_TamperLevel_TypeDef
+   1407          *         enumeration.
+   1408          * @retval None
+   1409          */
+   1410          void RTC_TamperLevelConfig(RTC_Tamper_TypeDef RTC_Tamper,
+   1411                                     RTC_TamperLevel_TypeDef RTC_TamperLevel)
+   1412          {
+   1413            /* Check the parameters */
+   1414            assert_param(IS_RTC_TAMPER((uint8_t)RTC_Tamper));
+   1415            assert_param(IS_RTC_TAMPER_LEVEL(RTC_TamperLevel));
+   1416          
+   1417            /* Disable the write protection for RTC registers */
+   1418            RTC_WriteProtectionCmd(DISABLE);
+   1419          
+   1420            if (RTC_TamperLevel != RTC_TamperLevel_Low)
+   1421            {
+   1422              /* Enable the selected Tampers */
+   1423              RTC->TCR1 |= (uint8_t)(RTC_Tamper << 1);
+   1424            }
+   1425            else
+   1426            {
+   1427              /* Disable the selected Tampers */
+   1428              RTC->TCR1 &= (uint8_t)~(uint8_t)(RTC_Tamper << 1);
+   1429            }
+   1430          
+   1431            /* Enable the write protection for RTC registers */
+   1432            RTC_WriteProtectionCmd(ENABLE);
+   1433          }
+   1434          
+   1435          /**
+   1436          * @brief  Enables or Disables the Tamper detection.
+   1437          * @param  RTC_Tamper: Select the tamper to configure.
+   1438          *         This parameter can be one parameter from the @ref RTC_Tamper_TypeDef
+   1439          *         enumeration.
+   1440          * @param  NewState: new state of the tamper pin.
+   1441          *         This parameter can be: ENABLE or DISABLE.
+   1442          * @retval None
+   1443          */
+   1444          void RTC_TamperCmd(RTC_Tamper_TypeDef RTC_Tamper,
+   1445                             FunctionalState NewState)
+   1446          {
+   1447          
+   1448            /* Check the parameters */
+   1449            assert_param(IS_RTC_TAMPER((uint8_t)RTC_Tamper));
+   1450            assert_param(IS_FUNCTIONAL_STATE(NewState));
+   1451          
+   1452            /* Disable the write protection for RTC registers */
+   1453            RTC_WriteProtectionCmd(DISABLE);
+   1454          
+   1455          
+   1456            if (NewState != DISABLE)
+   1457            {
+   1458              /* Enable the selected Tampers */
+   1459              RTC->TCR1 |= (uint8_t)RTC_Tamper;
+   1460            }
+   1461            else
+   1462            {
+   1463              /* Disable the selected Tampers */
+   1464              RTC->TCR1 &= (uint8_t)~RTC_Tamper;
+   1465            }
+   1466          
+   1467          
+   1468            /* Enable the write protection for RTC registers */
+   1469            RTC_WriteProtectionCmd(ENABLE);
+   1470          }
+   1471          
+   1472          /**
+   1473          * @brief  Configures the Synchronization Shift Control Settings.
+   1474          * @param  RTC_ShiftAdd1S : Select to add or not 1 second to the time Calendar.
+   1475          *         This parameter can be one parameter from the @ref RTC_ShiftAdd1S_TypeDef
+   1476          *         enumeration.
+   1477          * @param  RTC_ShiftSubFS: Select the number of Second Fractions to Substitute.
+   1478          *         This parameter can be one any value from 0 to 0x7FFF.
+   1479           * @retval An ErrorStatus enumeration value:
+   1480          *          - SUCCESS: RTC Shift registers are configured
+   1481          *          - ERROR: RTC Shift registers are not configured
+   1482          */
+   1483          ErrorStatus RTC_SynchroShiftConfig(RTC_ShiftAdd1S_TypeDef RTC_ShiftAdd1S,
+   1484                                             uint16_t RTC_ShiftSubFS)
+   1485          {
+   1486            uint8_t shiftrhreg = 0;
+   1487            ErrorStatus status = ERROR;
+   1488            uint16_t shpfcount = 0;
+   1489          
+   1490            /* Check the parameters */
+   1491            assert_param(IS_RTC_SHIFT_ADD1S(RTC_ShiftAdd1S));
+   1492            assert_param(IS_RTC_SHIFT_SUBFS(RTC_ShiftSubFS));
+   1493          
+   1494            /* Disable the write protection for RTC registers */
+   1495            RTC_WriteProtectionCmd(DISABLE);
+   1496          
+   1497            /* Check if a Shift is pending*/
+   1498            if ((RTC->ISR1 & RTC_ISR1_SHPF) != RESET)
+   1499            {
+   1500              /* wait until the shift is completed*/
+   1501              while (((RTC->ISR1 & RTC_ISR1_SHPF) != RESET) && (shpfcount != SHPF_TIMEOUT))
+   1502              {
+   1503                shpfcount++;
+   1504              }
+   1505            }
+   1506          
+   1507            /* check if the Shift pending is completed or if there is no Shift operation at all*/
+   1508            if ((RTC->ISR1 & RTC_ISR1_SHPF) == RESET)
+   1509            {
+   1510              /* Configure the Shift settings */
+   1511              shiftrhreg = (uint8_t)((uint8_t)(RTC_ShiftSubFS >> 8) | (uint8_t)(RTC_ShiftAdd1S));
+   1512              RTC->SHIFTRH = (uint8_t)(shiftrhreg);
+   1513              RTC->SHIFTRL = (uint8_t)(RTC_ShiftSubFS);
+   1514          
+   1515              status = SUCCESS;
+   1516            }
+   1517            else
+   1518            {
+   1519              status = ERROR;
+   1520            }
+   1521          
+   1522            /* Enable the write protection for RTC registers */
+   1523            RTC_WriteProtectionCmd(ENABLE);
+   1524          
+   1525            return (ErrorStatus)(status);
+   1526          }
+   1527          
+   1528          /**
+   1529          * @brief  Configures the Smooth Calibration Settings.
+   1530          * @param  RTC_SmoothCalibPeriod : Select the Smooth Calibration Period.
+   1531          *         This parameter can be one parameter from
+   1532          *         the @ref RTC_SmoothCalibPeriod_TypeDef enumeration.
+   1533          * @param  RTC_SmoothCalibPlusPulses : Select to Set or reset the CALP bit.
+   1534          *         This parameter can be one parameter from the
+   1535          *         @ref RTC_SmoothCalibPlusPulses_TypeDef enumeration.
+   1536          * @param  RTC_SmouthCalibMinusPulsesValue: Select the value of CALM[8:0] bits.
+   1537          *         This parameter can be one any value from 0 to 0x01FF.
+   1538          * @retval An ErrorStatus enumeration value:
+   1539          *          - SUCCESS: RTC Calib registers are configured
+   1540          *          - ERROR: RTC Calib registers are not configured
+   1541          */
+   1542          ErrorStatus RTC_SmoothCalibConfig(RTC_SmoothCalibPeriod_TypeDef RTC_SmoothCalibPeriod,
+   1543                                            RTC_SmoothCalibPlusPulses_TypeDef RTC_SmoothCalibPlusPulses,
+   1544                                            uint16_t RTC_SmouthCalibMinusPulsesValue)
+   1545          {
+   1546            ErrorStatus status = ERROR;
+   1547            uint16_t recalpfcount = 0;
+   1548          
+   1549            /* Check the parameters */
+   1550            assert_param(IS_RTC_SMOOTH_CALIB_PERIOD(RTC_SmoothCalibPeriod));
+   1551            assert_param(IS_RTC_SMOOTH_CALIB_PLUS(RTC_SmoothCalibPlusPulses));
+   1552            assert_param(IS_RTC_SMOOTH_CALIB_MINUS(RTC_SmouthCalibMinusPulsesValue));
+   1553          
+   1554            /* Disable the write protection for RTC registers */
+   1555            RTC_WriteProtectionCmd(DISABLE);
+   1556          
+   1557            /* check if a calibrartion is pending*/
+   1558            if ((RTC->ISR1 & RTC_ISR1_RECALPF) != RESET)
+   1559            {
+   1560              /* wait until the Calibration is completed*/
+   1561              while (((RTC->ISR1 & RTC_ISR1_RECALPF) != RESET) && (recalpfcount != RECALPF_TIMEOUT))
+   1562              {
+   1563                recalpfcount++;
+   1564              }
+   1565            }
+   1566          
+   1567            /* check if the calibrartion pending is completed or if there is no calibration operation at all*/
+   1568            if ((RTC->ISR1 & RTC_ISR1_RECALPF) == RESET)
+   1569            {
+   1570              /* Configure the Smooth calib settings */
+   1571              RTC->CALRH = (uint8_t)((uint8_t)((uint8_t)RTC_SmoothCalibPeriod | (uint8_t)RTC_SmoothCalibPlusPulses) | (uint8_t)((uint16_t)RTC_SmouthCalibMinusPulsesValue >> 8));
+   1572              RTC->CALRL = (uint8_t)(RTC_SmouthCalibMinusPulsesValue);
+   1573          
+   1574              status = SUCCESS;
+   1575            }
+   1576            else
+   1577            {
+   1578              status = ERROR;
+   1579            }
+   1580          
+   1581            /* Enable the write protection for RTC registers */
+   1582            RTC_WriteProtectionCmd(ENABLE);
+   1583          
+   1584            return (ErrorStatus)(status);
+   1585          }
+   1586          
+   1587          /**
+   1588          * @brief  Configure the Calib Pinout (RTC_CALIB) Selection (1Hz or 512Hz).
+   1589          * @param  RTC_CalibOutput : Select the Calib output Selection .
+   1590          *         This parameter can be one parameter from the
+   1591          *         @ref RTC_CalibOutput_TypeDef enumeration.
+   1592          * @retval None
+   1593          */
+   1594          void RTC_CalibOutputConfig(RTC_CalibOutput_TypeDef RTC_CalibOutput)
+   1595          {
+   1596            /* Check the parameters */
+   1597            assert_param(IS_RTC_CALOUTPUT_SELECT(RTC_CalibOutput));
+   1598          
+   1599            /* Disable the write protection for RTC registers */
+   1600            RTC_WriteProtectionCmd(DISABLE);
+   1601          
+   1602            if (RTC_CalibOutput != RTC_CalibOutput_512Hz)
+   1603            {
+   1604              /* Enable the RTC clock output */
+   1605              RTC->CR3 |= (uint8_t)RTC_CR3_COSEL;
+   1606            }
+   1607            else
+   1608            {
+   1609              /* Disable the RTC clock output */
+   1610              RTC->CR3 &= (uint8_t)~RTC_CR3_COSEL;
+   1611            }
+   1612          
+   1613            /* Enable the write protection for RTC registers */
+   1614            RTC_WriteProtectionCmd(ENABLE);
+   1615          }
+   1616          
+   1617          /**
+   1618          * @brief  Enables or disables the RTC clock to be output through the relative pin.
+   1619          * @param  NewState: new state of the RTC calib output
+   1620          *         This parameter can be: ENABLE or DISABLE.
+   1621          * @retval None
+   1622          */
+   1623          void RTC_CalibOutputCmd(FunctionalState NewState)
+   1624          {
+   1625            /* Check the parameters */
+   1626            assert_param(IS_FUNCTIONAL_STATE(NewState));
+   1627          
+   1628            /* Disable the write protection for RTC registers */
+   1629            RTC_WriteProtectionCmd(DISABLE);
+   1630          
+   1631            if (NewState != DISABLE)
+   1632            {
+   1633              /* Enable the RTC clock output */
+   1634              RTC->CR3 |= (uint8_t)RTC_CR3_COE;
+   1635            }
+   1636            else
+   1637            {
+   1638              /* Disable the RTC clock output */
+   1639              RTC->CR3 &= (uint8_t)~RTC_CR3_COE;
+   1640            }
+   1641          
+   1642            /* Enable the write protection for RTC registers */
+   1643            RTC_WriteProtectionCmd(ENABLE);
+   1644          }
+   1645          
+   1646          /**
+   1647          * @brief  Checks whether the specified RTC flag is set or not.
+   1648          * @param  RTC_FLAG: specifies the flag to check.
+   1649          *         This parameter can be one of the @ref RTC_Flag_TypeDef enumeration.
+   1650          * @retval Status of RTC_FLAG (SET or RESET)
+   1651          */
+   1652          FlagStatus RTC_GetFlagStatus(RTC_Flag_TypeDef RTC_FLAG)
+   1653          {
+   1654            FlagStatus flagstatus = RESET;
+   1655            uint16_t tmpreg1 = 0;
+   1656            uint16_t tmpreg2 = 0;
+   1657          
+   1658            /* Check the parameters */
+   1659            assert_param(IS_RTC_GET_FLAG(RTC_FLAG));
+   1660          
+   1661            /* Get all the flags */
+   1662            tmpreg2 = (uint16_t)((uint16_t)RTC->ISR1 << 8);
+   1663            tmpreg1 = (uint16_t)((uint16_t)((uint16_t)(RTC->ISR2)) | tmpreg2);
+   1664          
+   1665            /* Return the status of the flag */
+   1666            if ((tmpreg1 & (uint16_t)RTC_FLAG) != RESET)
+   1667            {
+   1668              flagstatus = SET;
+   1669            }
+   1670            else
+   1671            {
+   1672              flagstatus = RESET;
+   1673            }
+   1674            return (FlagStatus)flagstatus;
+   1675          }
+   1676          
+   1677          /**
+   1678          * @brief  Clears the RTC's pending flags.
+   1679          * @param  RTC_FLAG: specifies the RTC flag to clear.
+   1680          *         This parameter can be any combination of the @ref RTC_Flag_TypeDef
+   1681          *         enumeration.
+   1682          * @retval None
+   1683          */
+   1684          void RTC_ClearFlag(RTC_Flag_TypeDef RTC_FLAG)
+   1685          {
+   1686            /* Check the parameters */
+   1687            assert_param(IS_RTC_CLEAR_FLAG((uint16_t)RTC_FLAG));
+   1688          
+   1689            /* Clear the Flags in the RTC_ISR registers */
+   1690            RTC->ISR2 = (uint8_t)~((uint8_t)RTC_FLAG) ;
+   1691            RTC->ISR1 = (uint8_t)(((uint8_t)~(uint8_t)((uint16_t)RTC_FLAG >> (uint8_t)8)) & ((uint8_t)~(uint8_t)(RTC_ISR1_INIT)));
+   1692          }
+   1693          
+   1694          /**
+   1695          * @brief  Checks whether the specified RTC interrupt has occurred or not.
+   1696          * @param  RTC_IT: specifies the RTC interrupt source to check.
+   1697          *   This parameter can be one of the @ref RTC_IT_TypeDef enumeration.
+   1698          * @retval Status of RTC_IT (SET or RESET).
+   1699          */
+   1700          ITStatus RTC_GetITStatus(RTC_IT_TypeDef RTC_IT)
+   1701          {
+   1702            ITStatus itstatus = RESET;
+   1703            uint8_t enablestatus = 0, tmpreg = 0;
+   1704          
+   1705            /* Check the parameters */
+   1706            assert_param(IS_RTC_GET_IT(RTC_IT));
+   1707          
+   1708            /* Get the Interrupt enable Status */
+   1709            enablestatus = (uint8_t)(RTC->CR2 & (uint16_t)RTC_IT);
+   1710          
+   1711            /* Get the Interrupt pending bit */
+   1712            tmpreg = (uint8_t)(RTC->ISR2 & (uint8_t)((uint16_t)RTC_IT >> 4));
+   1713          
+   1714            /* Get the status of the Interrupt */
+   1715            if ((enablestatus != (uint8_t)RESET) && (tmpreg != (uint8_t)RESET))
+   1716            {
+   1717              itstatus = SET;
+   1718            }
+   1719            else
+   1720            {
+   1721              itstatus = RESET;
+   1722            }
+   1723          
+   1724            return (ITStatus)itstatus;
+   1725          }
+   1726          
+   1727          /**
+   1728          * @brief  Clears the RTC's interrupt pending bits.
+   1729          * @param  RTC_IT: specifies the RTC interrupt pending bit to clear.
+   1730          *         This parameter can be any combination of the @ref RTC_IT_TypeDef
+   1731          *         enumeration.
+   1732          * @retval None
+   1733          */
+   1734          void RTC_ClearITPendingBit(RTC_IT_TypeDef RTC_IT)
+   1735          {
+   1736            /* Check the parameters */
+   1737            assert_param(IS_RTC_CLEAR_IT((uint16_t)RTC_IT));
+   1738          
+   1739            /* Clear the interrupt pending bits in the RTC_ISR registers */
+   1740            RTC->ISR2 = (uint8_t)~(uint8_t)((uint16_t)RTC_IT >> 4);
+   1741          }
+   1742          
+   1743          /**
+   1744           * @addtogroup RTC_Private_Functions
+   1745           * @{
+   1746           */
+   1747          /**
+   1748          * @brief  Converts a 2 digit decimal to BCD format
+   1749          * @param  Value: Byte to be converted.
+   1750          * @retval Converted byte
+   1751          */
+   1752          static uint8_t ByteToBcd2(uint8_t Value)
+   1753          {
+   1754            uint8_t bcdhigh = 0;
+   1755          
+   1756            while (Value >= 10)
+   1757            {
+   1758              bcdhigh++;
+   1759              Value -= 10;
+   1760            }
+   1761          
+   1762            return  (uint8_t)((uint8_t)(bcdhigh << 4) | Value);
+   1763          }
+   1764          
+   1765          /**
+   1766          * @brief  Converts from 2 digit BCD to Binary format
+   1767          * @param  Value: BCD value to be converted.
+   1768          * @retval Converted word
+   1769          */
+   1770          static uint8_t Bcd2ToByte(uint8_t Value)
+   1771          {
+   1772            uint8_t tmp = 0;
+   1773          
+   1774            tmp = (uint8_t)((uint8_t)((uint8_t)(Value & (uint8_t)0xF0) >> 4) * (uint8_t)10);
+   1775          
+   1776            return (uint8_t)(tmp + (Value & (uint8_t)0x0F));
+   1777          }
+   1778          /**
+   1779           * @}
+   1780           */
+   1781          /**
+   1782           * @}
+   1783           */
+   1784          
+   1785          /**
+   1786          * @}
+   1787          */
+   1788          
+   1789          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+   1790          
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      27  Bcd2ToByte
+      32  ByteToBcd2
+      96  RTC_AlarmCmd
+      53  RTC_AlarmStructInit
+      85  RTC_AlarmSubSecondConfig
+      34  RTC_BypassShadowCmd
+      34  RTC_CalibOutputCmd
+      34  RTC_CalibOutputConfig
+      15  RTC_ClearFlag
+      10  RTC_ClearITPendingBit
+      27  RTC_DateStructInit
+      38  RTC_DayLightSavingConfig
+     238  RTC_DeInit
+      34  RTC_EnterInitMode
+       5  RTC_ExitInitMode
+     177  RTC_GetAlarm
+      94  RTC_GetDate
+      57  RTC_GetFlagStatus
+      41  RTC_GetITStatus
+       6  RTC_GetStoreOperation
+      55  RTC_GetSubSecond
+      86  RTC_GetTime
+      29  RTC_GetWakeUpCounter
+      57  RTC_ITConfig
+      76  RTC_Init
+      42  RTC_OutputConfig
+      34  RTC_RatioCmd
+     297  RTC_SetAlarm
+     193  RTC_SetDate
+     168  RTC_SetTime
+      38  RTC_SetWakeUpCounter
+     103  RTC_SmoothCalibConfig
+      19  RTC_StructInit
+      99  RTC_SynchroShiftConfig
+      48  RTC_TamperCmd
+      36  RTC_TamperFilterConfig
+      49  RTC_TamperLevelConfig
+      36  RTC_TamperPinsPrechargeDuration
+      36  RTC_TamperSamplingFreqConfig
+      24  RTC_TimeStructInit
+      40  RTC_WaitForSynchro
+      40  RTC_WakeUpClockConfig
+      79  RTC_WakeUpCmd
+      17  RTC_WriteProtectionCmd
+
+ 
+ 2 838 bytes in section .far_func.text
+ 
+ 2 838 bytes of CODE memory
+
+Errors: none
+Warnings: none
