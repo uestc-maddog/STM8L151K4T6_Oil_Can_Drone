@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:27
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 26/Dec/2016  10:48:18
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
@@ -194,121 +194,122 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
     168              //RTC_AWU_Initial(186);     // RTC 唤醒中断    186 * 26.95 ms = 5s
     169              enableInterrupts();       // 打开总中断 
     170              
-    171              printf("Oil_Can_Drone\r\n");                      // 发送字符串，末尾换行
-    172          }
-    173          
-    174          /*===========================================================================
-    175          * 函数 : BSP_RF_SendPacket() => 无线发送数据函数                            *
-    176          * 输入 ：Sendbuffer指向待发送的数据，length发送数据长度                      *
-    177          * 输出 ：0，发送成功                                                      
-    178                   1，等待应答超时
-    179                   2，数据包长度错误
-    180                   3，数据包帧头错误
-    181                   4，数据包源地址错误
-    182                   5，数据包目标地址错误
-    183                   6，数据包帧尾
-    184          ============================================================================*/
-    185          INT8U RF_SendPacket(INT8U *Sendbuffer, INT8U length)
-    186          {
-    187              uint8_t  i = 0, ack_len = 0, ack_buffer[15] = {0};
-    188              RecvWaitTime = (int)RECV_TIMEOUT;           // 等待应答超时限制1500ms
-    189              
-    190              CC1101SendPacket(SendBuffer, length, ADDRESS_CHECK);    // 发送数据 
-    191              //DelayMs(5);                       
-    192              
-    193              //CC1101Init();                               // 初始化L01寄存器 
-    194              CC1101SetTRMode(RX_MODE);                   // 准备接收应答
-    195          
-    196              TIM3_Set(1);                                // 开启TIM3
-    197              printf("waiting for ack...\r\n");
-    198              while(CC_IRQ_READ() != 0)                   // 等待接收数据包
-    199              {
-    200                  if(RecvWaitTime <= 0)      
-    201                  {  
-    202                      TIM3_Set(0);                            // 关闭TIM3
-    203                      printf("RecvWaitTime0=%d\r\n", RecvWaitTime);
-    204                      return 1;                              // 等待应答超时
-    205                  }
-    206              }
-    207              //TIM3_Set(0); 
-    208              //printf("RecvWaitTime1=%d\r\n", RecvWaitTime);
-    209          
-    210              RecvWaitTime = 50;           // 等待应答超时限制50ms
-    211              //TIM3_Set(1);                                // 开启TIM3
-    212              while(CC_IRQ_READ() == 0)
-    213              {
-    214                  if(RecvWaitTime <= 0)      
-    215                  {  
-    216                      TIM3_Set(0);                            // 关闭TIM3
-    217                      printf("RecvWaitTime1=%d\r\n", RecvWaitTime);
-    218                      return 1;                              // 等待应答超时
-    219                  }
-    220              }
-    221              printf("RecvWaitTime2=%d\r\n", RecvWaitTime);
-    222              TIM3_Set(0);                                // 关闭TIM3
-    223              ack_len = CC1101RecPacket(ack_buffer);      // 读取收到的数据
-    224              
-    225          //                        // 帧头  源地址  目标地址    帧尾
-    226          //AckBuffer[ACK_LENGTH]   = {0x55,  0xff,     0,     0x0d, 0x0a};                                             // 主机应答数据
-    227              
-    228          //    if((strlen((const char*)ack_buffer) <= 0) || (strlen((const char*)ack_buffer)) > 29)  
-    229          //    {
-    230          //        CC1101Init(); 
-    231          //        printf("ack_len0=%d\r\n", ack_len);
-    232          //        return 2;                                              // 数据包长度错误
-    233          //    }
-    234              
-    235              if(ack_len <= 0 || ack_len > 15)  
-    236              {
-    237                  CC1101Init(); 
-    238                  printf("ack_len1=%d\r\n", ack_len);
-    239                  return 2;                                          // 数据包长度错误
-    240              }
-    241              if(ack_len != ACK_LENGTH) return 2;                                               // 数据包长度错误
-    242              if(ack_buffer[0] != 0x55) return 3;                                               // 数据包帧头错误
-    243              if(ack_buffer[1] != 0xff) return 4;                                               // 数据包源地址错误       
-    244              if(ack_buffer[2] == 0xff) return 5;                                               // 数据包目标地址错误
-    245              if((ack_buffer[ack_len-2] != 0x0d) || (ack_buffer[ack_len-1] != 0x0a)) return 6;  // 数据包帧尾
-    246          
-    247              // 应答正确
-    248              printf("ack_len=%d;ack_buffer:", (int)ack_len);
-    249              for(i = 0; i < ack_len; i++)                     
-    250              {
-    251                  printf("%d ", (int)ack_buffer[i]);
-    252              }
-    253              printf("\r\n");
-    254          
-    255              return 0;  
-    256          }
-    257          
-    258          void Get_TheTime(void)
-    259          {
-    260            RTC_TimeTypeDef GETRTC_Time;
-    261            RTC_DateTypeDef GETRTC_Data;
-    262            //unsigned char sec_st,sec_su , min_mt,min_mu ,hour_ht , hour_hu , midd ,status;
-    263            if(RTC_GetFlagStatus(RTC_FLAG_RSF) == SET)  //有时间更新 
-    264            {
-    265              
+    171              U1_Set(1);
+    172              printf("Oil_Can_Drone\r\n");                      // 发送字符串，末尾换行
+    173          }
+    174          
+    175          /*===========================================================================
+    176          * 函数 : BSP_RF_SendPacket() => 无线发送数据函数                            *
+    177          * 输入 ：Sendbuffer指向待发送的数据，length发送数据长度                      *
+    178          * 输出 ：0，发送成功                                                      
+    179                   1，等待应答超时
+    180                   2，数据包长度错误
+    181                   3，数据包帧头错误
+    182                   4，数据包源地址错误
+    183                   5，数据包目标地址错误
+    184                   6，数据包帧尾
+    185          ============================================================================*/
+    186          INT8U RF_SendPacket(INT8U *Sendbuffer, INT8U length)
+    187          {
+    188              uint8_t  i = 0, ack_len = 0, ack_buffer[15] = {0};
+    189              RecvWaitTime = (int)RECV_TIMEOUT;           // 等待应答超时限制1500ms
+    190              
+    191              CC1101SendPacket(SendBuffer, length, ADDRESS_CHECK);    // 发送数据 
+    192              //DelayMs(5);                       
+    193              
+    194              //CC1101Init();                               // 初始化L01寄存器 
+    195              CC1101SetTRMode(RX_MODE);                   // 准备接收应答
+    196          
+    197              TIM3_Set(1);                                // 开启TIM3
+    198              printf("waiting for ack...\r\n");
+    199              while(CC_IRQ_READ() != 0)                   // 等待接收数据包
+    200              {
+    201                  if(RecvWaitTime <= 0)      
+    202                  {  
+    203                      TIM3_Set(0);                            // 关闭TIM3
+    204                      printf("RecvWaitTime0=%d\r\n", RecvWaitTime);
+    205                      return 1;                              // 等待应答超时
+    206                  }
+    207              }
+    208              //TIM3_Set(0); 
+    209              //printf("RecvWaitTime1=%d\r\n", RecvWaitTime);
+    210          
+    211              RecvWaitTime = 50;           // 等待应答超时限制50ms
+    212              //TIM3_Set(1);                                // 开启TIM3
+    213              while(CC_IRQ_READ() == 0)
+    214              {
+    215                  if(RecvWaitTime <= 0)      
+    216                  {  
+    217                      TIM3_Set(0);                            // 关闭TIM3
+    218                      printf("RecvWaitTime1=%d\r\n", RecvWaitTime);
+    219                      return 1;                              // 等待应答超时
+    220                  }
+    221              }
+    222              printf("RecvWaitTime2=%d\r\n", RecvWaitTime);
+    223              TIM3_Set(0);                                // 关闭TIM3
+    224              ack_len = CC1101RecPacket(ack_buffer);      // 读取收到的数据
+    225              
+    226          //                        // 帧头  源地址  目标地址    帧尾
+    227          //AckBuffer[ACK_LENGTH]   = {0x55,  0xff,     0,     0x0d, 0x0a};                                             // 主机应答数据
+    228              
+    229          //    if((strlen((const char*)ack_buffer) <= 0) || (strlen((const char*)ack_buffer)) > 29)  
+    230          //    {
+    231          //        CC1101Init(); 
+    232          //        printf("ack_len0=%d\r\n", ack_len);
+    233          //        return 2;                                              // 数据包长度错误
+    234          //    }
+    235              
+    236              if(ack_len <= 0 || ack_len > 15)  
+    237              {
+    238                  CC1101Init(); 
+    239                  printf("ack_len1=%d\r\n", ack_len);
+    240                  return 2;                                          // 数据包长度错误
+    241              }
+    242              if(ack_len != ACK_LENGTH) return 2;                                               // 数据包长度错误
+    243              if(ack_buffer[0] != 0x55) return 3;                                               // 数据包帧头错误
+    244              if(ack_buffer[1] != 0xff) return 4;                                               // 数据包源地址错误       
+    245              if(ack_buffer[2] == 0xff) return 5;                                               // 数据包目标地址错误
+    246              if((ack_buffer[ack_len-2] != 0x0d) || (ack_buffer[ack_len-1] != 0x0a)) return 6;  // 数据包帧尾
+    247          
+    248              // 应答正确
+    249              printf("ack_len=%d;ack_buffer:", (int)ack_len);
+    250              for(i = 0; i < ack_len; i++)                     
+    251              {
+    252                  printf("%d ", (int)ack_buffer[i]);
+    253              }
+    254              printf("\r\n");
+    255          
+    256              return 0;  
+    257          }
+    258          
+    259          void Get_TheTime(void)
+    260          {
+    261            RTC_TimeTypeDef GETRTC_Time;
+    262            RTC_DateTypeDef GETRTC_Data;
+    263            //unsigned char sec_st,sec_su , min_mt,min_mu ,hour_ht , hour_hu , midd ,status;
+    264            if(RTC_GetFlagStatus(RTC_FLAG_RSF) == SET)  //有时间更新 
+    265            {
     266              
-    267              RTC_GetDate(RTC_Format_BIN , &GETRTC_Data);
-    268              RTC_GetTime(RTC_Format_BIN , &GETRTC_Time);  
-    269                
-    270               RTC_ClearFlag(RTC_FLAG_RSF);   //清除标志
-    271               printf("20%d/%d/%d Day%d %d:%d:%d\r\n" , GETRTC_Data.RTC_Year , GETRTC_Data.RTC_Month  , GETRTC_Data.RTC_Date  ,  GETRTC_Data.RTC_WeekDay ,GETRTC_Time.RTC_Hours , GETRTC_Time.RTC_Minutes , GETRTC_Time.RTC_Seconds);
-    272            }
-    273          }
-    274          
-    275          void RTC_AWU_Initial(uint16_t time)    // time * 26.95 ms 
-    276          { 
-    277              RTC_DeInit(); //初始化默认状态 
-    278              
-    279              CLK_PeripheralClockConfig(CLK_Peripheral_RTC, ENABLE);      // 允许RTC时钟 
-    280              CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_64); // 选择RTC时钟源LSI/64=593.75Hz 
-    281              RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);        // 593.75Hz/16=37.109375Hz t = 26.95ms 
-    282              RTC_ITConfig(RTC_IT_WUT, ENABLE);  // 开启中断 
-    283              RTC_SetWakeUpCounter(time);        // 设置RTC Weakup计算器初值 
-    284              RTC_WakeUpCmd(ENABLE);             // 使能自动唤醒 
-    285          } 
+    267              
+    268              RTC_GetDate(RTC_Format_BIN , &GETRTC_Data);
+    269              RTC_GetTime(RTC_Format_BIN , &GETRTC_Time);  
+    270                
+    271               RTC_ClearFlag(RTC_FLAG_RSF);   //清除标志
+    272               printf("20%d/%d/%d Day%d %d:%d:%d\r\n" , GETRTC_Data.RTC_Year , GETRTC_Data.RTC_Month  , GETRTC_Data.RTC_Date  ,  GETRTC_Data.RTC_WeekDay ,GETRTC_Time.RTC_Hours , GETRTC_Time.RTC_Minutes , GETRTC_Time.RTC_Seconds);
+    273            }
+    274          }
+    275          
+    276          void RTC_AWU_Initial(uint16_t time)    // time * 26.95 ms 
+    277          { 
+    278              RTC_DeInit(); //初始化默认状态 
+    279              
+    280              CLK_PeripheralClockConfig(CLK_Peripheral_RTC, ENABLE);      // 允许RTC时钟 
+    281              CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_64); // 选择RTC时钟源LSI/64=593.75Hz 
+    282              RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);        // 593.75Hz/16=37.109375Hz t = 26.95ms 
+    283              RTC_ITConfig(RTC_IT_WUT, ENABLE);  // 开启中断 
+    284              RTC_SetWakeUpCounter(time);        // 设置RTC Weakup计算器初值 
+    285              RTC_WakeUpCmd(ENABLE);             // 使能自动唤醒 
+    286          } 
 
    Section sizes:
 
@@ -338,19 +339,19 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
        2  RecvWaitTime
        6  SendBuffer
        2  SendCnt
-      32  System_Initial
+      38  System_Initial
       23  TIM3_1MS_ISR
       37  TIM3_Set
      173  main
       36  putchar
 
  
- 888 bytes in section .far_func.text
+ 894 bytes in section .far_func.text
    6 bytes in section .near.bss
   11 bytes in section .near.data
  237 bytes in section .near.rodata
  
- 888 bytes of CODE  memory
+ 894 bytes of CODE  memory
  237 bytes of CONST memory
   17 bytes of DATA  memory
 

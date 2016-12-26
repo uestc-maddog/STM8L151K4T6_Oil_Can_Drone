@@ -168,6 +168,7 @@ void System_Initial(void)
     //RTC_AWU_Initial(186);     // RTC 唤醒中断    186 * 26.95 ms = 5s
     enableInterrupts();       // 打开总中断 
     
+    U1_Set(1);
     printf("Oil_Can_Drone\r\n");                      // 发送字符串，末尾换行
 }
 

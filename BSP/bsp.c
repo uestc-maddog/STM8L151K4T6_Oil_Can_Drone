@@ -1,13 +1,4 @@
-/*===========================================================================
-* 网址 ：http://www.cdebyte.com/   http://yhmcu.taobao.com/                 *
-* 作者 ：李勇  原 亿和电子工作室  现 亿佰特电子科技有限公司                 * 
-* 邮件 ：yihe_liyong@126.com                                                *
-* 电话 ：18615799380                                                        *
-============================================================================*/
-
 #include "bsp.h"
-
-extern void TIM3_Set(u8 sta);                         // 设置TIM3的开关   sta:0，关闭   1，开启
 
 /*===========================================================================
 * 函数 ：SClK_Initial() => 初始化系统时钟，系统时钟 = 4MHZ                  *
@@ -46,10 +37,10 @@ void USART1_Initial(void)
 {
     // 串口初始化
     CLK_PeripheralClockConfig(CLK_Peripheral_USART1, ENABLE); //使能外设时钟，STM8L外设时钟默认关闭
-    USART_Init(USART1,115200,USART_WordLength_8b,USART_StopBits_1,USART_Parity_No,USART_Mode_Tx|USART_Mode_Rx);//USART初始化，115200，8N1
+    USART_Init(USART1,9600,USART_WordLength_8b,USART_StopBits_1,USART_Parity_No,USART_Mode_Tx|USART_Mode_Rx);//USART初始化，9600，8N1
     
-    // USART_ITConfig (USART_IT_RXNE,ENABLE);//使能接收中断
-    USART_Cmd(USART1, ENABLE);//使能USART 
+    USART_ITConfig(USART1,USART_IT_RXNE,ENABLE); // 使能接收中断
+    U1_Set(0);                                   // 关闭USART1
 }
 
 // ADC初始化
@@ -180,6 +171,30 @@ void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , uns
   RTC_WriteProtectionCmd(ENABLE);//向密钥寄存器里进行写保护
 }
 
+//// 设置TIM3的开关
+//// sta:0，关闭   1，开启
+//void TIM3_Set(u8 sta)
+//{
+//    if(sta)
+//    {  
+//        TIM3_SetCounter(0);     // 计数器清空
+//        TIM3_ITConfig(TIM3_IT_Update,ENABLE);   // 使能TIM3更新中断
+//        TIM3_Cmd(ENABLE);      // 使能TIM3	
+//    }
+//    else 
+//    {
+//        TIM3_Cmd(DISABLE);     // 关闭TIM3		   
+//        TIM3_ITConfig(TIM3_IT_Update,DISABLE);  // 关闭TIM3更新中断
+//    }
+//}
+
+// 设置USART1的开关
+// sta:0，关闭   1，开启
+void U1_Set(u8 sta)
+{
+    if(sta) USART_Cmd(USART1, ENABLE);         // 使能USART1	
+    else    USART_Cmd(USART1, DISABLE);        // 关闭USART1		       
+}
 /*===========================================================================
 -----------------------------------文件结束----------------------------------
 ===========================================================================*/

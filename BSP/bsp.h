@@ -48,6 +48,8 @@ void TIM3_Initial(void);                // 初始化定时器3，定时时间为1ms
 INT8U SPI_ExchangeByte(INT8U input);     // 通过SPI进行数据交换 
 uint16_t ADC_Data_Read(void);           // 读取ADC完成一次模数转换结果
 
+void U1_Set(u8 sta);                    // 设置USART1的开关 sta:0，关闭   1，开启
+
 void RTC_Initial(void);
 
 void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , unsigned int year ,unsigned char month ,unsigned char day ,unsigned char week);
