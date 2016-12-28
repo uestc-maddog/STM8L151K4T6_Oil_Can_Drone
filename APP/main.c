@@ -36,6 +36,7 @@ int putchar(int c)
 
 void main(void)
 {
+    u8 SendError_Time = 0;                             // 连续发送出错次数
     volatile u8 res = 0;
     volatile u8 Timer_30s = 6;                        // 上电发送
     float ADC_Value = 0.0f;
@@ -53,7 +54,8 @@ void main(void)
             LED_ON();                          // LED闪烁，用于指示发送成功
             CSB_Initial();                     // 初始化超声波模块
             CC1101Init();                      // 初始化CC1101模块
-            
+            SendError_Time = 0;                // 出错次数清零
+              
             distance = Measured_Range();       // 超声波测距 
             if(distance)  
             {
@@ -71,7 +73,8 @@ send:
             {
                 printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
                 DelayMs(25);
-                goto send;
+                if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
+                printf("Send Canceled!\r\n");  // 发送失败
             }
             else printf("Send OK!\r\n");              // 发送成功
             
