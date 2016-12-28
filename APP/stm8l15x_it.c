@@ -358,7 +358,7 @@ INTERRUPT_HANDLER(TIM3_UPD_OVF_TRG_BRK_IRQHandler, 21)
   */
   TIM3_ClearITPendingBit(TIM3_IT_Update);
   TIM3_1MS_ISR();
-}
+                                                              }
 /**
   * @brief  Timer3 Capture/Compare Interrupt routine.
   * @param  None
@@ -438,19 +438,18 @@ INTERRUPT_HANDLER(USART1_TX_IRQHandler, 27)
   * @param  None
   * @retval None
   */
+extern volatile u8 Distance[2];
+extern volatile u8 Dis_Index;
 INTERRUPT_HANDLER(USART1_RX_IRQHandler, 28)
 {
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */ 
-  u8 Res;
-
-  if(USART_GetITStatus(USART1,USART_IT_RXNE) == SET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
-  {
-      Res = USART_ReceiveData8(USART1);//(USART1->DR);//读取接收到的数据
-      USART_SendData8(USART1 , Res);
-      USART_ClearITPendingBit(USART1,USART_IT_RXNE);//情况中断标志位
-   }   
+    if(USART_GetITStatus(USART1,USART_IT_RXNE) == SET)  // 串口接收中断
+    {     
+        Distance[Dis_Index++] = USART_ReceiveData8(USART1);
+        USART_ClearITPendingBit(USART1,USART_IT_RXNE);  // 清除中断标志位
+    } 
 }
 
 /**

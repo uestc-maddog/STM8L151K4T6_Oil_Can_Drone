@@ -23,16 +23,16 @@ void SClK_Initial(void)
 void GPIO_Initial(void)
 {
     // 配置LED引脚    PC6
-    GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_High_Slow);
+    GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_High_Fast);
     LED_OFF();        // 熄灭LED
     
     // 配置SWITCH引脚 PD1 PD2
-    GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_High_Slow);
-    GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_High_Slow);
+    GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_High_Fast);
+    GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_High_Fast);
     SWITCH_OFF();     // 关闭CC1101电源
      
     // 配置CC1101相关控制引脚 CSN(PB4), IRQ(PB3), GDO2(PA3)
-    GPIO_Init(PORT_CC_IRQ, PIN_CC_IRQ, GPIO_Mode_In_PU_No_IT);
+    GPIO_Init(PORT_CC_IRQ, PIN_CC_IRQ, GPIO_Mode_In_FL_No_IT);
     GPIO_Init(PORT_CC_GDO2, PIN_CC_GDO2, GPIO_Mode_In_PU_No_IT);
     
     GPIO_Init(PORT_CC_CSN, PIN_CC_CSN, GPIO_Mode_Out_PP_High_Fast);
@@ -46,10 +46,10 @@ void USART1_Initial(void)
 {
     // 串口初始化
     CLK_PeripheralClockConfig(CLK_Peripheral_USART1, ENABLE); //使能外设时钟，STM8L外设时钟默认关闭
-    USART_Init(USART1,115200,USART_WordLength_8b,USART_StopBits_1,USART_Parity_No,USART_Mode_Tx|USART_Mode_Rx);//USART初始化，115200，8N1
+    USART_Init(USART1,9600,USART_WordLength_8b,USART_StopBits_1,USART_Parity_No,USART_Mode_Tx|USART_Mode_Rx);//USART初始化，9600，8N1
     
-    // USART_ITConfig (USART_IT_RXNE,ENABLE);//使能接收中断
-    USART_Cmd(USART1, ENABLE);//使能USART 
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);// 使能接收中断
+    U1_Set(1);                                    // 使能USART1 
 }
 
 // ADC初始化
@@ -89,7 +89,7 @@ void SPI_Initial(void)
     
     SPI_DeInit(SPI1);
     
-    // 配置SPI相关参数,2分频（8MHZ）
+    // 配置SPI相关参数,2分频（2MHZ）
     SPI_Init(SPI1, SPI_FirstBit_MSB, SPI_BaudRatePrescaler_2,
          SPI_Mode_Master, SPI_CPOL_Low, SPI_CPHA_1Edge,
          SPI_Direction_2Lines_FullDuplex, SPI_NSS_Soft, 7);
@@ -180,6 +180,36 @@ void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , uns
   RTC_WriteProtectionCmd(ENABLE);//向密钥寄存器里进行写保护
 }
 
+// 设置TIM3的开关
+// sta:0，关闭   1，开启
+void TIM3_Set(u8 sta)
+{
+    if(sta)
+    {  
+        TIM3_SetCounter(0);     // 计数器清空
+        TIM3_ITConfig(TIM3_IT_Update,ENABLE);   // 使能TIM3更新中断
+        TIM3_Cmd(ENABLE);      // 使能TIM3	
+    }
+    else 
+    {
+        TIM3_Cmd(DISABLE);     // 关闭TIM3		   
+        TIM3_ITConfig(TIM3_IT_Update,DISABLE);  // 关闭TIM3更新中断
+    }
+}
+
+void CSB_Initial(void)
+{
+    GPIO_Init(PORT_CSB, PIN_CSB, GPIO_Mode_Out_PP_High_Fast);
+    CSB_Sleep();
+}
+
+// 设置USART1的开关
+// sta:0，关闭   1，开启
+void U1_Set(u8 sta)
+{
+    if(sta) USART_Cmd(USART1, ENABLE);   // 使能USART1 
+    else    USART_Cmd(USART1, DISABLE);  // 关闭USART1 
+}
 /*===========================================================================
 -----------------------------------文件结束----------------------------------
 ===========================================================================*/

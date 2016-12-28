@@ -21,7 +21,10 @@
 #define PIN_MOSI        GPIO_Pin_6
 #define PIN_MISO        GPIO_Pin_7
 
-// LED 和 SWITCH引脚定义，LED(PC6), SWITCH(PD1), SMG_EN(PD2)
+// LED 和 SWITCH引脚定义，CSB(PC4), LED(PC6), SWITCH(PD1), SMG_EN(PD2)
+#define PORT_CSB        GPIOC
+#define PIN_CSB         GPIO_Pin_4
+
 #define PORT_LED        GPIOC
 #define PIN_LED         GPIO_Pin_6
 
@@ -32,6 +35,10 @@
 #define PIN_SMGEN       GPIO_Pin_2    // SMG_EN
 
 // LED SWITCH操作函数，(ON)打开, (OFF)关闭，(TOG)翻转
+#define CSB_Wakeup()    GPIO_ResetBits(PORT_CSB, PIN_CSB)    // wakeup
+#define CSB_Sleep()     GPIO_SetBits(PORT_CSB, PIN_CSB)      // sleep
+#define CSB_TOG()       GPIO_ToggleBits(PORT_CSB, PIN_CSB)
+
 #define LED_ON()        GPIO_ResetBits(PORT_LED, PIN_LED)        
 #define LED_OFF()       GPIO_SetBits(PORT_LED, PIN_LED)
 #define LED_TOG()       GPIO_ToggleBits(PORT_LED, PIN_LED)
@@ -48,8 +55,11 @@ void TIM3_Initial(void);                // 初始化定时器3，定时时间为1ms
 INT8U SPI_ExchangeByte(INT8U input);     // 通过SPI进行数据交换 
 uint16_t ADC_Data_Read(void);           // 读取ADC完成一次模数转换结果
 
-void RTC_Initial(void);
+void TIM3_Set(u8 sta);                  // 设置TIM3的开关   sta:0，关闭   1，开启     
+void U1_Set(u8 sta);                    // 设置USART1的开关 sta:0，关闭   1，开启
+void CSB_Initial(void);
 
+void RTC_Initial(void);
 void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , unsigned int year ,unsigned char month ,unsigned char day ,unsigned char week);
 #endif //_BSP_H_
 

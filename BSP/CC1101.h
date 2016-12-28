@@ -20,10 +20,10 @@
 //#define TX_Address 0x07         
 
 #define SEND_GAP         500    // 每间隔1s发送一次数据
-#define RECV_TIMEOUT    1500    // 接收超时
+#define RECV_TIMEOUT    2200    // 接收超时     1500
 
-#define ACK_LENGTH      5       // 应答信号长度        
-#define SEND_LENGTH     6       // 发送数据每包的长度
+#define ACK_LENGTH      4       // 应答信号长度        
+#define SEND_LENGTH     5       // 发送数据每包的长度
 
 /*===========================================================================
 ------------------------------Internal IMPORT functions----------------------

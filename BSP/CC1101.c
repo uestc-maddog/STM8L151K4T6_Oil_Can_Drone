@@ -6,7 +6,7 @@ Website     : http://yh-ebyte.taobao.com
 Description : This module contains the low level operations for CC1101
 ================================================================================
 */
-#include "CC1101.H"
+#include "CC1101.h"
 #include "STM8l15x_conf.h"
 #include "stdio.h"
 
@@ -37,8 +37,6 @@ INT8U PaTabel[] = {0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,};   // 915MHz   10dB
 // Base frequency = 399.999939 
 // Modulated = true 
 // Channel number = 1 
-// PA table 
-#define PA_TABLE {0xc2,0x00,0x00,0x00,0x00,0x00,0x00,0x00,}
 
 // RF = 915MHz
 static const uint8_t CC1101InitData[23][2]= 
@@ -46,12 +44,12 @@ static const uint8_t CC1101InitData[23][2]=
   {CC1101_IOCFG0,   0x06},
   {CC1101_FIFOTHR,  0x47},
   {CC1101_PKTCTRL0, 0x05},
-  {CC1101_CHANNR,   0x01},   // í¨μà1  Channel number = 1
+  {CC1101_CHANNR,   0x01},   // 通道号  Channel number = 1
   {CC1101_FSCTRL1,  0x06},
-  {CC1101_FREQ2,    0x23},   // ?ù?μ  915.000000       ??2¨?μ?ê=?ù?μ+2???￡¨0.2MHz￡?* í¨μào?  915.199951MHz
+  {CC1101_FREQ2,    0x23},   // 基频915.000000       载波频率=基频+0.2MHz*通道号=915.199951MHz
   {CC1101_FREQ1,    0x31},
   {CC1101_FREQ0,    0x3B},
-  {CC1101_MDMCFG4,  0xFA},   // êy?Y?ù?ê￡o49.9878kBaud
+  {CC1101_MDMCFG4,  0xFA},   // 通信速率 49.9878kBaud
   {CC1101_MDMCFG3,  0xF8},
   {CC1101_MDMCFG2,  0x13},
   {CC1101_DEVIATN,  0x15},
@@ -74,7 +72,7 @@ static const uint8_t CC1101InitData[23][2]=
 //  {CC1101_IOCFG0,   0x06},
 //  {CC1101_FIFOTHR,  0x47},
 //  {CC1101_PKTCTRL0, 0x05},
-//  {CC1101_CHANNR,   0x01},   // í¨μà1  Channel number = 1
+//  {CC1101_CHANNR,   0x01},  // í¨μà1  Channel number = 1
 //  {CC1101_FSCTRL1,  0x06},
 //  {CC1101_FREQ2,    0x0F}, // ?ù?μ  399.999939MHz    ??2¨?μ?ê=?ù?μ+2???￡¨0.2MHz￡?* í¨μào?  400.199890MHz
 //  {CC1101_FREQ1,    0x62},
@@ -96,28 +94,28 @@ static const uint8_t CC1101InitData[23][2]=
 //};
 
 /*read a byte from the specified register*/
-INT8U CC1101ReadReg( INT8U addr );
+INT8U CC1101ReadReg(INT8U addr);
 
 /*Read some bytes from the rigisters continously*/
-void CC1101ReadMultiReg( INT8U addr, INT8U *buff, INT8U size );
+void CC1101ReadMultiReg(INT8U addr, INT8U *buff, INT8U size);
 
 /*Write a byte to the specified register*/
-void CC1101WriteReg( INT8U addr, INT8U value );
+void CC1101WriteReg(INT8U addr, INT8U value);
 
 /*Flush the TX buffer of CC1101*/
-void CC1101ClrTXBuff( void );
+void CC1101ClrTXBuff(void);
 
 /*Flush the RX buffer of CC1101*/
-void CC1101ClrRXBuff( void );
+void CC1101ClrRXBuff(void);
 
 /*Get received count of CC1101*/
-INT8U CC1101GetRXCnt( void );
+INT8U CC1101GetRXCnt(void);
 
 /*Reset the CC1101 device*/
-void CC1101Reset( void );
+void CC1101Reset(void);
 
 /*Write some bytes to the specified register*/
-void CC1101WriteMultiReg( INT8U addr, INT8U *buff, INT8U size );
+void CC1101WriteMultiReg(INT8U addr, INT8U *buff, INT8U size);
 
 extern INT8U SPI_ExchangeByte(INT8U input); // 通过SPI进行数据交换,见bsp.c
 extern void DelayMs(u16 x); 
@@ -139,7 +137,7 @@ void  CC1101WORInit( void )
     CC1101WriteReg(CC1101_WOREVT1,0x8C);
     CC1101WriteReg(CC1101_WOREVT0,0xA0);
 	
-    CC1101WriteCmd( CC1101_SWORRST );
+    CC1101WriteCmd(CC1101_SWORRST);
 }
 /*
 ================================================================================
@@ -149,18 +147,18 @@ INPUT    : addr, The address of the register
 OUTPUT   : the byte read from the rigister
 ================================================================================
 */
-INT8U CC1101ReadReg( INT8U addr )
+INT8U CC1101ReadReg(INT8U addr)
 {
     INT8U i;
-    CC_CSN_LOW( );
-    SPI_ExchangeByte( addr | READ_SINGLE);
-    i = SPI_ExchangeByte( 0xFF );
-    CC_CSN_HIGH( );
+    CC_CSN_LOW();
+    SPI_ExchangeByte(addr | READ_SINGLE);
+    i = SPI_ExchangeByte(0xFF);
+    CC_CSN_HIGH();
     return i;
 }
 /*
 ================================================================================
-Function : CC1101ReadMultiReg( )
+Function : CC1101ReadMultiReg()
     Read some bytes from the rigisters continously
 INPUT    : addr, The address of the register
            buff, The buffer stores the data
@@ -430,7 +428,7 @@ INT8U CC1101RecPacket(INT8U *rxBuffer)
         {
             CC1101ReadReg(CC1101_RXFIFO);
         }
-        if(pktLen <= 0 || pktLen > 15) return 0;
+        if(pktLen <= 0 || pktLen > 10) return 0;
         else                           pktLen --;
         CC1101ReadMultiReg(CC1101_RXFIFO, rxBuffer, pktLen); // Pull data
         CC1101ReadMultiReg(CC1101_RXFIFO, status, 2);        // Read  status bytes

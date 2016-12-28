@@ -1,31 +1,31 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 22/Dec/2016  20:03:29
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 28/Dec/2016  14:45:31
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  
-#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\stm8l15x_it.c
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\APP\stm8l15x_it.c
 #    Command line =  
-#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\stm8l15x_it.c" -e
-#        -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\APP\stm8l15x_it.c
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
 #        --no_cross_call --debug --code_model medium --data_model medium -o
-#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\Debug\Obj\
 #        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
-#        STM8L15X_MD -lcN "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
-#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#        STM8L15X_MD -lcN
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\Debug\List\
+#        -I C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\ -I
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\STM8L15x_StdPeriph_Driver\inc\
+#        -I C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\APP\ -I
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\BSP\
+#        --vregs 16
 #    List file    =  
-#        E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\stm8l15x_it.lst
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\Debug\List\stm8l15x_it.lst
 #    Object file  =  
-#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\stm8l15x_it.o
+#        C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\Debug\Obj\stm8l15x_it.o
 #
 ###############################################################################
 
-E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\stm8l15x_it.c
+C:\Users\Growl\Desktop\STM8L151K4T6_Oil_Can_Drone+Uart_CSB\APP\stm8l15x_it.c
       1          /**
       2            ******************************************************************************
       3            * @file    GPIO/GPIO_Toggle/stm8l15x_it.c
@@ -386,7 +386,7 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\stm8l15x_it.c
     358            */
     359            TIM3_ClearITPendingBit(TIM3_IT_Update);
     360            TIM3_1MS_ISR();
-    361          }
+    361                                                                        }
     362          /**
     363            * @brief  Timer3 Capture/Compare Interrupt routine.
     364            * @param  None
@@ -466,43 +466,42 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\stm8l15x_it.c
     438            * @param  None
     439            * @retval None
     440            */
-    441          INTERRUPT_HANDLER(USART1_RX_IRQHandler, 28)
-    442          {
-    443            /* In order to detect unexpected events during development,
-    444               it is recommended to set a breakpoint on the following instruction.
-    445            */ 
-    446            u8 Res;
-    447          
-    448            if(USART_GetITStatus(USART1,USART_IT_RXNE) == SET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
-    449            {
-    450                Res = USART_ReceiveData8(USART1);//(USART1->DR);//读取接收到的数据
-    451                USART_SendData8(USART1 , Res);
-    452                USART_ClearITPendingBit(USART1,USART_IT_RXNE);//情况中断标志位
-    453             }   
-    454          }
-    455          
-    456          /**
-    457            * @brief  I2C1 Interrupt routine.
-    458            * @param  None
-    459            * @retval None
-    460            */
-    461          INTERRUPT_HANDLER(I2C1_IRQHandler, 29)
-    462          {
-    463            /* In order to detect unexpected events during development,
-    464               it is recommended to set a breakpoint on the following instruction.
-    465            */
-    466          }
-    467          
-    468          /**
-    469            * @}
-    470            */
-    471          
-    472          /**
-    473            * @}
-    474            */
-    475          
-    476          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
-    477          
+    441          extern volatile u8 Distance[2];
+    442          extern volatile u8 Dis_Index;
+    443          INTERRUPT_HANDLER(USART1_RX_IRQHandler, 28)
+    444          {
+    445            /* In order to detect unexpected events during development,
+    446               it is recommended to set a breakpoint on the following instruction.
+    447            */ 
+    448              if(USART_GetITStatus(USART1,USART_IT_RXNE) == SET)  // 串口接收中断
+    449              {     
+    450                  Distance[Dis_Index++] = USART_ReceiveData8(USART1);
+    451                  USART_ClearITPendingBit(USART1,USART_IT_RXNE);  // 清除中断标志位
+    452              } 
+    453          }
+    454          
+    455          /**
+    456            * @brief  I2C1 Interrupt routine.
+    457            * @param  None
+    458            * @retval None
+    459            */
+    460          INTERRUPT_HANDLER(I2C1_IRQHandler, 29)
+    461          {
+    462            /* In order to detect unexpected events during development,
+    463               it is recommended to set a breakpoint on the following instruction.
+    464            */
+    465          }
+    466          
+    467          /**
+    468            * @}
+    469            */
+    470          
+    471          /**
+    472            * @}
+    473            */
+    474          
+    475          /******************* (C) COPYRIGHT 2010 STMicroelectronics *****END OF FILE****/
+    476          
 
    Section sizes:
 
@@ -537,14 +536,14 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\stm8l15x_it.c
       33  TIM3_UPD_OVF_TRG_BRK_IRQHandler
        1  TIM4_UPD_OVF_TRG_IRQHandler
        1  TRAP_IRQHandler
-      63  USART1_RX_IRQHandler
+      82  USART1_RX_IRQHandler
        1  USART1_TX_IRQHandler
 
  
- 298 bytes in section .far_func.text
+ 317 bytes in section .far_func.text
    2 bytes in section .near.bss
  
- 298 bytes of CODE memory
+ 317 bytes of CODE memory
    2 bytes of DATA memory
 
 Errors: none
