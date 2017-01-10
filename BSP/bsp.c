@@ -29,7 +29,7 @@ void GPIO_Initial(void)
     // 配置SWITCH引脚 PD1 PD2
     GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_High_Fast);
     GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_High_Fast);
-    SWITCH_OFF();     // 关闭CC1101电源
+    SWITCH_ON();     // 关闭CC1101电源
      
     // 配置CC1101相关控制引脚 CSN(PB4), IRQ(PB3), GDO2(PA3)
     GPIO_Init(PORT_CC_IRQ, PIN_CC_IRQ, GPIO_Mode_In_FL_No_IT);
@@ -52,11 +52,11 @@ void USART1_Initial(void)
     U1_Set(1);                                    // 使能USART1 
 }
 
-// ADC初始化
+// ADC初始化     PA4  ADC1_IN2
 void ADC_Initial(void)
 {
     CLK_PeripheralClockConfig(CLK_Peripheral_ADC1, ENABLE);  // 使能ADC1时钟
-    GPIO_Init(GPIOA , GPIO_Pin_6, GPIO_Mode_In_FL_No_IT);    // 设置PA->6 为悬空输入，并中断禁止
+    GPIO_Init(GPIOA, GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);     // 设置PA->4 为悬空输入，并中断禁止
     ADC_Init(ADC1,
              ADC_ConversionMode_Single,   // 单次转换模式
              ADC_Resolution_12Bit,        // 12位精度转换械
@@ -64,7 +64,7 @@ void ADC_Initial(void)
              );  
 
     ADC_ChannelCmd(ADC1,
-                   ADC_Channel_0,         // 设置为通道0进行采样
+                   ADC_Channel_2,         // 设置为通道2进行采样
                    ENABLE);
 
     ADC_Cmd(ADC1 , ENABLE);               // 使能ADC  
@@ -75,8 +75,8 @@ uint16_t ADC_Data_Read(void)
 {
   ADC_SoftwareStartConv(ADC1);      //启动ADC
 
-  while(ADC_GetFlagStatus(ADC1 , ADC_FLAG_EOC) == 0);  // 等待转换结束
-  ADC_ClearFlag(ADC1 , ADC_FLAG_EOC);                  // 清除中断标志
+  while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
+  ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
   return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
 }
 
@@ -125,24 +125,33 @@ void TIM3_Initial(void)
 INT8U SPI_ExchangeByte(INT8U input)
 {
     SPI_SendData(SPI1, input);
-    while (RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE));   // 等待数据传输完成	
-    while (RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE));  // 等待数据接收完成
-    return (SPI_ReceiveData(SPI1));
+    while(RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE));   // 等待数据传输完成	
+    while(RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE));  // 等待数据接收完成
+    return(SPI_ReceiveData(SPI1));
 }
 
 void RTC_Initial(void)
 {
-    CLK_LSICmd(ENABLE);                                  // 打开芯片内部的低速振荡器LSI
-    while(CLK_GetFlagStatus(CLK_FLAG_LSIRDY) == RESET); // 等待振荡器稳定
-   
-    CLK_RTCClockConfig(CLK_RTCCLKSource_LSI ,           // 选择内部低速低频38KHZ时钟源作为RTC时钟源
-                       CLK_RTCCLKDiv_1                  // 设置为1分频
-                       );
+#if RTC_CLK == RTC_CLK_LSI   // 内部38K时钟
+    
+    printf("RTC_CLK_LSI\r\n");
+    
+    CLK_LSICmd(ENABLE);                                          // 打开芯片内部的低速振荡器LSI
+    while(CLK_GetFlagStatus(CLK_FLAG_LSIRDY) == RESET);         // 等待振荡器稳定
+    CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_1);   // 选择LSI作为RTC时钟源   1分频
+                       
+#else                       // 外部32K时钟
+    
+    printf("RTC_CLK_LSE\r\n");
+    CLK_LSEConfig(CLK_LSE_ON);  
+    while(CLK_GetFlagStatus(CLK_FLAG_LSERDY) == RESET);          // 等待振荡器稳定 
+    CLK_RTCClockConfig(CLK_RTCCLKSource_LSE, CLK_RTCCLKDiv_1);   // 选择LSE作为RTC时钟源   1分频
+
+#endif
     
     CLK_PeripheralClockConfig(CLK_Peripheral_RTC , ENABLE);    //使能实时时钟RTC时钟
     
-    RTC_Set(22 , 15 , 26 , 16 , 7 , 23 , 6);//向实时时钟里设置，时分秒，年月日，星期分别是：22时15分20秒，2016年7月23日星期6
-
+    RTC_Set(22 , 15 , 26 , 16 , 7 , 23 , 6); //向实时时钟里设置，时分秒，年月日，星期分别是：22时15分20秒，2016年7月23日星期6
 }
 
 void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , unsigned int year ,unsigned char month ,unsigned char day ,unsigned char week)

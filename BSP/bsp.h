@@ -12,6 +12,12 @@
 #include "CC1101.h"
 #include "mytypedef.h"
 
+// RTC时钟源选择
+#define RTC_CLK_LSE 1
+#define RTC_CLK_LSI 0
+
+#define RTC_CLK RTC_CLK_LSI
+
 // ADC 参考电压
 #define Voltage_Refer 3.41f
 
@@ -21,12 +27,12 @@
 #define PIN_MOSI        GPIO_Pin_6
 #define PIN_MISO        GPIO_Pin_7
 
-// LED 和 SWITCH引脚定义，CSB(PC4), LED(PC6), SWITCH(PD1), SMG_EN(PD2)
-#define PORT_CSB        GPIOC
-#define PIN_CSB         GPIO_Pin_4
-
+// LED 和 SWITCH引脚定义，LED(PC4), CSB(PC0), SWITCH(PD1), SMG_EN(PD2)
 #define PORT_LED        GPIOC
-#define PIN_LED         GPIO_Pin_6
+#define PIN_LED         GPIO_Pin_4
+
+#define PORT_CSB        GPIOC
+#define PIN_CSB         GPIO_Pin_0
 
 #define PORT_SWITCH     GPIOD
 #define PIN_SWITCH      GPIO_Pin_1
