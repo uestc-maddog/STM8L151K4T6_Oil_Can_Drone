@@ -41,9 +41,9 @@
 #define PIN_SMGEN       GPIO_Pin_2    // SMG_EN
 
 // LED SWITCH操作函数，(ON)打开, (OFF)关闭，(TOG)翻转
-#define CSB_Wakeup()    GPIO_ResetBits(PORT_CSB, PIN_CSB)    // wakeup
-#define CSB_Sleep()     GPIO_SetBits(PORT_CSB, PIN_CSB)      // sleep
-#define CSB_TOG()       GPIO_ToggleBits(PORT_CSB, PIN_CSB)
+#define CSB_Wakeup()    GPIO_ResetBits(GPIOC, GPIO_Pin_0)    // wakeup
+#define CSB_Sleep()     GPIO_SetBits(GPIOC, GPIO_Pin_0)      // sleep
+#define CSB_TOG()       GPIO_ToggleBits(GPIOC, GPIO_Pin_0)
 
 #define LED_ON()        GPIO_ResetBits(PORT_LED, PIN_LED)        
 #define LED_OFF()       GPIO_SetBits(PORT_LED, PIN_LED)

@@ -19,7 +19,7 @@ Enabled=0
 ShowSource=1
 [DebugChecksum]
 <<<<<<< HEAD
-Checksum=-1457454496
+Checksum=-769861145
 =======
 Checksum=-1512290207
 >>>>>>> origin/master
@@ -59,9 +59,6 @@ LogEnabled=0
 GraphEnabled=0
 ShowTimeLog=1
 ShowTimeSum=1
-[Breakpoints]
-Bp0=_ "STD_DATA" "TIM3_OC1Init" 0 0 0 3 0 "" 0 ""
-Count=1
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -69,6 +66,9 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
+[Breakpoints]
+Bp0=_ "STD_DATA" "TIM3_OC1Init" 0 0 0 3 0 "" 0 ""
+Count=1
 [Aliases]
 A0=_ "F:\BaiduYunDownload\STM8L\STM8L101K3T6\STM8L151K4T6_Oil_Can_Drone\APP\main.c" ""
 A1=_ "F:\BaiduYunDownload\STM8L\STM8L101K3T6\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_gpio.c" ""

@@ -36,23 +36,25 @@ int putchar(int c)
 
 void main(void)
 {
-    u8 SendError_Time = 0;                             // 连续发送出错次数
+    u8 i = 0, SendError_Time = 0;                             // 连续发送出错次数
     volatile u8 res = 0;
-    volatile u8 Timer_30s = 6;                        // 上电发送
+    volatile u8 Timer_30s = 6;  
+    // 上电发送
     float ADC_Value = 0.0f;
     SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
        
     System_Initial();                                 // 初始化系统所有外设              	
     
-    // CSB测试
+    // 综合测试
     while(1)
     {
         printf("Timer_30s=%d\r\n", (int)Timer_30s);  
         if(Timer_30s++ == 6)                   // 约 3 Min     30s * 6
         {
             // ADC采集电池电压
-            ADC_Value = ADC_Data_Read();                  // PA4
-            ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer;
+            ADC_Value = 0;
+            for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
+            ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
             printf("ADC_Value = %.2f V\r\n", ADC_Value); 
         
             SWITCH_ON();                       // 接通CC1101、CSB电源
@@ -69,7 +71,7 @@ void main(void)
             }
             else 
             {
-                SendBuffer[3] = 0;
+                SendBuffer[3] = 255;
                 printf("Measured_Error\r\n");
             } 
             
@@ -83,12 +85,16 @@ send:
                 if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
                 printf("Send Canceled!\r\n");  // 发送失败
             }
-            else printf("Send OK!\r\n");              // 发送成功
+            else 
+            {
+                for(i = 0; i < SEND_LENGTH; i++) printf("%d ", SendBuffer[i]);
+                printf("Send OK!\r\n");              // 发送成功
+            }
 //*******************************************************************************************     
             
             SWITCH_OFF();                      // 关闭CC1101、CSB电源
             LED_OFF();
-            Timer_30s = 6;                     // 1
+            Timer_30s = 3;                     // 1
         }
         RTC_AWU_Initial(1116);               // RTC 唤醒中断    30s
         halt();                             // 挂起，最低功耗
@@ -126,11 +132,12 @@ void System_Initial(void)
     SClK_Initial();         // 初始化系统时钟，16M / 4 = 4M    
     GPIO_Initial();         // 初始化GPIO   LED  SWITCH
  
-    CSB_Initial();          // 初始化超声波模块
     USART1_Initial();       // 初始化串口1  超声波模块使用 
     TIM3_Initial();         // 初始化定时器3，基准1ms  
     SPI_Initial();          // 初始化SPI  
     ADC_Initial();          // 初始化ADC
+    
+    //CSB_Initial();          // 初始化超声波模块
    
     enableInterrupts();     // 使能系统总中断
     
@@ -271,14 +278,22 @@ Detectde:
         distance_cm = ( (( (u16)Distance[0] << 8 ) + Distance[1]) / 10 ) & 0xff;    // 限定distance_cm在[0, 255]范围内
         if(distance_cm <= 11)      // 测距出错
         {
-            if(++threshold_timer == 4) return 0;     // 测距出错，返回0
+            if(++threshold_timer == 10) 
+            {
+                printf("Threshold ERROR\r\n");
+                return 0;     // 测距出错，返回0
+            }
             goto Detectde;
         }
         else return distance_cm;  // 测距正确 
     }
     else
     {
-        if(++error_timer == 10) return 0;           // 测距出错，返回0
+        if(++error_timer == 10) 
+        {
+            printf("Timer_10 ERROR\r\n");
+            return 0;           // 测距出错，返回0
+        }
         goto Detectde;
     }
 }
@@ -316,12 +331,13 @@ Detectde:
 ////        DelayMs(1500); 
 //    }
     
-//    // ADC测试 
+// // ADC测试 
 //    while(1)
 //    {
-//        ADC_Value = ADC_Data_Read();                  // PA4
-//        ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer;
-//        printf("ADC_Value = %.2f V\r\n", ADC_Value);  
+//        ADC_Value = 0;
+//        for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
+//        ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
+//        printf("ADC_Value = %.2f V\r\n", ADC_Value); 
 //        DelayMs(1000);DelayMs(1000);
 //    }
 

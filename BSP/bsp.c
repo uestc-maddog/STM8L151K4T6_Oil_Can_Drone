@@ -22,9 +22,13 @@ void SClK_Initial(void)
 ============================================================================*/
 void GPIO_Initial(void)
 {
-    // 配置LED引脚    PC6
+    // 配置LED引脚    PC4
     GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_High_Fast);
     LED_OFF();        // 熄灭LED
+    
+    // 配置CSB引脚    PC0
+    GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);
+    CSB_Sleep();
     
     // 配置SWITCH引脚 PD1 PD2
     GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_High_Fast);
@@ -68,6 +72,9 @@ void ADC_Initial(void)
                    ENABLE);
 
     ADC_Cmd(ADC1 , ENABLE);               // 使能ADC  
+    
+    ADC_Data_Read();                      // 预先读取两次误差较大的值
+    ADC_Data_Read();                      
 }
 
 // 读取ADC完成一次模数转换结果
@@ -208,7 +215,7 @@ void TIM3_Set(u8 sta)
 
 void CSB_Initial(void)
 {
-    GPIO_Init(PORT_CSB, PIN_CSB, GPIO_Mode_Out_PP_High_Fast);
+    GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);
     CSB_Sleep();
 }
 
