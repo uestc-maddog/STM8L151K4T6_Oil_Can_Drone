@@ -14,8 +14,8 @@ volatile u16  Cnt1ms = 0;     // 1ms计数变量，每1ms加一
 int  RecvWaitTime = 0;        // 接收等待时间                
 u16  SendCnt = 0;             // 计数发送的数据包数                
 
-                           // 帧头  源地址  目标地址  distance*10  帧尾
-u8 SendBuffer[SEND_LENGTH] = {0x55,   0,    0xff,     15,          0xaa}; // 从机待发送数据
+                           // 帧头  源地址  目标地址  distance*10  电池电量 帧尾
+u8 SendBuffer[SEND_LENGTH] = {0x55,   0,    0xff,     15,         50,      0xaa}; // 从机待发送数据
                            // 帧头  源地址  目标地址  帧尾
 u8 AckBuffer[ACK_LENGTH]   = {0x55,  0xff,     0,     0xaa};        // 主机应答数据
              
@@ -36,10 +36,9 @@ int putchar(int c)
 
 void main(void)
 {
-    u8 i = 0, SendError_Time = 0;                             // 连续发送出错次数
+    u8 i = 0, SendError_Time = 0;                      // 连续发送出错次数
     volatile u8 res = 0;
-    volatile u8 Timer_30s = 6;  
-    // 上电发送
+    volatile u8 Timer_30s = 6;                        // 上电发送
     float ADC_Value = 0.0f;
     SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
        
@@ -56,7 +55,9 @@ void main(void)
             for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
             ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
             printf("ADC_Value = %.2f V\r\n", ADC_Value); 
-        
+            //SendBuffer[4] = ((u8)((ADC_Value * 300.0) / Voltage_Bat_Full) ) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压
+            SendBuffer[4] = ((u8)(((ADC_Value * 3.0 - Voltage_Bat_Empty) / (Voltage_Bat_Full - Voltage_Bat_Empty)) * 100)) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压
+            
             SWITCH_ON();                       // 接通CC1101、CSB电源
             LED_ON();                          // LED闪烁，用于指示发送成功
             //CSB_Initial();                     // 初始化超声波模块
@@ -81,7 +82,7 @@ send:
             if(res != 0) 
             {
                 printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
-                DelayMs(25);
+                DelayMs(5);
                 if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
                 printf("Send Canceled!\r\n");  // 发送失败
             }
@@ -94,10 +95,10 @@ send:
             
             SWITCH_OFF();                      // 关闭CC1101、CSB电源
             LED_OFF();
-            Timer_30s = 3;                     // 1
+            Timer_30s = 6;                     // 1
         }
-        RTC_AWU_Initial(1116);               // RTC 唤醒中断    30s
-        halt();                             // 挂起，最低功耗
+        RTC_AWU_Initial(1116);                 // RTC 唤醒中断    30s
+        halt();                                // 挂起，最低功耗
     }
 }
 
@@ -196,7 +197,7 @@ INT8U RF_SendPacket(INT8U *Sendbuffer, INT8U length)
     if(ack_len != ACK_LENGTH) return 2;                    // 数据包长度错误
     if(ack_buffer[0] != 0x55) return 3;                    // 数据包帧头错误
     if(ack_buffer[1] != 0xff) return 4;                    // 数据包源地址错误       
-    if(ack_buffer[2] == 0xff) return 5;                    // 数据包目标地址错误
+    if(ack_buffer[2] != TX_Address) return 5;              // 数据包目标地址错误
     if(ack_buffer[3] != 0xaa) return 6;            // 数据包帧尾
 
     // 应答正确
@@ -269,7 +270,7 @@ Detectde:
     while(!USART_GetFlagStatus(USART1, USART_FLAG_TXE));//等待发送完毕
     USART_SendData8(USART1, 0x55); 
     
-    DelayMs(25);      // 等待串口返回测量结果   25
+    DelayMs(20);      // 等待串口返回测量结果   25
     CSB_Sleep(); 
     //U1_Set(0);        // 关闭串口1
     
@@ -278,11 +279,12 @@ Detectde:
         distance_cm = ( (( (u16)Distance[0] << 8 ) + Distance[1]) / 10 ) & 0xff;    // 限定distance_cm在[0, 255]范围内
         if(distance_cm <= 11)      // 测距出错
         {
-            if(++threshold_timer == 10) 
+            if(++threshold_timer == 100) 
             {
                 printf("Threshold ERROR\r\n");
                 return 0;     // 测距出错，返回0
             }
+            DelayMs(15);
             goto Detectde;
         }
         else return distance_cm;  // 测距正确 
@@ -294,6 +296,7 @@ Detectde:
             printf("Timer_10 ERROR\r\n");
             return 0;           // 测距出错，返回0
         }
+        DelayMs(15);
         goto Detectde;
     }
 }

@@ -1,29 +1,34 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 11/Jan/2017  15:15:13
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 14/Jan/2017  16:15:46
 # Copyright 2010-2015 IAR Systems AB.
 #
-#    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
+#    Source file  =  
+#        C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\APP\main.c
 #    Command line =  
-#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c" -e -Ol
-#        --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
+#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\APP\main.c"
+#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
 #        --no_cross_call --debug --code_model medium --data_model medium -o
-#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
+#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
 #        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
-#        STM8L15X_MD -lcN "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\" -I "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\" -I "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\" -I
-#        "E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\" -I "E:\Github
-#        Project\STM8L151K4T6_Oil_Can_Drone\BSP\" --vregs 16
+#        STM8L15X_MD -lcN
+#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\List\"
+#        -I "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\"
+#        -I
+#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\"
+#        -I
+#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\APP\"
+#        -I
+#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\"
+#        --vregs 16
 #    List file    =  
-#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\List\main.lst
+#        C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\List\main.lst
 #    Object file  =  
-#        E:\Github Project\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\main.o
+#        C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\main.o
 #
 ###############################################################################
 
-E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
+C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\APP\main.c
       1          #include "stdio.h" 
       2          #include "string.h" 
       3          #include "bsp.h" 
@@ -40,8 +45,8 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
      14          int  RecvWaitTime = 0;        // 接收等待时间                
      15          u16  SendCnt = 0;             // 计数发送的数据包数                
      16          
-     17                                     // 帧头  源地址  目标地址  distance*10  帧尾
-     18          u8 SendBuffer[SEND_LENGTH] = {0x55,   0,    0xff,     15,          0xaa}; // 从机待发送数据
+     17                                     // 帧头  源地址  目标地址  distance*10  电池电量 帧尾
+     18          u8 SendBuffer[SEND_LENGTH] = {0x55,   0,    0xff,     15,         50,      0xaa}; // 从机待发送数据
      19                                     // 帧头  源地址  目标地址  帧尾
      20          u8 AckBuffer[ACK_LENGTH]   = {0x55,  0xff,     0,     0xaa};        // 主机应答数据
      21                       
@@ -62,383 +67,386 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
      36          
      37          void main(void)
      38          {
-     39              u8 i = 0, SendError_Time = 0;                             // 连续发送出错次数
+     39              u8 i = 0, SendError_Time = 0;                      // 连续发送出错次数
      40              volatile u8 res = 0;
-     41              volatile u8 Timer_30s = 6;  
-     42              // 上电发送
-     43              float ADC_Value = 0.0f;
-     44              SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
-     45                 
-     46              System_Initial();                                 // 初始化系统所有外设              	
-     47              
-     48              // 综合测试
-     49              while(1)
-     50              {
-     51                  printf("Timer_30s=%d\r\n", (int)Timer_30s);  
-     52                  if(Timer_30s++ == 6)                   // 约 3 Min     30s * 6
-     53                  {
-     54                      // ADC采集电池电压
-     55                      ADC_Value = 0;
-     56                      for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
-     57                      ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
-     58                      printf("ADC_Value = %.2f V\r\n", ADC_Value); 
-     59                  
-     60                      SWITCH_ON();                       // 接通CC1101、CSB电源
-     61                      LED_ON();                          // LED闪烁，用于指示发送成功
-     62                      //CSB_Initial();                     // 初始化超声波模块
-     63                      CC1101Init();                      // 初始化CC1101为发送模式 
-     64                      SendError_Time = 0;                // 出错次数清零
-     65                      
-     66                      distance = Measured_Range();       // 测距 
-     67                      if(distance)  
-     68                      {
-     69                          SendBuffer[3] = distance;
-     70                          printf("distance = %d cm\r\n", distance);
-     71                      }
-     72                      else 
-     73                      {
-     74                          SendBuffer[3] = 255;
-     75                          printf("Measured_Error\r\n");
-     76                      } 
-     77                      
-     78          //*******************************************************************************************
-     79          send:            
-     80                      res = RF_SendPacket(SendBuffer, SEND_LENGTH);
-     81                      if(res != 0) 
-     82                      {
-     83                          printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
-     84                          DelayMs(25);
-     85                          if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
-     86                          printf("Send Canceled!\r\n");  // 发送失败
-     87                      }
-     88                      else 
-     89                      {
-     90                          for(i = 0; i < SEND_LENGTH; i++) printf("%d ", SendBuffer[i]);
-     91                          printf("Send OK!\r\n");              // 发送成功
-     92                      }
-     93          //*******************************************************************************************     
-     94                      
-     95                      SWITCH_OFF();                      // 关闭CC1101、CSB电源
-     96                      LED_OFF();
-     97                      Timer_30s = 3;                     // 1
-     98                  }
-     99                  RTC_AWU_Initial(1116);               // RTC 唤醒中断    30s
-    100                  halt();                             // 挂起，最低功耗
-    101              }
-    102          }
-    103          
-    104          /*===========================================================================
-    105          * 函数 : DelayMs() => 延时函数(ms级)                                        *
-    106          * 输入 ：x, 需要延时多少(0-65535)                                             *
-    107          ============================================================================*/
-    108          void DelayMs(u16 x)
-    109          {
-    110              u16 timer_ms = x;
-    111              
-    112              Cnt1ms = 0;
-    113              TIM3_Set(1);
-    114              while(Cnt1ms < timer_ms);
-    115              TIM3_Set(0);
-    116          }
-    117          
-    118          /*===========================================================================
-    119          * 函数 ：TIM3_1MS_ISR() => 定时器3服务函数, 定时时间基准为1ms               *
-    120          ============================================================================*/
-    121          void TIM3_1MS_ISR(void)
-    122          {
-    123              Cnt1ms++;
-    124              if(RecvWaitTime > 0) RecvWaitTime--;    // 数据接收计时
-    125          }
-    126          
-    127          /*===========================================================================
-    128          * 函数: System_Initial() => 初始化系统所有外设                              *
-    129          ============================================================================*/
-    130          void System_Initial(void)
-    131          {
-    132              SClK_Initial();         // 初始化系统时钟，16M / 4 = 4M    
-    133              GPIO_Initial();         // 初始化GPIO   LED  SWITCH
-    134           
-    135              USART1_Initial();       // 初始化串口1  超声波模块使用 
-    136              TIM3_Initial();         // 初始化定时器3，基准1ms  
-    137              SPI_Initial();          // 初始化SPI  
-    138              ADC_Initial();          // 初始化ADC
-    139              
-    140              //CSB_Initial();          // 初始化超声波模块
-    141             
-    142              enableInterrupts();     // 使能系统总中断
-    143              
-    144              printf("Oil_Can_Drone\r\n");                      // 发送字符串，末尾换行
-    145          }
-    146          
-    147          /*===========================================================================
-    148          * 函数 : BSP_RF_SendPacket() => 无线发送数据函数                            *
-    149          * 输入 ：Sendbuffer指向待发送的数据，length发送数据长度                      *
-    150          * 输出 ：0，发送成功                                                      
-    151                   1，等待应答超时
-    152                   2，数据包长度错误
-    153                   3，数据包帧头错误
-    154                   4，数据包源地址错误
-    155                   5，数据包目标地址错误
-    156                   6，数据包帧尾
-    157                   7，应答信号错误
-    158          ============================================================================*/
-    159          INT8U RF_SendPacket(INT8U *Sendbuffer, INT8U length)
-    160          {
-    161              uint8_t  i = 0, ack_len = 0, ack_buffer[10] = {0};
-    162              RecvWaitTime = (int)RECV_TIMEOUT;           // 等待应答超时限制1500ms
-    163              
-    164              CC1101SendPacket(SendBuffer, length, ADDRESS_CHECK);    // 发送数据 
-    165              CC1101SetTRMode(RX_MODE);                               // 准备接收应答
-    166          
-    167              TIM3_Set(1);                                // 开启TIM3
-    168              //printf("waiting for ack...\r\n");
-    169              while(CC_IRQ_READ() != 0)                   // 等待接收数据包
-    170              {
-    171                  if(RecvWaitTime <= 0)      
-    172                  {  
-    173                      TIM3_Set(0);                            // 关闭TIM3
-    174                      return 1;                              // 等待应答超时
-    175                  }
-    176              }
-    177              RecvWaitTime = 50;           // 等待应答超时限制50ms
-    178              while(CC_IRQ_READ() == 0)
-    179              {
-    180                  if(RecvWaitTime <= 0)      
-    181                  {  
-    182                      TIM3_Set(0);                            // 关闭TIM3
-    183                      return 7;                              // 等待应答超时
-    184                  }
-    185              }
-    186          //    printf("RecvWaitTime2=%d\r\n", RecvWaitTime);
-    187              TIM3_Set(0);                                // 关闭TIM3
-    188              ack_len = CC1101RecPacket(ack_buffer);      // 读取收到的数据
-    189              
-    190              if(ack_len <= 0 || ack_len > 10)  
-    191              {
-    192                  CC1101Init(); 
-    193                  //printf("ack_len1=%d\r\n", ack_len);
-    194                  return 2;                                          // 数据包长度错误
-    195              }
-    196              if(ack_len != ACK_LENGTH) return 2;                    // 数据包长度错误
-    197              if(ack_buffer[0] != 0x55) return 3;                    // 数据包帧头错误
-    198              if(ack_buffer[1] != 0xff) return 4;                    // 数据包源地址错误       
-    199              if(ack_buffer[2] == 0xff) return 5;                    // 数据包目标地址错误
-    200              if(ack_buffer[3] != 0xaa) return 6;            // 数据包帧尾
-    201          
-    202              // 应答正确
-    203              printf("ack_len=%d;ack_buffer:", (int)ack_len);
-    204              for(i = 0; i < ack_len; i++)                     
-    205              {
-    206                  printf("%d ", (int)ack_buffer[i]);
-    207              }
-    208              printf("\r\n");
-    209          
-    210              return 0;  
-    211          }
-    212          
-    213          void Get_TheTime(void)
-    214          {
-    215            RTC_TimeTypeDef GETRTC_Time;
-    216            RTC_DateTypeDef GETRTC_Data;
-    217            //unsigned char sec_st,sec_su , min_mt,min_mu ,hour_ht , hour_hu , midd ,status;
-    218            if(RTC_GetFlagStatus(RTC_FLAG_RSF) == SET)  //有时间更新 
-    219            {
-    220              RTC_GetDate(RTC_Format_BIN , &GETRTC_Data);
-    221              RTC_GetTime(RTC_Format_BIN , &GETRTC_Time);  
-    222                
-    223               RTC_ClearFlag(RTC_FLAG_RSF);   //清除标志
-    224               printf("20%d/%d/%d Day%d %d:%d:%d\r\n", GETRTC_Data.RTC_Year, GETRTC_Data.RTC_Month, GETRTC_Data.RTC_Date, GETRTC_Data.RTC_WeekDay, GETRTC_Time.RTC_Hours, GETRTC_Time.RTC_Minutes, GETRTC_Time.RTC_Seconds);
-    225            }
-    226          }
-    227          
-    228          // 外部时钟32K
-    229          void RTC_AWU_Initial(uint16_t time)    // time * 32 ms 
-    230          { 
-    231              RTC_DeInit();   // 初始化默认状态 
-    232           
-    233          #if RTC_CLK == RTC_CLK_LSE   // 外部32K时钟
-    234              CLK_LSEConfig(CLK_LSE_ON);  
-    235              while (CLK_GetFlagStatus(CLK_FLAG_LSERDY) == RESET);  
-    236              CLK_RTCClockConfig(CLK_RTCCLKSource_LSE, CLK_RTCCLKDiv_64);  // 选择RTC时钟源LSE/64=500Hz 
-    237              
-    238          #else                        // 内部38K时钟
-    239              CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_64);  // 选择RTC时钟源LSI/64=593.75Hz 
-    240           
-    241          #endif 
-    242              
-    243              CLK_PeripheralClockConfig(CLK_Peripheral_RTC, ENABLE);      // 允许RTC时钟 
-    244              RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);        // 500Hz/16=31.25Hz t = 32ms 
-    245              RTC_ITConfig(RTC_IT_WUT, ENABLE);  // 开启中断 
-    246              RTC_SetWakeUpCounter(time);        // 设置RTC Weakup计算器初值 
-    247              RTC_WakeUpCmd(ENABLE);             // 使能自动唤醒 
-    248          } 
-    249          
+     41              volatile u8 Timer_30s = 6;                        // 上电发送
+     42              float ADC_Value = 0.0f;
+     43              SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
+     44                 
+     45              System_Initial();                                 // 初始化系统所有外设              	
+     46              
+     47              // 综合测试
+     48              while(1)
+     49              {
+     50                  printf("Timer_30s=%d\r\n", (int)Timer_30s);  
+     51                  if(Timer_30s++ == 6)                   // 约 3 Min     30s * 6
+     52                  {
+     53                      // ADC采集电池电压
+     54                      ADC_Value = 0;
+     55                      for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
+     56                      ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
+     57                      printf("ADC_Value = %.2f V\r\n", ADC_Value); 
+     58                      //SendBuffer[4] = ((u8)((ADC_Value * 300.0) / Voltage_Bat_Full) ) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压
+     59                      SendBuffer[4] = ((u8)(((ADC_Value * 3.0 - Voltage_Bat_Empty) / (Voltage_Bat_Full - Voltage_Bat_Empty)) * 100)) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压
+     60                      
+     61                      SWITCH_ON();                       // 接通CC1101、CSB电源
+     62                      LED_ON();                          // LED闪烁，用于指示发送成功
+     63                      //CSB_Initial();                     // 初始化超声波模块
+     64                      CC1101Init();                      // 初始化CC1101为发送模式 
+     65                      SendError_Time = 0;                // 出错次数清零
+     66                      
+     67                      distance = Measured_Range();       // 测距 
+     68                      if(distance)  
+     69                      {
+     70                          SendBuffer[3] = distance;
+     71                          printf("distance = %d cm\r\n", distance);
+     72                      }
+     73                      else 
+     74                      {
+     75                          SendBuffer[3] = 255;
+     76                          printf("Measured_Error\r\n");
+     77                      } 
+     78                      
+     79          //*******************************************************************************************
+     80          send:            
+     81                      res = RF_SendPacket(SendBuffer, SEND_LENGTH);
+     82                      if(res != 0) 
+     83                      {
+     84                          printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
+     85                          DelayMs(5);
+     86                          if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
+     87                          printf("Send Canceled!\r\n");  // 发送失败
+     88                      }
+     89                      else 
+     90                      {
+     91                          for(i = 0; i < SEND_LENGTH; i++) printf("%d ", SendBuffer[i]);
+     92                          printf("Send OK!\r\n");              // 发送成功
+     93                      }
+     94          //*******************************************************************************************     
+     95                      
+     96                      SWITCH_OFF();                      // 关闭CC1101、CSB电源
+     97                      LED_OFF();
+     98                      Timer_30s = 6;                     // 1
+     99                  }
+    100                  RTC_AWU_Initial(1116);                 // RTC 唤醒中断    30s
+    101                  halt();                                // 挂起，最低功耗
+    102              }
+    103          }
+    104          
+    105          /*===========================================================================
+    106          * 函数 : DelayMs() => 延时函数(ms级)                                        *
+    107          * 输入 ：x, 需要延时多少(0-65535)                                             *
+    108          ============================================================================*/
+    109          void DelayMs(u16 x)
+    110          {
+    111              u16 timer_ms = x;
+    112              
+    113              Cnt1ms = 0;
+    114              TIM3_Set(1);
+    115              while(Cnt1ms < timer_ms);
+    116              TIM3_Set(0);
+    117          }
+    118          
+    119          /*===========================================================================
+    120          * 函数 ：TIM3_1MS_ISR() => 定时器3服务函数, 定时时间基准为1ms               *
+    121          ============================================================================*/
+    122          void TIM3_1MS_ISR(void)
+    123          {
+    124              Cnt1ms++;
+    125              if(RecvWaitTime > 0) RecvWaitTime--;    // 数据接收计时
+    126          }
+    127          
+    128          /*===========================================================================
+    129          * 函数: System_Initial() => 初始化系统所有外设                              *
+    130          ============================================================================*/
+    131          void System_Initial(void)
+    132          {
+    133              SClK_Initial();         // 初始化系统时钟，16M / 4 = 4M    
+    134              GPIO_Initial();         // 初始化GPIO   LED  SWITCH
+    135           
+    136              USART1_Initial();       // 初始化串口1  超声波模块使用 
+    137              TIM3_Initial();         // 初始化定时器3，基准1ms  
+    138              SPI_Initial();          // 初始化SPI  
+    139              ADC_Initial();          // 初始化ADC
+    140              
+    141              //CSB_Initial();          // 初始化超声波模块
+    142             
+    143              enableInterrupts();     // 使能系统总中断
+    144              
+    145              printf("Oil_Can_Drone\r\n");                      // 发送字符串，末尾换行
+    146          }
+    147          
+    148          /*===========================================================================
+    149          * 函数 : BSP_RF_SendPacket() => 无线发送数据函数                            *
+    150          * 输入 ：Sendbuffer指向待发送的数据，length发送数据长度                      *
+    151          * 输出 ：0，发送成功                                                      
+    152                   1，等待应答超时
+    153                   2，数据包长度错误
+    154                   3，数据包帧头错误
+    155                   4，数据包源地址错误
+    156                   5，数据包目标地址错误
+    157                   6，数据包帧尾
+    158                   7，应答信号错误
+    159          ============================================================================*/
+    160          INT8U RF_SendPacket(INT8U *Sendbuffer, INT8U length)
+    161          {
+    162              uint8_t  i = 0, ack_len = 0, ack_buffer[10] = {0};
+    163              RecvWaitTime = (int)RECV_TIMEOUT;           // 等待应答超时限制1500ms
+    164              
+    165              CC1101SendPacket(SendBuffer, length, ADDRESS_CHECK);    // 发送数据 
+    166              CC1101SetTRMode(RX_MODE);                               // 准备接收应答
+    167          
+    168              TIM3_Set(1);                                // 开启TIM3
+    169              //printf("waiting for ack...\r\n");
+    170              while(CC_IRQ_READ() != 0)                   // 等待接收数据包
+    171              {
+    172                  if(RecvWaitTime <= 0)      
+    173                  {  
+    174                      TIM3_Set(0);                            // 关闭TIM3
+    175                      return 1;                              // 等待应答超时
+    176                  }
+    177              }
+    178              RecvWaitTime = 50;           // 等待应答超时限制50ms
+    179              while(CC_IRQ_READ() == 0)
+    180              {
+    181                  if(RecvWaitTime <= 0)      
+    182                  {  
+    183                      TIM3_Set(0);                            // 关闭TIM3
+    184                      return 7;                              // 等待应答超时
+    185                  }
+    186              }
+    187          //    printf("RecvWaitTime2=%d\r\n", RecvWaitTime);
+    188              TIM3_Set(0);                                // 关闭TIM3
+    189              ack_len = CC1101RecPacket(ack_buffer);      // 读取收到的数据
+    190              
+    191              if(ack_len <= 0 || ack_len > 10)  
+    192              {
+    193                  CC1101Init(); 
+    194                  //printf("ack_len1=%d\r\n", ack_len);
+    195                  return 2;                                          // 数据包长度错误
+    196              }
+    197              if(ack_len != ACK_LENGTH) return 2;                    // 数据包长度错误
+    198              if(ack_buffer[0] != 0x55) return 3;                    // 数据包帧头错误
+    199              if(ack_buffer[1] != 0xff) return 4;                    // 数据包源地址错误       
+    200              if(ack_buffer[2] != TX_Address) return 5;              // 数据包目标地址错误
+    201              if(ack_buffer[3] != 0xaa) return 6;            // 数据包帧尾
+    202          
+    203              // 应答正确
+    204              printf("ack_len=%d;ack_buffer:", (int)ack_len);
+    205              for(i = 0; i < ack_len; i++)                     
+    206              {
+    207                  printf("%d ", (int)ack_buffer[i]);
+    208              }
+    209              printf("\r\n");
+    210          
+    211              return 0;  
+    212          }
+    213          
+    214          void Get_TheTime(void)
+    215          {
+    216            RTC_TimeTypeDef GETRTC_Time;
+    217            RTC_DateTypeDef GETRTC_Data;
+    218            //unsigned char sec_st,sec_su , min_mt,min_mu ,hour_ht , hour_hu , midd ,status;
+    219            if(RTC_GetFlagStatus(RTC_FLAG_RSF) == SET)  //有时间更新 
+    220            {
+    221              RTC_GetDate(RTC_Format_BIN , &GETRTC_Data);
+    222              RTC_GetTime(RTC_Format_BIN , &GETRTC_Time);  
+    223                
+    224               RTC_ClearFlag(RTC_FLAG_RSF);   //清除标志
+    225               printf("20%d/%d/%d Day%d %d:%d:%d\r\n", GETRTC_Data.RTC_Year, GETRTC_Data.RTC_Month, GETRTC_Data.RTC_Date, GETRTC_Data.RTC_WeekDay, GETRTC_Time.RTC_Hours, GETRTC_Time.RTC_Minutes, GETRTC_Time.RTC_Seconds);
+    226            }
+    227          }
+    228          
+    229          // 外部时钟32K
+    230          void RTC_AWU_Initial(uint16_t time)    // time * 32 ms 
+    231          { 
+    232              RTC_DeInit();   // 初始化默认状态 
+    233           
+    234          #if RTC_CLK == RTC_CLK_LSE   // 外部32K时钟
+    235              CLK_LSEConfig(CLK_LSE_ON);  
+    236              while (CLK_GetFlagStatus(CLK_FLAG_LSERDY) == RESET);  
+    237              CLK_RTCClockConfig(CLK_RTCCLKSource_LSE, CLK_RTCCLKDiv_64);  // 选择RTC时钟源LSE/64=500Hz 
+    238              
+    239          #else                        // 内部38K时钟
+    240              CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_64);  // 选择RTC时钟源LSI/64=593.75Hz 
+    241           
+    242          #endif 
+    243              
+    244              CLK_PeripheralClockConfig(CLK_Peripheral_RTC, ENABLE);      // 允许RTC时钟 
+    245              RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);        // 500Hz/16=31.25Hz t = 32ms 
+    246              RTC_ITConfig(RTC_IT_WUT, ENABLE);  // 开启中断 
+    247              RTC_SetWakeUpCounter(time);        // 设置RTC Weakup计算器初值 
+    248              RTC_WakeUpCmd(ENABLE);             // 使能自动唤醒 
+    249          } 
     250          
-    251          // 返回距离   0~255  cm
-    252          // 0:测量出错
-    253          u8 Measured_Range(void)
-    254          {
-    255              u8 distance_cm = 0, error_timer = 0, threshold_timer = 0;
-    256              
-    257          Detectde:
-    258              CSB_Sleep();
-    259              distance_cm = 0;
-    260              Distance[0] = 0;    // 清零，重新测距
-    261              Distance[1] = 0;    
-    262              Dis_Index = 0;
-    263              CSB_Wakeup();
-    264              //DelayMs(1);       // 至少50us 唤醒
-    265              
-    266              DelayMs(5);         // 系统唤醒3ms后，发送测距触发信号0x55  
-    267              
-    268              //U1_Set(1);        // 开启U1接收中断，准备接收测量结果
-    269              while(!USART_GetFlagStatus(USART1, USART_FLAG_TXE));//等待发送完毕
-    270              USART_SendData8(USART1, 0x55); 
-    271              
-    272              DelayMs(25);      // 等待串口返回测量结果   25
-    273              CSB_Sleep(); 
-    274              //U1_Set(0);        // 关闭串口1
-    275              
-    276              if(Dis_Index == Dis_Len) // 串口收到距离信息
-    277              {
-    278                  distance_cm = ( (( (u16)Distance[0] << 8 ) + Distance[1]) / 10 ) & 0xff;    // 限定distance_cm在[0, 255]范围内
-    279                  if(distance_cm <= 11)      // 测距出错
-    280                  {
-    281                      if(++threshold_timer == 10) 
-    282                      {
-    283                          printf("Threshold ERROR\r\n");
-    284                          return 0;     // 测距出错，返回0
-    285                      }
-    286                      goto Detectde;
-    287                  }
-    288                  else return distance_cm;  // 测距正确 
-    289              }
-    290              else
-    291              {
-    292                  if(++error_timer == 10) 
-    293                  {
-    294                      printf("Timer_10 ERROR\r\n");
-    295                      return 0;           // 测距出错，返回0
-    296                  }
-    297                  goto Detectde;
-    298              }
-    299          }
-    300          
-    301          //// RTC-AWU测试
-    302          //    while(1)
-    303          //    {
-    304          //        LED_TOG();                // LED闪烁，用于指示发送成功
-    305          //        printf("OK!\r\n");            
-    306          //        RTC_AWU_Initial(186);     // RTC 唤醒中断    186 * 26.95 ms = 5s
-    307          //        halt();//挂起，最低功耗
-    308          //    }
-    309          
-    310          //    // CSB测试
-    311          //    while(1)
-    312          //    {
-    313          //        SWITCH_ON();                       // 接通CC1101、CSB电源
-    314          //        //CSB_Initial();                     // 初始化超声波模块
-    315          //        CC1101Init();                      // 初始化CC1101为发送模式 
-    316          //        distance = Measured_Range();       // 测距 
-    317          //        if(distance)  
-    318          //        {
-    319          //            LED_ON();
-    320          //            printf("distance = %d cm\r\n", distance);
-    321          //        }
-    322          //        else 
-    323          //        {
-    324          //            LED_OFF();
-    325          //            printf("Measured_Error\r\n");
-    326          //        } 
-    327          //        SWITCH_OFF();                      // 关闭CC1101、CSB电源
-    328          //        RTC_AWU_Initial(2232);             // RTC 唤醒中断    60s
-    329          //        halt();                            // 挂起，最低功耗
-    330          ////        DelayMs(1500); 
-    331          ////        DelayMs(1500); 
-    332          //    }
-    333              
-    334          // // ADC测试 
-    335          //    while(1)
-    336          //    {
-    337          //        ADC_Value = 0;
-    338          //        for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
-    339          //        ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
-    340          //        printf("ADC_Value = %.2f V\r\n", ADC_Value); 
-    341          //        DelayMs(1000);DelayMs(1000);
-    342          //    }
-    343          
-    344          ////  RTC测试 
-    345          //    RTC_Initial();            // 初始化RTC   LSI
-    346          //    while(1)
-    347          //    {
-    348          //        Get_TheTime();
-    349          //        DelayMs(1000);DelayMs(1000);
-    350          //    }
-    351              
-    352          ///// 通信测试
-    353          //    CC1101Init();                          // 初始化CC1101模块
-    354          //    while(1)
-    355          //    {
-    356          //        LED_ON();                          // LED闪烁，用于指示发送成功
-    357          // send:        
-    358          //        res = RF_SendPacket(SendBuffer, SEND_LENGTH);
-    359          //        if(res != 0) 
-    360          //        {
-    361          //          printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
-    362          //          DelayMs(25);
-    363          //          goto send;
-    364          //        }
-    365          //        else  printf("Send OK!\r\n");              // 发送成功
-    366          //        LED_OFF();
-    367          //        
-    368          //        DelayMs(1000);DelayMs(1000);DelayMs(1000);DelayMs(1000);DelayMs(1000);
-    369          //    }
-    370          
-    371          //    while(1)
-    372          //    {
-    373          //        printf("Timer_30s=%d\r\n", (int)Timer_30s);  
-    374          //        if(Timer_30s++ == 6)                   // 约 3 Min     30s * 6
-    375          //        {
-    376          //            // ADC采集
-    377          //            ADC_Value = ADC_Data_Read();                  // PA4
-    378          //            ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer;
-    379          //            printf("ADC_Value = %.2f V\r\n", ADC_Value); 
-    380          //          
-    381          //            SWITCH_ON();                       // 接通CC1101、CSB电源
-    382          //            LED_ON();                          // LED闪烁，用于指示发送成功
-    383          //            //CSB_Initial();                     // 初始化超声波模块
-    384          //            CC1101Init();                      // 初始化CC1101模块
-    385          //            SendError_Time = 0;                // 出错次数清零
-    386          //              
-    387          //            distance = Measured_Range();       // 超声波测距 
-    388          //            if(distance)  
-    389          //            {
-    390          //                SendBuffer[3] = distance;
-    391          //                printf("distance = %d cm\r\n", distance);
-    392          //            }
-    393          //            else 
-    394          //            {
-    395          //                SendBuffer[3] = 0;             // 测量出错  发送0
-    396          //                printf("Measured_Error\r\n");
-    397          //            } 
-    398          //send:            
-    399          //            res = RF_SendPacket(SendBuffer, SEND_LENGTH);
-    400          //            if(res != 0) 
-    401          //            {
-    402          //                printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
-    403          //                DelayMs(25);
-    404          //                if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
-    405          //                printf("Send Canceled!\r\n");  // 发送失败
-    406          //            }
-    407          //            else printf("Send OK!\r\n");              // 发送成功
-    408          //            
-    409          //            SWITCH_OFF();
-    410          //            LED_OFF();
-    411          //            Timer_30s = 5;    // 1
-    412          //        }
-    413          //        RTC_AWU_Initial(1116);     // RTC 唤醒中断    1116 * 26.95 ms = 30s
-    414          //        halt();//挂起，最低功耗
-    415          //    }
+    251          
+    252          // 返回距离   0~255  cm
+    253          // 0:测量出错
+    254          u8 Measured_Range(void)
+    255          {
+    256              u8 distance_cm = 0, error_timer = 0, threshold_timer = 0;
+    257              
+    258          Detectde:
+    259              CSB_Sleep();
+    260              distance_cm = 0;
+    261              Distance[0] = 0;    // 清零，重新测距
+    262              Distance[1] = 0;    
+    263              Dis_Index = 0;
+    264              CSB_Wakeup();
+    265              //DelayMs(1);       // 至少50us 唤醒
+    266              
+    267              DelayMs(5);         // 系统唤醒3ms后，发送测距触发信号0x55  
+    268              
+    269              //U1_Set(1);        // 开启U1接收中断，准备接收测量结果
+    270              while(!USART_GetFlagStatus(USART1, USART_FLAG_TXE));//等待发送完毕
+    271              USART_SendData8(USART1, 0x55); 
+    272              
+    273              DelayMs(20);      // 等待串口返回测量结果   25
+    274              CSB_Sleep(); 
+    275              //U1_Set(0);        // 关闭串口1
+    276              
+    277              if(Dis_Index == Dis_Len) // 串口收到距离信息
+    278              {
+    279                  distance_cm = ( (( (u16)Distance[0] << 8 ) + Distance[1]) / 10 ) & 0xff;    // 限定distance_cm在[0, 255]范围内
+    280                  if(distance_cm <= 11)      // 测距出错
+    281                  {
+    282                      if(++threshold_timer == 100) 
+    283                      {
+    284                          printf("Threshold ERROR\r\n");
+    285                          return 0;     // 测距出错，返回0
+    286                      }
+    287                      DelayMs(15);
+    288                      goto Detectde;
+    289                  }
+    290                  else return distance_cm;  // 测距正确 
+    291              }
+    292              else
+    293              {
+    294                  if(++error_timer == 10) 
+    295                  {
+    296                      printf("Timer_10 ERROR\r\n");
+    297                      return 0;           // 测距出错，返回0
+    298                  }
+    299                  DelayMs(15);
+    300                  goto Detectde;
+    301              }
+    302          }
+    303          
+    304          //// RTC-AWU测试
+    305          //    while(1)
+    306          //    {
+    307          //        LED_TOG();                // LED闪烁，用于指示发送成功
+    308          //        printf("OK!\r\n");            
+    309          //        RTC_AWU_Initial(186);     // RTC 唤醒中断    186 * 26.95 ms = 5s
+    310          //        halt();//挂起，最低功耗
+    311          //    }
+    312          
+    313          //    // CSB测试
+    314          //    while(1)
+    315          //    {
+    316          //        SWITCH_ON();                       // 接通CC1101、CSB电源
+    317          //        //CSB_Initial();                     // 初始化超声波模块
+    318          //        CC1101Init();                      // 初始化CC1101为发送模式 
+    319          //        distance = Measured_Range();       // 测距 
+    320          //        if(distance)  
+    321          //        {
+    322          //            LED_ON();
+    323          //            printf("distance = %d cm\r\n", distance);
+    324          //        }
+    325          //        else 
+    326          //        {
+    327          //            LED_OFF();
+    328          //            printf("Measured_Error\r\n");
+    329          //        } 
+    330          //        SWITCH_OFF();                      // 关闭CC1101、CSB电源
+    331          //        RTC_AWU_Initial(2232);             // RTC 唤醒中断    60s
+    332          //        halt();                            // 挂起，最低功耗
+    333          ////        DelayMs(1500); 
+    334          ////        DelayMs(1500); 
+    335          //    }
+    336              
+    337          // // ADC测试 
+    338          //    while(1)
+    339          //    {
+    340          //        ADC_Value = 0;
+    341          //        for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
+    342          //        ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
+    343          //        printf("ADC_Value = %.2f V\r\n", ADC_Value); 
+    344          //        DelayMs(1000);DelayMs(1000);
+    345          //    }
+    346          
+    347          ////  RTC测试 
+    348          //    RTC_Initial();            // 初始化RTC   LSI
+    349          //    while(1)
+    350          //    {
+    351          //        Get_TheTime();
+    352          //        DelayMs(1000);DelayMs(1000);
+    353          //    }
+    354              
+    355          ///// 通信测试
+    356          //    CC1101Init();                          // 初始化CC1101模块
+    357          //    while(1)
+    358          //    {
+    359          //        LED_ON();                          // LED闪烁，用于指示发送成功
+    360          // send:        
+    361          //        res = RF_SendPacket(SendBuffer, SEND_LENGTH);
+    362          //        if(res != 0) 
+    363          //        {
+    364          //          printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
+    365          //          DelayMs(25);
+    366          //          goto send;
+    367          //        }
+    368          //        else  printf("Send OK!\r\n");              // 发送成功
+    369          //        LED_OFF();
+    370          //        
+    371          //        DelayMs(1000);DelayMs(1000);DelayMs(1000);DelayMs(1000);DelayMs(1000);
+    372          //    }
+    373          
+    374          //    while(1)
+    375          //    {
+    376          //        printf("Timer_30s=%d\r\n", (int)Timer_30s);  
+    377          //        if(Timer_30s++ == 6)                   // 约 3 Min     30s * 6
+    378          //        {
+    379          //            // ADC采集
+    380          //            ADC_Value = ADC_Data_Read();                  // PA4
+    381          //            ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer;
+    382          //            printf("ADC_Value = %.2f V\r\n", ADC_Value); 
+    383          //          
+    384          //            SWITCH_ON();                       // 接通CC1101、CSB电源
+    385          //            LED_ON();                          // LED闪烁，用于指示发送成功
+    386          //            //CSB_Initial();                     // 初始化超声波模块
+    387          //            CC1101Init();                      // 初始化CC1101模块
+    388          //            SendError_Time = 0;                // 出错次数清零
+    389          //              
+    390          //            distance = Measured_Range();       // 超声波测距 
+    391          //            if(distance)  
+    392          //            {
+    393          //                SendBuffer[3] = distance;
+    394          //                printf("distance = %d cm\r\n", distance);
+    395          //            }
+    396          //            else 
+    397          //            {
+    398          //                SendBuffer[3] = 0;             // 测量出错  发送0
+    399          //                printf("Measured_Error\r\n");
+    400          //            } 
+    401          //send:            
+    402          //            res = RF_SendPacket(SendBuffer, SEND_LENGTH);
+    403          //            if(res != 0) 
+    404          //            {
+    405          //                printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
+    406          //                DelayMs(25);
+    407          //                if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
+    408          //                printf("Send Canceled!\r\n");  // 发送失败
+    409          //            }
+    410          //            else printf("Send OK!\r\n");              // 发送成功
+    411          //            
+    412          //            SWITCH_OFF();
+    413          //            LED_OFF();
+    414          //            Timer_30s = 5;    // 1
+    415          //        }
+    416          //        RTC_AWU_Initial(1116);     // RTC 唤醒中断    1116 * 26.95 ms = 30s
+    417          //        halt();//挂起，最低功耗
+    418          //    }
 
    Section sizes:
 
@@ -465,27 +473,27 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP\main.c
        1  Dis_Index
        2  Distance
       85  Get_TheTime
-     199  Measured_Range
+     215  Measured_Range
      285  RF_SendPacket
       60  RTC_AWU_Initial
        2  RecvWaitTime
-       5  SendBuffer
+       6  SendBuffer
        2  SendCnt
       32  System_Initial
       23  TIM3_1MS_ISR
        1  distance
-     374  main
+     427  main
       36  putchar
 
  
- 1 126 bytes in section .far_func.text
+ 1 195 bytes in section .far_func.text
     10 bytes in section .near.bss
-     9 bytes in section .near.data
+    10 bytes in section .near.data
    235 bytes in section .near.rodata
  
- 1 126 bytes of CODE  memory
+ 1 195 bytes of CODE  memory
    235 bytes of CONST memory
-    19 bytes of DATA  memory
+    20 bytes of DATA  memory
 
 Errors: none
 Warnings: 1
