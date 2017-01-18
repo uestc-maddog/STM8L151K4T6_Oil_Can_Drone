@@ -11,13 +11,14 @@
 
 #define RX_Address 0xff         // 接收端   设备地址
 
-//#define TX_Address 0x02         // 发送端   从机设备地址  
-//#define TX_Address 0x01         
-#define TX_Address 0x03        
-//#define TX_Address 0x04         
+//#define TX_Address 0x01         // 发送端   从机设备地址  
+//#define TX_Address 0x02         
+//#define TX_Address 0x03        
+#define TX_Address 0x04         
 //#define TX_Address 0x05         
 //#define TX_Address 0x06        
 //#define TX_Address 0x07         
+//#define TX_Address 0x08 
 
 #define SEND_GAP         500    // 每间隔1s发送一次数据
 #define RECV_TIMEOUT    3000    // 接收超时     1500
@@ -50,6 +51,7 @@ you must offer the following functions for this module
 
 #define CC_IRQ_READ()   GPIO_ReadInputDataBit(PORT_CC_IRQ, PIN_CC_IRQ)
 
+extern INT8U PaTabel[8];
 /*===========================================================================
 ----------------------------------macro definitions--------------------------
 ============================================================================*/
@@ -93,6 +95,8 @@ void  CC1101WORInit(void);
 
 /*Initialize the CC1101, User can modify it*/
 void CC1101Init(void);
+void CC1101SetLowPower(void);  // 设置cc1101进入低功耗模式
+void CC1101_Settings(void);
 
 #endif // _CC1101_H_
 

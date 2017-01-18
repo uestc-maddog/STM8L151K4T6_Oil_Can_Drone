@@ -7,7 +7,6 @@
 #define Dis_Len 2
 volatile u8 Distance[Dis_Len] = {0, 0};
 volatile u8 Dis_Index = 0;
-volatile u8 distance = 0; 
 
 // CC1101
 volatile u16  Cnt1ms = 0;     // 1ms计数变量，每1ms加一 
@@ -20,11 +19,15 @@ u8 SendBuffer[SEND_LENGTH] = {0x55,   0,    0xff,     15,         50,      0xaa}
 u8 AckBuffer[ACK_LENGTH]   = {0x55,  0xff,     0,     0xaa};        // 主机应答数据
              
 void System_Initial(void);                     // 系统初始化
+void System_GetData(void);                     // ADC采集电池电压、超声波测距、CC1101发送
+
 u8   RF_SendPacket(u8 *Sendbuffer, u8 length);  // 从机发送数据包
 void Get_TheTime(void);
 void RTC_AWU_Initial(uint16_t time);            // time * 26.95 ms 
 void DelayMs(u16 x);                            // TIM3延时函数
 u8   Measured_Range(void);                      // 超声波测距
+void STM8_PerPwd(void);                         // STM8外设低功耗配置
+void IWDG_Init(uint8_t time_1ms);               // 初始化独立看门狗
 
 // printf支持
 int putchar(int c)   
@@ -36,69 +39,20 @@ int putchar(int c)
 
 void main(void)
 {
-    u8 i = 0, SendError_Time = 0;                      // 连续发送出错次数
-    volatile u8 res = 0;
-    volatile u8 Timer_30s = 6;                        // 上电发送
-    float ADC_Value = 0.0f;
-    SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
+    volatile u8 Timer_30s = 0;                        // 上电即发送
        
-    System_Initial();                                 // 初始化系统所有外设              	
+    System_Initial();                                 // 初始化系统   设置系统时钟为4M，并开启全局中断             	   
+    System_GetData();                                 // ADC采集电池电压、超声波测距、CC1101发送后进入Sleep、STM8外设低功耗配置
     
-    // 综合测试
     while(1)
-    {
-        printf("Timer_30s=%d\r\n", (int)Timer_30s);  
-        if(Timer_30s++ == 6)                   // 约 3 Min     30s * 6
+    { 
+        RTC_AWU_Initial(1116);                  // RTC 唤醒中断    30s
+        halt();                                 // 挂起，最低功耗
+        if(++Timer_30s == 10)                   // 5min 重启检测
         {
-            // ADC采集电池电压
-            ADC_Value = 0;
-            for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
-            ADC_Value = ADC_Value / 0x0FFF * Voltage_Refer / 4.0;
-            printf("ADC_Value = %.2f V\r\n", ADC_Value); 
-            //SendBuffer[4] = ((u8)((ADC_Value * 300.0) / Voltage_Bat_Full) ) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压
-            SendBuffer[4] = ((u8)(((ADC_Value * 3.0 - Voltage_Bat_Empty) / (Voltage_Bat_Full - Voltage_Bat_Empty)) * 100)) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压
-            
-            SWITCH_ON();                       // 接通CC1101、CSB电源
-            LED_ON();                          // LED闪烁，用于指示发送成功
-            //CSB_Initial();                     // 初始化超声波模块
-            CC1101Init();                      // 初始化CC1101为发送模式 
-            SendError_Time = 0;                // 出错次数清零
-            
-            distance = Measured_Range();       // 测距 
-            if(distance)  
-            {
-                SendBuffer[3] = distance;
-                printf("distance = %d cm\r\n", distance);
-            }
-            else 
-            {
-                SendBuffer[3] = 255;
-                printf("Measured_Error\r\n");
-            } 
-            
-//*******************************************************************************************
-send:            
-            res = RF_SendPacket(SendBuffer, SEND_LENGTH);
-            if(res != 0) 
-            {
-                printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
-                DelayMs(5);
-                if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
-                printf("Send Canceled!\r\n");  // 发送失败
-            }
-            else 
-            {
-                for(i = 0; i < SEND_LENGTH; i++) printf("%d ", SendBuffer[i]);
-                printf("Send OK!\r\n");              // 发送成功
-            }
-//*******************************************************************************************     
-            
-            SWITCH_OFF();                      // 关闭CC1101、CSB电源
-            LED_OFF();
-            Timer_30s = 6;                     // 1
+            IWDG_Init(20);                      // 初始化独立看门狗   
+            while(1);                           // 不喂狗，20ms后直接IWDG复位  
         }
-        RTC_AWU_Initial(1116);                 // RTC 唤醒中断    30s
-        halt();                                // 挂起，最低功耗
     }
 }
 
@@ -130,19 +84,73 @@ void TIM3_1MS_ISR(void)
 ============================================================================*/
 void System_Initial(void)
 {
-    SClK_Initial();         // 初始化系统时钟，16M / 4 = 4M    
-    GPIO_Initial();         // 初始化GPIO   LED  SWITCH
- 
-    USART1_Initial();       // 初始化串口1  超声波模块使用 
-    TIM3_Initial();         // 初始化定时器3，基准1ms  
-    SPI_Initial();          // 初始化SPI  
-    ADC_Initial();          // 初始化ADC
+    SClK_Initial();                     // 初始化系统时钟，16M / 4 = 4M   
     
-    //CSB_Initial();          // 初始化超声波模块
-   
+    GPIO_Initial();                    // 初始化GPIO   LED_ON、SWITCH_ON、CC1101控制线(CSN、GDO0、GDO2)   
+    USART1_Initial();                  // 初始化串口1  超声波模块使用 
+    printf("MCU Reseted.\r\n");        // 发送字符串，末尾换行
+                 
+    CSB_Initial();                     // 初始化超声波模块
+    ADC_Initial();                     // 初始化ADC
+    CC1101Init();                      // 初始化CC1101为发送模式  使能TIM3（1ms基准）、SPI
+            
     enableInterrupts();     // 使能系统总中断
-    
-    printf("Oil_Can_Drone\r\n");                      // 发送字符串，末尾换行
+}
+
+/*===========================================================================
+* 函数: System_GetData() => ADC采集电池电压、超声波测距、CC1101发送           *
+============================================================================*/
+void System_GetData(void)                
+{
+    u8 i = 0, SendError_Time = 0;                      // SendError_Time：连续发送出错次数
+    volatile u8 distance = 0;                         // 距离
+    volatile u8 res = 0;                              // CC1101发送结果
+    float ADC_Value = 0.0f;                           // 电池 1/3 电压
+    SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
+        
+  
+    // ADC采集电池电压
+    ADC_Value = 0;
+    for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
+    ADC_Value = ADC_Value / (float)0x3FFC * Voltage_Refer;                // 0x3FFC = 0x0FFF * 4 取四次电压均值
+    //printf("ADC_Value = %.2f V\r\n", ADC_Value); 
+    SendBuffer[4] = ((u8)((ADC_Value * 3.0 - Voltage_Bat_Empty) * 100)) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压   (Voltage_Bat_Full - Voltage_Bat_Empty) = 1.0
+
+    // 超声波测距
+    distance = Measured_Range();       // 测距 
+    if(distance)  
+    {
+        SendBuffer[3] = distance;      // 油桶127cm
+        //printf("distance = %d cm\r\n", distance);
+    }
+    else 
+    {
+        SendBuffer[3] = 255;
+        //printf("Measured_Error\r\n");
+    } 
+
+    //****************************************CC1101发送数据*********************************************
+    SendError_Time = 0;                // 出错次数清零
+send:            
+    res = RF_SendPacket(SendBuffer, SEND_LENGTH);
+    if(res != 0) 
+    {
+        //printf("Send ERROR:%d\r\n", (int)res);  // 发送失败
+        DelayMs(5);
+        if(++SendError_Time < 20) goto send;   //  出错次数达到20次，则放弃此次传输
+        
+        CC1101SetLowPower();            // 此次cc1101发送数据失败，设置cc1101进入低功耗模式
+        //printf("Send Canceled!\r\n");   
+    }
+    else 
+    {
+        CC1101SetLowPower();           // 设置cc1101进入低功耗模式
+        //for(i = 0; i < SEND_LENGTH; i++) printf("%d ", SendBuffer[i]);
+        //printf("Send OK!\r\n");              // 发送成功
+    }
+    //****************************************CC1101发送数据*********************************************   
+
+    STM8_PerPwd();                     // 低功耗IO配置  包括LED_OFF、SWITCH_OFF
 }
 
 /*===========================================================================
@@ -209,6 +217,16 @@ INT8U RF_SendPacket(INT8U *Sendbuffer, INT8U length)
     printf("\r\n");
 
     return 0;  
+}
+
+// 初始化独立看门狗
+void IWDG_Init(uint8_t time_1ms)
+{
+  IWDG_SetReload(time_1ms);                         // 复位时间： time_1ms * 4
+  IWDG_Enable();                                    // 先写0XCC 
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);     // 后写0X55
+  
+  IWDG_SetPrescaler(IWDG_Prescaler_64);             // 64KHZ / 64 = 1KHz  即1ms
 }
 
 void Get_TheTime(void)
@@ -299,6 +317,35 @@ Detectde:
         DelayMs(15);
         goto Detectde;
     }
+}
+
+// STM8外设低功耗配置
+void STM8_PerPwd(void)
+{   
+    // 模拟开关                OK
+    GPIO_Init(GPIOD, GPIO_Pin_1 | GPIO_Pin_2, GPIO_Mode_Out_PP_High_Slow);    // 有模拟开关时，关闭模拟开关   相当于SWITCH_OFF
+    
+    // CSB  UART LED           OK
+    GPIO_Init(GPIOC, GPIO_Pin_0 | GPIO_Pin_3 | GPIO_Pin_4, GPIO_Mode_Out_PP_High_Slow); // CSB_Sleep LED_OFF
+    GPIO_Init(GPIOC, GPIO_Pin_2, GPIO_Mode_Out_PP_High_Slow);           // 已测试，最低功耗
+    
+    // 除能外设
+    CLK_PeripheralClockConfig(CLK_Peripheral_TIM3, DISABLE);
+    CLK_PeripheralClockConfig(CLK_Peripheral_SPI1, DISABLE);
+    CLK_PeripheralClockConfig(CLK_Peripheral_USART1, DISABLE);
+            
+    // 未使用IO  设置为输出低  功耗最低
+    GPIO_Init(GPIOA, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
+    GPIO_Init(GPIOB, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2,  GPIO_Mode_Out_PP_Low_Slow);
+    GPIO_Init(GPIOC, GPIO_Pin_1 | GPIO_Pin_5 | GPIO_Pin_6,  GPIO_Mode_Out_PP_Low_Slow);
+    GPIO_Init(GPIOD, GPIO_Pin_0 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7, GPIO_Mode_Out_PP_Low_Slow);
+    
+    // SWIM   RST    ADC          OK
+    GPIO_Init(GPIOA, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4, GPIO_Mode_Out_PP_Low_Slow);  // 已测试，最低功耗
+    
+    // CC1101 SPI                 OK
+    GPIO_Init(GPIOB, GPIO_Pin_3, GPIO_Mode_Out_PP_High_Slow);           // 已测试，最低功耗
+    GPIO_Init(GPIOB, GPIO_Pin_4, GPIO_Mode_Out_PP_High_Slow);           // 已测试，最低功耗
 }
 
 //// RTC-AWU测试

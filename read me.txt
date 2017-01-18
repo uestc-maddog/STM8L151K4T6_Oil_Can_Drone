@@ -1,1 +1,11 @@
 L151K4T6_Drone（+CSB）
+
+
+
+
+功耗：
+run-----12.0ma  LED 2K
+halt---0.875ma
+
+
+IWDG定时复位

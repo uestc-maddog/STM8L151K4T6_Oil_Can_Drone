@@ -23,8 +23,6 @@
 #include "stm8l15x_it.h"
 #include "bsp.h"
 
-u16 TIM2_Conut;
-
 /** @addtogroup STM8L15x_StdPeriph_Examples
   * @{
   */
@@ -319,17 +317,6 @@ INTERRUPT_HANDLER(TIM2_UPD_OVF_TRG_BRK_IRQHandler, 19)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
-  TIM2_Conut++;
-  if(TIM2_Conut >= 1000)  //累计1000毫秒记数
-  {
-    TIM2_Conut = 0;
-    GPIO_ToggleBits(GPIOD , GPIO_Pin_5);  //异或取反控制LED1
-    GPIO_ToggleBits(GPIOB , GPIO_Pin_0);  //异或取反控制LED2
-    GPIO_ToggleBits(GPIOB , GPIO_Pin_1);  //异或取反控制LED3
-    GPIO_ToggleBits(GPIOD , GPIO_Pin_6);  //异或取反控制LED4
-  }
-  
-  TIM2_ClearITPendingBit(TIM2_IT_Update); //清除中断标志
 }
 
 /**

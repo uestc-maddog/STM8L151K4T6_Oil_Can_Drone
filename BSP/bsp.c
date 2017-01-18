@@ -22,25 +22,18 @@ void SClK_Initial(void)
 ============================================================================*/
 void GPIO_Initial(void)
 {
-    // 配置LED引脚    PC4
-    GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_High_Fast);
-    LED_OFF();        // 熄灭LED
+    // 配置LED引脚       PC4
+    GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_Low_Slow);          // 初始化为低电平    点亮LED 
     
-    // 配置CSB引脚    PC0
-    GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);
-    CSB_Sleep();
-    
-    // 配置SWITCH引脚 PD1 PD2
-    GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_High_Fast);
-    GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_High_Fast);
-    SWITCH_ON();     // 关闭CC1101电源
+    // 配置SWITCH引脚    PD1 PD2
+    GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_Low_Slow);    // 初始化为低电平    相当于SWITCH_ON
+    GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_Low_Slow);      
      
     // 配置CC1101相关控制引脚 CSN(PB4), IRQ(PB3), GDO2(PA3)
     GPIO_Init(PORT_CC_IRQ, PIN_CC_IRQ, GPIO_Mode_In_FL_No_IT);
     GPIO_Init(PORT_CC_GDO2, PIN_CC_GDO2, GPIO_Mode_In_PU_No_IT);
     
-    GPIO_Init(PORT_CC_CSN, PIN_CC_CSN, GPIO_Mode_Out_PP_High_Fast);
-    GPIO_SetBits(PORT_CC_CSN, PIN_CC_CSN);
+    GPIO_Init(PORT_CC_CSN, PIN_CC_CSN, GPIO_Mode_Out_PP_High_Fast);  // CSN拉高
 }
 
 /*===========================================================================
@@ -215,8 +208,7 @@ void TIM3_Set(u8 sta)
 
 void CSB_Initial(void)
 {
-    GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);
-    CSB_Sleep();
+    GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);   // 初始化为高电平 等效于CSB_Sleep 
 }
 
 // 设置USART1的开关

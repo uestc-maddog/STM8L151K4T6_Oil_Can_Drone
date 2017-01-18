@@ -1,34 +1,38 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 14/Jan/2017  16:15:46
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 18/Jan/2017  11:46:00
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  
-#        C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
+#        C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\BSP\bsp.c
 #    Command line =  
-#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c"
-#        -e -Ol --no_cse --no_unroll --no_inline --no_code_motion --no_tbaa
-#        --no_cross_call --debug --code_model medium --data_model medium -o
-#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\"
-#        --dlib_config "E:\My Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D
-#        STM8L15X_MD -lcN
-#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\List\"
-#        -I "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\"
-#        -I
-#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc\"
-#        -I
-#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\APP\"
-#        -I
-#        "C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\"
-#        --vregs 16
+#        "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\BSP\bsp.c" -e -Ol --no_cse --no_unroll --no_inline
+#        --no_code_motion --no_tbaa --no_cross_call --debug --code_model medium
+#        --data_model medium -o
+#        "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\Debug\Obj\" --dlib_config "E:\My
+#        Program\IAR_STM8-7.0\stm8\LIB\dlstm8mmf.h" -D STM8L15X_MD -lcN
+#        "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\Debug\List\" -I
+#        "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\"
+#        -I "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\STM8L15x_StdPeriph_Driver\inc\" -I
+#        "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\APP\" -I
+#        "C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\BSP\" --vregs 16
 #    List file    =  
-#        C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\List\bsp.lst
+#        C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\Debug\List\bsp.lst
 #    Object file  =  
-#        C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\Debug\Obj\bsp.o
+#        C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone -
+#        IWDG\Debug\Obj\bsp.o
 #
 ###############################################################################
 
-C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
+C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\BSP\bsp.c
       1          /*===========================================================================
       2          * 网址 ：http://www.cdebyte.com/   http://yhmcu.taobao.com/                 *
       3          * 作者 ：李勇  原 亿和电子工作室  现 亿佰特电子科技有限公司                 * 
@@ -53,213 +57,205 @@ C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
      22          ============================================================================*/
      23          void GPIO_Initial(void)
      24          {
-     25              // 配置LED引脚    PC4
-     26              GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_High_Fast);
-     27              LED_OFF();        // 熄灭LED
-     28              
-     29              // 配置CSB引脚    PC0
-     30              GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);
-     31              CSB_Sleep();
-     32              
-     33              // 配置SWITCH引脚 PD1 PD2
-     34              GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_High_Fast);
-     35              GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_High_Fast);
-     36              SWITCH_ON();     // 关闭CC1101电源
-     37               
-     38              // 配置CC1101相关控制引脚 CSN(PB4), IRQ(PB3), GDO2(PA3)
-     39              GPIO_Init(PORT_CC_IRQ, PIN_CC_IRQ, GPIO_Mode_In_FL_No_IT);
-     40              GPIO_Init(PORT_CC_GDO2, PIN_CC_GDO2, GPIO_Mode_In_PU_No_IT);
-     41              
-     42              GPIO_Init(PORT_CC_CSN, PIN_CC_CSN, GPIO_Mode_Out_PP_High_Fast);
-     43              GPIO_SetBits(PORT_CC_CSN, PIN_CC_CSN);
-     44          }
-     45          
-     46          /*===========================================================================
-     47          * 函数 USART1_Initial() => 初始化串口                                 *
-     48          ============================================================================*/
-     49          void USART1_Initial(void)
-     50          {
-     51              // 串口初始化
-     52              CLK_PeripheralClockConfig(CLK_Peripheral_USART1, ENABLE); //使能外设时钟，STM8L外设时钟默认关闭
-     53              USART_Init(USART1,9600,USART_WordLength_8b,USART_StopBits_1,USART_Parity_No,USART_Mode_Tx|USART_Mode_Rx);//USART初始化，9600，8N1
-     54              
-     55              USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);// 使能接收中断
-     56              U1_Set(1);                                    // 使能USART1 
-     57          }
-     58          
-     59          // ADC初始化     PA4  ADC1_IN2
-     60          void ADC_Initial(void)
-     61          {
-     62              CLK_PeripheralClockConfig(CLK_Peripheral_ADC1, ENABLE);  // 使能ADC1时钟
-     63              GPIO_Init(GPIOA, GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);     // 设置PA->4 为悬空输入，并中断禁止
-     64              ADC_Init(ADC1,
-     65                       ADC_ConversionMode_Single,   // 单次转换模式
-     66                       ADC_Resolution_12Bit,        // 12位精度转换械
-     67                       ADC_Prescaler_2              // 时钟设置为2分频
-     68                       );  
-     69          
-     70              ADC_ChannelCmd(ADC1,
-     71                             ADC_Channel_2,         // 设置为通道2进行采样
-     72                             ENABLE);
-     73          
-     74              ADC_Cmd(ADC1 , ENABLE);               // 使能ADC  
-     75              
-     76              ADC_Data_Read();                      // 预先读取两次误差较大的值
-     77              ADC_Data_Read();                      
-     78          }
-     79          
-     80          // 读取ADC完成一次模数转换结果
-     81          uint16_t ADC_Data_Read(void)
-     82          {
-     83            ADC_SoftwareStartConv(ADC1);      //启动ADC
-     84          
-     85            while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
-     86            ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
-     87            return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
-     88          }
-     89          
-     90          /*===========================================================================
-     91          * 函数 ：SPI_Initial() => 初始化SPI                                         *
-     92          ============================================================================*/
-     93          void SPI_Initial(void)
-     94          {
-     95              CLK_PeripheralClockConfig(CLK_Peripheral_SPI1, ENABLE);
-     96              
-     97              SPI_DeInit(SPI1);
+     25              // 配置LED引脚       PC4
+     26              GPIO_Init(PORT_LED, PIN_LED, GPIO_Mode_Out_PP_Low_Slow);          // 初始化为低电平    点亮LED 
+     27              
+     28              // 配置SWITCH引脚    PD1 PD2
+     29              GPIO_Init(PORT_SWITCH, PIN_SWITCH, GPIO_Mode_Out_PP_Low_Slow);    // 初始化为低电平    相当于SWITCH_ON
+     30              GPIO_Init(PORT_SMGEN, PIN_SMGEN, GPIO_Mode_Out_PP_Low_Slow);      
+     31               
+     32              // 配置CC1101相关控制引脚 CSN(PB4), IRQ(PB3), GDO2(PA3)
+     33              GPIO_Init(PORT_CC_IRQ, PIN_CC_IRQ, GPIO_Mode_In_FL_No_IT);
+     34              GPIO_Init(PORT_CC_GDO2, PIN_CC_GDO2, GPIO_Mode_In_PU_No_IT);
+     35              
+     36              GPIO_Init(PORT_CC_CSN, PIN_CC_CSN, GPIO_Mode_Out_PP_High_Fast);  // CSN拉高
+     37          }
+     38          
+     39          /*===========================================================================
+     40          * 函数 USART1_Initial() => 初始化串口                                 *
+     41          ============================================================================*/
+     42          void USART1_Initial(void)
+     43          {
+     44              // 串口初始化
+     45              CLK_PeripheralClockConfig(CLK_Peripheral_USART1, ENABLE); //使能外设时钟，STM8L外设时钟默认关闭
+     46              USART_Init(USART1,9600,USART_WordLength_8b,USART_StopBits_1,USART_Parity_No,USART_Mode_Tx|USART_Mode_Rx);//USART初始化，9600，8N1
+     47              
+     48              USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);// 使能接收中断
+     49              U1_Set(1);                                    // 使能USART1 
+     50          }
+     51          
+     52          // ADC初始化     PA4  ADC1_IN2
+     53          void ADC_Initial(void)
+     54          {
+     55              CLK_PeripheralClockConfig(CLK_Peripheral_ADC1, ENABLE);  // 使能ADC1时钟
+     56              GPIO_Init(GPIOA, GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);     // 设置PA->4 为悬空输入，并中断禁止
+     57              ADC_Init(ADC1,
+     58                       ADC_ConversionMode_Single,   // 单次转换模式
+     59                       ADC_Resolution_12Bit,        // 12位精度转换械
+     60                       ADC_Prescaler_2              // 时钟设置为2分频
+     61                       );  
+     62          
+     63              ADC_ChannelCmd(ADC1,
+     64                             ADC_Channel_2,         // 设置为通道2进行采样
+     65                             ENABLE);
+     66          
+     67              ADC_Cmd(ADC1 , ENABLE);               // 使能ADC  
+     68              
+     69              ADC_Data_Read();                      // 预先读取两次误差较大的值
+     70              ADC_Data_Read();                      
+     71          }
+     72          
+     73          // 读取ADC完成一次模数转换结果
+     74          uint16_t ADC_Data_Read(void)
+     75          {
+     76            ADC_SoftwareStartConv(ADC1);      //启动ADC
+     77          
+     78            while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
+     79            ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
+     80            return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
+     81          }
+     82          
+     83          /*===========================================================================
+     84          * 函数 ：SPI_Initial() => 初始化SPI                                         *
+     85          ============================================================================*/
+     86          void SPI_Initial(void)
+     87          {
+     88              CLK_PeripheralClockConfig(CLK_Peripheral_SPI1, ENABLE);
+     89              
+     90              SPI_DeInit(SPI1);
+     91              
+     92              // 配置SPI相关参数,2分频（2MHZ）
+     93              SPI_Init(SPI1, SPI_FirstBit_MSB, SPI_BaudRatePrescaler_2,
+     94                   SPI_Mode_Master, SPI_CPOL_Low, SPI_CPHA_1Edge,
+     95                   SPI_Direction_2Lines_FullDuplex, SPI_NSS_Soft, 7);
+     96            
+     97              SPI_Cmd(SPI1,ENABLE);
      98              
-     99              // 配置SPI相关参数,2分频（2MHZ）
-    100              SPI_Init(SPI1, SPI_FirstBit_MSB, SPI_BaudRatePrescaler_2,
-    101                   SPI_Mode_Master, SPI_CPOL_Low, SPI_CPHA_1Edge,
-    102                   SPI_Direction_2Lines_FullDuplex, SPI_NSS_Soft, 7);
-    103            
-    104              SPI_Cmd(SPI1,ENABLE);
-    105              
-    106              // SPI相关IO口配置
-    107              GPIO_Init(PORT_SPI, PIN_MISO, GPIO_Mode_In_PU_No_IT);       // MISO (PB7)
-    108              GPIO_Init(PORT_SPI, PIN_SCLK, GPIO_Mode_Out_PP_High_Fast);  // SCLK (PB5)
-    109              GPIO_Init(PORT_SPI, PIN_MOSI, GPIO_Mode_Out_PP_High_Fast);  // MOSI (PB6)
-    110          }
+     99              // SPI相关IO口配置
+    100              GPIO_Init(PORT_SPI, PIN_MISO, GPIO_Mode_In_PU_No_IT);       // MISO (PB7)
+    101              GPIO_Init(PORT_SPI, PIN_SCLK, GPIO_Mode_Out_PP_High_Fast);  // SCLK (PB5)
+    102              GPIO_Init(PORT_SPI, PIN_MOSI, GPIO_Mode_Out_PP_High_Fast);  // MOSI (PB6)
+    103          }
+    104          
+    105          /*===========================================================================
+    106          * 函数 ：TIM3_Initial() => 初始化定时器3，定时时间为1ms                     *
+    107          ============================================================================*/
+    108          void TIM3_Initial(void)
+    109          {
+    110              TIM3_DeInit();
     111          
-    112          /*===========================================================================
-    113          * 函数 ：TIM3_Initial() => 初始化定时器3，定时时间为1ms                     *
-    114          ============================================================================*/
-    115          void TIM3_Initial(void)
-    116          {
-    117              TIM3_DeInit();
-    118          
-    119              CLK_PeripheralClockConfig(CLK_Peripheral_TIM3, ENABLE);
-    120          
-    121              // 配置Timer3相关参数，时钟为4/4 = 1MHZ，定时时间 = 1000/1000000 = 1ms
-    122              TIM3_TimeBaseInit(TIM3_Prescaler_4, TIM3_CounterMode_Up, 1000);
-    123              TIM3_ARRPreloadConfig(ENABLE);     // 使能定时器3自动重载功能  
-    124              TIM3_Set(0);                       // 关闭TIM3
-    125          }
-    126          
-    127          /*===========================================================================
-    128          * 函数 ：SPI_ExchangeByte() => 通过SPI进行数据交换                          * 
-    129          * 输入 ：需要写入SPI的值                                                    * 
-    130          * 输出 ：通过SPI读出的值                                                    * 
-    131          ============================================================================*/
-    132          INT8U SPI_ExchangeByte(INT8U input)
-    133          {
-    134              SPI_SendData(SPI1, input);
-    135              while(RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE));   // 等待数据传输完成	
-    136              while(RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE));  // 等待数据接收完成
-    137              return(SPI_ReceiveData(SPI1));
-    138          }
-    139          
-    140          void RTC_Initial(void)
-    141          {
-    142          #if RTC_CLK == RTC_CLK_LSI   // 内部38K时钟
-    143              
-    144              printf("RTC_CLK_LSI\r\n");
-    145              
-    146              CLK_LSICmd(ENABLE);                                          // 打开芯片内部的低速振荡器LSI
-    147              while(CLK_GetFlagStatus(CLK_FLAG_LSIRDY) == RESET);         // 等待振荡器稳定
-    148              CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_1);   // 选择LSI作为RTC时钟源   1分频
-    149                                 
-    150          #else                       // 外部32K时钟
+    112              CLK_PeripheralClockConfig(CLK_Peripheral_TIM3, ENABLE);
+    113          
+    114              // 配置Timer3相关参数，时钟为4/4 = 1MHZ，定时时间 = 1000/1000000 = 1ms
+    115              TIM3_TimeBaseInit(TIM3_Prescaler_4, TIM3_CounterMode_Up, 1000);
+    116              TIM3_ARRPreloadConfig(ENABLE);     // 使能定时器3自动重载功能  
+    117              TIM3_Set(0);                       // 关闭TIM3
+    118          }
+    119          
+    120          /*===========================================================================
+    121          * 函数 ：SPI_ExchangeByte() => 通过SPI进行数据交换                          * 
+    122          * 输入 ：需要写入SPI的值                                                    * 
+    123          * 输出 ：通过SPI读出的值                                                    * 
+    124          ============================================================================*/
+    125          INT8U SPI_ExchangeByte(INT8U input)
+    126          {
+    127              SPI_SendData(SPI1, input);
+    128              while(RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_TXE));   // 等待数据传输完成	
+    129              while(RESET == SPI_GetFlagStatus(SPI1, SPI_FLAG_RXNE));  // 等待数据接收完成
+    130              return(SPI_ReceiveData(SPI1));
+    131          }
+    132          
+    133          void RTC_Initial(void)
+    134          {
+    135          #if RTC_CLK == RTC_CLK_LSI   // 内部38K时钟
+    136              
+    137              printf("RTC_CLK_LSI\r\n");
+    138              
+    139              CLK_LSICmd(ENABLE);                                          // 打开芯片内部的低速振荡器LSI
+    140              while(CLK_GetFlagStatus(CLK_FLAG_LSIRDY) == RESET);         // 等待振荡器稳定
+    141              CLK_RTCClockConfig(CLK_RTCCLKSource_LSI, CLK_RTCCLKDiv_1);   // 选择LSI作为RTC时钟源   1分频
+    142                                 
+    143          #else                       // 外部32K时钟
+    144              
+    145              printf("RTC_CLK_LSE\r\n");
+    146              CLK_LSEConfig(CLK_LSE_ON);  
+    147              while(CLK_GetFlagStatus(CLK_FLAG_LSERDY) == RESET);          // 等待振荡器稳定 
+    148              CLK_RTCClockConfig(CLK_RTCCLKSource_LSE, CLK_RTCCLKDiv_1);   // 选择LSE作为RTC时钟源   1分频
+    149          
+    150          #endif
     151              
-    152              printf("RTC_CLK_LSE\r\n");
-    153              CLK_LSEConfig(CLK_LSE_ON);  
-    154              while(CLK_GetFlagStatus(CLK_FLAG_LSERDY) == RESET);          // 等待振荡器稳定 
-    155              CLK_RTCClockConfig(CLK_RTCCLKSource_LSE, CLK_RTCCLKDiv_1);   // 选择LSE作为RTC时钟源   1分频
+    152              CLK_PeripheralClockConfig(CLK_Peripheral_RTC , ENABLE);    //使能实时时钟RTC时钟
+    153              
+    154              RTC_Set(22 , 15 , 26 , 16 , 7 , 23 , 6); //向实时时钟里设置，时分秒，年月日，星期分别是：22时15分20秒，2016年7月23日星期6
+    155          }
     156          
-    157          #endif
-    158              
-    159              CLK_PeripheralClockConfig(CLK_Peripheral_RTC , ENABLE);    //使能实时时钟RTC时钟
-    160              
-    161              RTC_Set(22 , 15 , 26 , 16 , 7 , 23 , 6); //向实时时钟里设置，时分秒，年月日，星期分别是：22时15分20秒，2016年7月23日星期6
-    162          }
-    163          
-    164          void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , unsigned int year ,unsigned char month ,unsigned char day ,unsigned char week)
-    165          { 
-    166            RTC_InitTypeDef  RTCInit;
-    167            RTC_TimeTypeDef RTCTime;
-    168            RTC_DateTypeDef RTCData;
-    169            
-    170            RTC_WriteProtectionCmd(DISABLE);  //解除RTC数据保护
-    171            
-    172            RTC_EnterInitMode();    //设置RTC进入初始化模式，允许对RTC时间和日期寄存器进行设置
-    173            while(RTC_GetFlagStatus(RTC_FLAG_INITF) == RESET);  //等待设置允许 等待INITF == 1完成允许设置
+    157          void RTC_Set(unsigned char hour , unsigned char min , unsigned char second , unsigned int year ,unsigned char month ,unsigned char day ,unsigned char week)
+    158          { 
+    159            RTC_InitTypeDef  RTCInit;
+    160            RTC_TimeTypeDef RTCTime;
+    161            RTC_DateTypeDef RTCData;
+    162            
+    163            RTC_WriteProtectionCmd(DISABLE);  //解除RTC数据保护
+    164            
+    165            RTC_EnterInitMode();    //设置RTC进入初始化模式，允许对RTC时间和日期寄存器进行设置
+    166            while(RTC_GetFlagStatus(RTC_FLAG_INITF) == RESET);  //等待设置允许 等待INITF == 1完成允许设置
+    167          
+    168            RTCInit.RTC_HourFormat = RTC_HourFormat_24;
+    169            RTCInit.RTC_AsynchPrediv = 37;
+    170            RTCInit.RTC_SynchPrediv = 999;
+    171            RTC_Init(&RTCInit);
+    172          
+    173            RTC_RatioCmd(ENABLE);
     174          
-    175            RTCInit.RTC_HourFormat = RTC_HourFormat_24;
-    176            RTCInit.RTC_AsynchPrediv = 37;
-    177            RTCInit.RTC_SynchPrediv = 999;
-    178            RTC_Init(&RTCInit);
-    179          
-    180            RTC_RatioCmd(ENABLE);
-    181          
-    182            RTCTime.RTC_Hours = hour;
-    183            RTCTime.RTC_Minutes = min;
-    184            RTCTime.RTC_Seconds = second;
-    185            RTCTime.RTC_H12 = RTC_H12_AM;     //24
-    186            RTC_SetTime(RTC_Format_BIN , &RTCTime);
-    187            
-    188            RTCData.RTC_WeekDay = (RTC_Weekday_TypeDef)week;   //RTC_Weekday_Sunday;    //sunday
-    189            RTCData.RTC_Month = (RTC_Month_TypeDef)month;    //RTC_Month_August;      //8month
-    190            RTCData.RTC_Date = day;      //14days
-    191            RTCData.RTC_Year = year;
-    192            RTC_SetDate(RTC_Format_BIN , &RTCData);
-    193             
-    194            RTC_ExitInitMode(); //不允许设置
-    195            
-    196            RTC_WriteProtectionCmd(ENABLE);//向密钥寄存器里进行写保护
-    197          }
-    198          
-    199          // 设置TIM3的开关
-    200          // sta:0，关闭   1，开启
-    201          void TIM3_Set(u8 sta)
-    202          {
-    203              if(sta)
-    204              {  
-    205                  TIM3_SetCounter(0);     // 计数器清空
-    206                  TIM3_ITConfig(TIM3_IT_Update,ENABLE);   // 使能TIM3更新中断
-    207                  TIM3_Cmd(ENABLE);      // 使能TIM3	
-    208              }
-    209              else 
-    210              {
-    211                  TIM3_Cmd(DISABLE);     // 关闭TIM3		   
-    212                  TIM3_ITConfig(TIM3_IT_Update,DISABLE);  // 关闭TIM3更新中断
-    213              }
-    214          }
-    215          
-    216          void CSB_Initial(void)
+    175            RTCTime.RTC_Hours = hour;
+    176            RTCTime.RTC_Minutes = min;
+    177            RTCTime.RTC_Seconds = second;
+    178            RTCTime.RTC_H12 = RTC_H12_AM;     //24
+    179            RTC_SetTime(RTC_Format_BIN , &RTCTime);
+    180            
+    181            RTCData.RTC_WeekDay = (RTC_Weekday_TypeDef)week;   //RTC_Weekday_Sunday;    //sunday
+    182            RTCData.RTC_Month = (RTC_Month_TypeDef)month;    //RTC_Month_August;      //8month
+    183            RTCData.RTC_Date = day;      //14days
+    184            RTCData.RTC_Year = year;
+    185            RTC_SetDate(RTC_Format_BIN , &RTCData);
+    186             
+    187            RTC_ExitInitMode(); //不允许设置
+    188            
+    189            RTC_WriteProtectionCmd(ENABLE);//向密钥寄存器里进行写保护
+    190          }
+    191          
+    192          // 设置TIM3的开关
+    193          // sta:0，关闭   1，开启
+    194          void TIM3_Set(u8 sta)
+    195          {
+    196              if(sta)
+    197              {  
+    198                  TIM3_SetCounter(0);     // 计数器清空
+    199                  TIM3_ITConfig(TIM3_IT_Update,ENABLE);   // 使能TIM3更新中断
+    200                  TIM3_Cmd(ENABLE);      // 使能TIM3	
+    201              }
+    202              else 
+    203              {
+    204                  TIM3_Cmd(DISABLE);     // 关闭TIM3		   
+    205                  TIM3_ITConfig(TIM3_IT_Update,DISABLE);  // 关闭TIM3更新中断
+    206              }
+    207          }
+    208          
+    209          void CSB_Initial(void)
+    210          {
+    211              GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);   // 初始化为高电平 等效于CSB_Sleep 
+    212          }
+    213          
+    214          // 设置USART1的开关
+    215          // sta:0，关闭   1，开启
+    216          void U1_Set(u8 sta)
     217          {
-    218              GPIO_Init(GPIOC, GPIO_Pin_0, GPIO_Mode_Out_PP_High_Fast);
-    219              CSB_Sleep();
+    218              if(sta) USART_Cmd(USART1, ENABLE);   // 使能USART1 
+    219              else    USART_Cmd(USART1, DISABLE);  // 关闭USART1 
     220          }
-    221          
-    222          // 设置USART1的开关
-    223          // sta:0，关闭   1，开启
-    224          void U1_Set(u8 sta)
-    225          {
-    226              if(sta) USART_Cmd(USART1, ENABLE);   // 使能USART1 
-    227              else    USART_Cmd(USART1, DISABLE);  // 关闭USART1 
-    228          }
-    229          /*===========================================================================
-    230          -----------------------------------文件结束----------------------------------
-    231          ===========================================================================*/
+    221          /*===========================================================================
+    222          -----------------------------------文件结束----------------------------------
+    223          ===========================================================================*/
 
    Section sizes:
 
@@ -268,8 +264,8 @@ C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
       14  ?_0
       36  ADC_Data_Read
       65  ADC_Initial
-      22  CSB_Initial
-     134  GPIO_Initial
+      13  CSB_Initial
+      76  GPIO_Initial
       70  RTC_Initial
      140  RTC_Set
        6  SClK_Initial
@@ -281,10 +277,10 @@ C:\Users\Growl\Desktop\Can_New(+1B)\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
       53  USART1_Initial
 
  
- 752 bytes in section .far_func.text
+ 685 bytes in section .far_func.text
   14 bytes in section .near.rodata
  
- 752 bytes of CODE  memory
+ 685 bytes of CODE  memory
   14 bytes of CONST memory
 
 Errors: none

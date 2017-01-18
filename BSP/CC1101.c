@@ -7,13 +7,15 @@ Description : This module contains the low level operations for CC1101
 ================================================================================
 */
 #include "CC1101.h"
+#include "bsp.h" 
 #include "STM8l15x_conf.h"
 #include "stdio.h"
 
 ////10, 7, 5, 0, -5, -10, -15, -20, dbm output power, 0x12 == -30dbm
 //INT8U PaTabel[] = { 0xc0, 0xC8, 0x84, 0x60, 0x68, 0x34, 0x1D, 0x0E};
 
-INT8U PaTabel[] = {0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,};   // 915MHz   10dBm
+INT8U PaTabel[8] = {0xC0 ,0xC0 ,0xC0 ,0xC0 ,0xC0 ,0xC0 ,0xC0 ,0xC0}; // 915MHz   10dBm
+//INT8U PaTabel[8] = {0x03,0x0e,0x1e,0x27,0x8e,0x84,0xcc,0xc0};      // 915MHz   10dBm
 
 // Sync word qualifier mode = 30/32 sync word bits detected 
 // CRC autoflush = false 
@@ -39,59 +41,88 @@ INT8U PaTabel[] = {0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,};   // 915MHz   10dB
 // Channel number = 1 
 
 // RF = 915MHz
-static const uint8_t CC1101InitData[23][2]= 
+// RF_SETTINGS is a data structure which contains all relevant CCxxx0 registers
+typedef struct S_RF_SETTINGS
 {
-  {CC1101_IOCFG0,   0x06},
-  {CC1101_FIFOTHR,  0x47},
-  {CC1101_PKTCTRL0, 0x05},
-  {CC1101_CHANNR,   0x01},   // 通道号  Channel number = 1
-  {CC1101_FSCTRL1,  0x06},
-  {CC1101_FREQ2,    0x23},   // 基频915.000000       载波频率=基频+0.2MHz*通道号=915.199951MHz
-  {CC1101_FREQ1,    0x31},
-  {CC1101_FREQ0,    0x3B},
-  {CC1101_MDMCFG4,  0xFA},   // 通信速率 49.9878kBaud
-  {CC1101_MDMCFG3,  0xF8},
-  {CC1101_MDMCFG2,  0x13},
-  {CC1101_DEVIATN,  0x15},
-  {CC1101_MCSM2,    0x07},   // none
-  {CC1101_MCSM1,    0x30},   // 0x3B
-  {CC1101_MCSM0,    0x18},
-  {CC1101_FOCCFG,   0x16},
-  {CC1101_WORCTRL,  0xFB},
-  {CC1101_FSCAL3,   0xE9},
-  {CC1101_FSCAL2,   0x2A},
-  {CC1101_FSCAL1,   0x00},
-  {CC1101_FSCAL0,   0x1F},
-  {CC1101_TEST2,    0x81},
-  {CC1101_TEST1,    0x35},
-};
+    INT8U FSCTRL2;		//自已加的
+    INT8U FSCTRL1;   // Frequency synthesizer control.
+    INT8U FSCTRL0;   // Frequency synthesizer control.
+    INT8U FREQ2;     // Frequency control word, high INT8U.
+    INT8U FREQ1;     // Frequency control word, middle INT8U.
+    INT8U FREQ0;     // Frequency control word, low INT8U.
+    INT8U MDMCFG4;   // Modem configuration.
+    INT8U MDMCFG3;   // Modem configuration.
+    INT8U MDMCFG2;   // Modem configuration.
+    INT8U MDMCFG1;   // Modem configuration.
+    INT8U MDMCFG0;   // Modem configuration.
+    INT8U CHANNR;    // Channel number.
+    INT8U DEVIATN;   // Modem deviation setting (when FSK modulation is enabled).
+    INT8U FREND1;    // Front end RX configuration.
+    INT8U FREND0;    // Front end RX configuration.
+    INT8U MCSM0;     // Main Radio Control State Machine configuration.
+    INT8U FOCCFG;    // Frequency Offset Compensation Configuration.
+    INT8U BSCFG;     // Bit synchronization Configuration.
+    INT8U AGCCTRL2;  // AGC control.
+    INT8U AGCCTRL1;  // AGC control.
+    INT8U AGCCTRL0;  // AGC control.
+    INT8U FSCAL3;    // Frequency synthesizer calibration.
+    INT8U FSCAL2;    // Frequency synthesizer calibration.
+    INT8U FSCAL1;    // Frequency synthesizer calibration.
+    INT8U FSCAL0;    // Frequency synthesizer calibration.
+    INT8U FSTEST;    // Frequency synthesizer calibration control
+    INT8U TEST2;     // Various test settings.
+    INT8U TEST1;     // Various test settings.
+    INT8U TEST0;     // Various test settings.
+    INT8U IOCFG2;    // GDO2 output pin configuration
+    INT8U IOCFG0;    // GDO0 output pin configuration
+    INT8U PKTCTRL1;  // Packet automation control.
+    INT8U PKTCTRL0;  // Packet automation control.
+    INT8U ADDR;      // Device address.
+    INT8U PKTLEN;    // Packet length.
+} RF_SETTINGS;
 
-//// RF = 400MHz
-//static const uint8_t CC1101InitData[22][2]= 
-//{
-//  {CC1101_IOCFG0,   0x06},
-//  {CC1101_FIFOTHR,  0x47},
-//  {CC1101_PKTCTRL0, 0x05},
-//  {CC1101_CHANNR,   0x01},  // í¨μà1  Channel number = 1
-//  {CC1101_FSCTRL1,  0x06},
-//  {CC1101_FREQ2,    0x0F}, // ?ù?μ  399.999939MHz    ??2¨?μ?ê=?ù?μ+2???￡¨0.2MHz￡?* í¨μào?  400.199890MHz
-//  {CC1101_FREQ1,    0x62},
-//  {CC1101_FREQ0,    0x76},
-//  {CC1101_MDMCFG4,  0xF6},
-//  {CC1101_MDMCFG3,  0x43},
-//  {CC1101_MDMCFG2,  0x13},
-//  {CC1101_DEVIATN,  0x15},
-//  {CC1101_MCSM0,    0x18},
-//  {CC1101_FOCCFG,   0x16},
-//  {CC1101_WORCTRL,  0xFB},
-//  {CC1101_FSCAL3,   0xE9},
-//  {CC1101_FSCAL2,   0x2A},
-//  {CC1101_FSCAL1,   0x00},
-//  {CC1101_FSCAL0,   0x1F},
-//  {CC1101_TEST2,    0x81},
-//  {CC1101_TEST1,    0x35},
-//  {CC1101_MCSM1,    0x3B},
-//};
+/////////////////////////////////////////////////////////////////
+const RF_SETTINGS rfSettings = 
+{
+    0x00,
+    0x08,   // FSCTRL1   Frequency synthesizer control.
+    0x00,   // FSCTRL0   Frequency synthesizer control.
+    0x23,   // FREQ2     Frequency control word, high byte.
+    0x31,   // FREQ1     Frequency control word, middle byte.
+    0x3B,   // FREQ0     Frequency control word, low byte.
+    0x5B,   // MDMCFG4   Modem configuration.
+    0xF8,   // MDMCFG3   Modem configuration.  空中波特率是100K
+    0x03,   // MDMCFG2   Modem configuration.
+    0x22,   // MDMCFG1   Modem configuration.
+    0xF8,   // MDMCFG0   Modem configuration.
+
+    0x00,   // CHANNR    Channel number.
+    0x47,   // DEVIATN   Modem deviation setting (when FSK modulation is enabled).
+    0xB6,   // FREND1    Front end RX configuration.
+    0x10,   // FREND0    Front end RX configuration.
+    0x18,   // MCSM0     Main Radio Control State Machine configuration.
+    0x1D,   // FOCCFG    Frequency Offset Compensation Configuration.
+    0x1C,   // BSCFG     Bit synchronization Configuration.
+    0xC7,   // AGCCTRL2  AGC control.
+    0x00,   // AGCCTRL1  AGC control.
+    0xB2,   // AGCCTRL0  AGC control.
+
+    0xEA,   // FSCAL3    Frequency synthesizer calibration.
+    0x2A,   // FSCAL2    Frequency synthesizer calibration.
+    0x00,   // FSCAL1    Frequency synthesizer calibration.
+    0x11,   // FSCAL0    Frequency synthesizer calibration.
+    0x59,   // FSTEST    Frequency synthesizer calibration.
+    0x81,   // TEST2     Various test settings.
+    0x35,   // TEST1     Various test settings.
+    0x09,   // TEST0     Various test settings.
+    0x0B,   // IOCFG2    GDO2 output pin configuration.
+    0x06,   // IOCFG0D   GDO0 output pin configuration. Refer to SmartRF?Studio User Manual for detailed pseudo register explanation.
+
+    0x04,   // PKTCTRL1  Packet automation control.
+    0x45,   // PKTCTRL0  Packet automation control.
+    0x00,   // ADDR      Device address.
+    0x0c    // PKTLEN    Packet length.
+};
 
 /*read a byte from the specified register*/
 INT8U CC1101ReadReg(INT8U addr);
@@ -263,9 +294,9 @@ OUTPUT   : None
 */
 void CC1101WriteCmd( INT8U command )
 {
-    CC_CSN_LOW( );
-    SPI_ExchangeByte( command );
-    CC_CSN_HIGH( );
+    CC_CSN_LOW();
+    SPI_ExchangeByte(command);
+    CC_CSN_HIGH();
 }
 /*
 ================================================================================
@@ -275,14 +306,14 @@ INPUT    : None
 OUTPUT   : None
 ================================================================================
 */
-void CC1101Reset( void )
+void CC1101Reset(void)
 {
     INT8U x;
 
-    CC_CSN_HIGH( );
-    CC_CSN_LOW( );
-    CC_CSN_HIGH( );
-    for( x = 0; x < 100; x ++ );        // 至少40us
+    CC_CSN_HIGH();
+    CC_CSN_LOW();
+    CC_CSN_HIGH();
+    for(x = 0; x < 100; x ++);        // 至少40us
     CC1101WriteCmd(CC1101_SRES);
 }
 /*
@@ -450,19 +481,15 @@ OUTPUT   : None
 */
 void CC1101Init( void )
 {
-    volatile INT8U i, j;
+    volatile INT8U i;
+    
+    TIM3_Initial();         // 初始化定时器3，基准1ms  
+    SPI_Initial();          // 初始化SPI  
+    
     CC1101Reset();    
     
-    for(i = 0; i < 23; i++)
-    {
-        CC1101WriteReg(CC1101InitData[i][0], CC1101InitData[i][1]);
-    }
- 
-    for(i = 0; i < 23; i++)
-    {
-        j = CC1101ReadReg(CC1101InitData[i][0]);
-        printf("%d  ", (int)j);
-    }
+    CC1101_Settings();
+    printf("%d ", (int)CC1101ReadReg(CC1101_FSCTRL1));
     
     CC1101SetAddress(TX_Address, BROAD_0AND255);  // 从机地址
     CC1101SetSYNC(0xD391);                        // 8799
@@ -471,13 +498,54 @@ void CC1101Init( void )
 
 //    CC1101WriteMultiReg(CC1101_PATABLE, PaTabel+1, 1);  // 发射功率
     CC1101WriteMultiReg(CC1101_PATABLE, PaTabel, 8);
-
-//    i = CC1101ReadStatus(CC1101_PARTNUM);//for test, must be 0x80
-//    i = CC1101ReadStatus(CC1101_VERSION);//for test, refer to the datasheet
-//    CC1101SetTRMode(TX_MODE);                      // 发送模式 
-    printf("Mode:TX\r\n");
 }
 
+void CC1101_Settings(void) 
+{
+    CC1101WriteReg(CC1101_FSCTRL0,  rfSettings.FSCTRL2);//自已加的
+    // Write register settings
+    CC1101WriteReg(CC1101_FSCTRL1,  rfSettings.FSCTRL1);
+    CC1101WriteReg(CC1101_FSCTRL0,  rfSettings.FSCTRL0);
+    CC1101WriteReg(CC1101_FREQ2,    rfSettings.FREQ2);
+    CC1101WriteReg(CC1101_FREQ1,    rfSettings.FREQ1);
+    CC1101WriteReg(CC1101_FREQ0,    rfSettings.FREQ0);
+    CC1101WriteReg(CC1101_MDMCFG4,  rfSettings.MDMCFG4);
+    CC1101WriteReg(CC1101_MDMCFG3,  rfSettings.MDMCFG3);
+    CC1101WriteReg(CC1101_MDMCFG2,  rfSettings.MDMCFG2);
+    CC1101WriteReg(CC1101_MDMCFG1,  rfSettings.MDMCFG1);
+    CC1101WriteReg(CC1101_MDMCFG0,  rfSettings.MDMCFG0);
+    CC1101WriteReg(CC1101_CHANNR,   rfSettings.CHANNR);
+    CC1101WriteReg(CC1101_DEVIATN,  rfSettings.DEVIATN);
+    CC1101WriteReg(CC1101_FREND1,   rfSettings.FREND1);
+    CC1101WriteReg(CC1101_FREND0,   rfSettings.FREND0);
+    CC1101WriteReg(CC1101_MCSM0 ,   rfSettings.MCSM0 );
+    CC1101WriteReg(CC1101_FOCCFG,   rfSettings.FOCCFG);
+    CC1101WriteReg(CC1101_BSCFG,    rfSettings.BSCFG);
+    CC1101WriteReg(CC1101_AGCCTRL2, rfSettings.AGCCTRL2);
+    CC1101WriteReg(CC1101_AGCCTRL1, rfSettings.AGCCTRL1);
+    CC1101WriteReg(CC1101_AGCCTRL0, rfSettings.AGCCTRL0);
+    CC1101WriteReg(CC1101_FSCAL3,   rfSettings.FSCAL3);
+    CC1101WriteReg(CC1101_FSCAL2,   rfSettings.FSCAL2);
+    CC1101WriteReg(CC1101_FSCAL1,   rfSettings.FSCAL1);
+    CC1101WriteReg(CC1101_FSCAL0,   rfSettings.FSCAL0);
+    CC1101WriteReg(CC1101_FSTEST,   rfSettings.FSTEST);
+    CC1101WriteReg(CC1101_TEST2,    rfSettings.TEST2);
+    CC1101WriteReg(CC1101_TEST1,    rfSettings.TEST1);
+    CC1101WriteReg(CC1101_TEST0,    rfSettings.TEST0);
+    CC1101WriteReg(CC1101_IOCFG2,   rfSettings.IOCFG2);
+    CC1101WriteReg(CC1101_IOCFG0,   rfSettings.IOCFG0);    
+    CC1101WriteReg(CC1101_PKTCTRL1, rfSettings.PKTCTRL1);
+    CC1101WriteReg(CC1101_PKTCTRL0, rfSettings.PKTCTRL0);
+    CC1101WriteReg(CC1101_ADDR,     rfSettings.ADDR);
+    CC1101WriteReg(CC1101_PKTLEN,   rfSettings.PKTLEN);
+}
+
+// 设置cc1101进入低功耗模式
+void CC1101SetLowPower(void)
+{
+    CC1101WriteCmd(CC1101_SPWD);
+    CC_CSN_HIGH();
+}
 
 /*
 ================================================================================
