@@ -1,26 +1,26 @@
-"C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\STM8L15x_StdPeriph_Driver\src\stm8l15x_itc.c"
+"E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\src\stm8l15x_itc.c"
 -std=c99
 -ferror-limit=100
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\STM8L15x_StdPeriph_Driver\inc
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\APP
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\BSP
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP
 -I
 E:\My Program\IAR_STM8-7.0\stm8\inc
 -I
 E:\My Program\IAR_STM8-7.0\stm8\inc\c
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\STM8L15x_StdPeriph_Driver\inc
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\STM8L15x_StdPeriph_Driver\inc
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\APP
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\APP
 -I
-C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\BSP
+E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP
 -DSTM8L15X_MD=1
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
@@ -235,7 +235,7 @@ C:\Users\Growl\Desktop\Can_New_TB\STM8L151K4T6_Oil_Can_Drone - IWDG\BSP
 -D__IAR_COMPILERBASE__=594189
 -D_GOANNA=1
 -D__DATE__="Jan 18 2017"
--D__TIME__="11:35:08"
+-D__TIME__="19:17:35"
 -D__STDC__=1
 -D__STDC_VERSION__=199901L
 -D__STDC_HOSTED__=1

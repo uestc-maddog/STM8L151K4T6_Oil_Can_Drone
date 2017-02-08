@@ -41,14 +41,15 @@ void main(void)
 {
     volatile u8 Timer_30s = 0;                        // 上电即发送
        
-    System_Initial();                                 // 初始化系统   设置系统时钟为4M，并开启全局中断             	   
+    System_Initial();                                 // 初始化系统   设置系统时钟为4M，并开启全局中断  
+    
     System_GetData();                                 // ADC采集电池电压、超声波测距、CC1101发送后进入Sleep、STM8外设低功耗配置
     
     while(1)
     { 
         RTC_AWU_Initial(1116);                  // RTC 唤醒中断    30s
         halt();                                 // 挂起，最低功耗
-        if(++Timer_30s == 10)                   // 5min 重启检测
+        if(++Timer_30s == 20)                   // 10min 重启检测
         {
             IWDG_Init(20);                      // 初始化独立看门狗   
             while(1);                           // 不喂狗，20ms后直接IWDG复位  

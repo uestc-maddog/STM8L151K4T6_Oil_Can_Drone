@@ -311,7 +311,7 @@ void CC1101Reset(void)
     INT8U x;
 
     CC_CSN_HIGH();
-    CC_CSN_LOW();
+     CC_CSN_LOW();
     CC_CSN_HIGH();
     for(x = 0; x < 100; x ++);        // ÖÁÉÙ40us
     CC1101WriteCmd(CC1101_SRES);

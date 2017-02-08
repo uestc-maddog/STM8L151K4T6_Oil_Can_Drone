@@ -13,8 +13,8 @@
 
 //#define TX_Address 0x01         // 发送端   从机设备地址  
 //#define TX_Address 0x02         
-//#define TX_Address 0x03        
-#define TX_Address 0x04         
+#define TX_Address 0x03        
+//#define TX_Address 0x04         
 //#define TX_Address 0x05         
 //#define TX_Address 0x06        
 //#define TX_Address 0x07         
