@@ -56,7 +56,7 @@ void ADC_Initial(void)
     GPIO_Init(GPIOA, GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);     // 设置PA->4 为悬空输入，并中断禁止
     ADC_Init(ADC1,
              ADC_ConversionMode_Single,   // 单次转换模式
-             ADC_Resolution_12Bit,        // 12位精度转换械
+             ADC_Resolution_12Bit,        // 12位精度转换
              ADC_Prescaler_2              // 时钟设置为2分频
              );  
 

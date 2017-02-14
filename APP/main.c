@@ -29,6 +29,9 @@ u8   Measured_Range(void);                      // 超声波测距
 void STM8_PerPwd(void);                         // STM8外设低功耗配置
 void IWDG_Init(uint8_t time_1ms);               // 初始化独立看门狗
 
+void BubbleSort(u8 arr[], u8 num);              // 冒泡排序
+void swap(u8 *left, u8 *right);                 // 交换
+
 // printf支持
 int putchar(int c)   
 {  
@@ -39,7 +42,7 @@ int putchar(int c)
 
 void main(void)
 {
-    volatile u8 Timer_30s = 0;                        // 上电即发送
+    u8 Timer_30s = 0;                                 // 30s计数器
        
     System_Initial();                                 // 初始化系统   设置系统时钟为4M，并开启全局中断  
     
@@ -88,14 +91,14 @@ void System_Initial(void)
     SClK_Initial();                     // 初始化系统时钟，16M / 4 = 4M   
     
     GPIO_Initial();                    // 初始化GPIO   LED_ON、SWITCH_ON、CC1101控制线(CSN、GDO0、GDO2)   
+    CSB_Initial();                     // 初始化超声波模块
     USART1_Initial();                  // 初始化串口1  超声波模块使用 
     printf("MCU Reseted.\r\n");        // 发送字符串，末尾换行
                  
-    CSB_Initial();                     // 初始化超声波模块
     ADC_Initial();                     // 初始化ADC
     CC1101Init();                      // 初始化CC1101为发送模式  使能TIM3（1ms基准）、SPI
             
-    enableInterrupts();     // 使能系统总中断
+    enableInterrupts();                // 使能系统总中断
 }
 
 /*===========================================================================
@@ -103,33 +106,45 @@ void System_Initial(void)
 ============================================================================*/
 void System_GetData(void)                
 {
-    u8 i = 0, SendError_Time = 0;                      // SendError_Time：连续发送出错次数
-    volatile u8 distance = 0;                         // 距离
-    volatile u8 res = 0;                              // CC1101发送结果
-    float ADC_Value = 0.0f;                           // 电池 1/3 电压
-    SendBuffer[1] = TX_Address;                       // 数据包源地址（从机地址）
+    u8 i = 0, SendError_Time = 0;                         // SendError_Time：连续发送出错次数
+    volatile u8 distance = 0;                            // 距离
+    u8 distance_array[9];                                 // 8次距离       8B数据+1B正确字节数
+    volatile u8 res = 0;                                 // CC1101发送结果
+    float ADC_Value = 0.0f;                              // 电池 1/3 电压
+    SendBuffer[1] = TX_Address;                          // 数据包源地址（从机地址）
         
   
     // ADC采集电池电压
     ADC_Value = 0;
-    for(i = 0; i < 4; i++) ADC_Value += ADC_Data_Read();                  // PA4
-    ADC_Value = ADC_Value / (float)0x3FFC * Voltage_Refer;                // 0x3FFC = 0x0FFF * 4 取四次电压均值
+    for(i = 0; i < 8; i++) ADC_Value += ADC_Data_Read();                  // PA4
+    ADC_Value = ADC_Value / (float)0x7FF8 * Voltage_Refer;                // 0x7FF8 = 0x0FFF * 8 取8次电压均值
+    if(ADC_Value < 2.4667) ADC_Value = 2.4667;                            // 当电池电压低于7.4V，设置电量百分比恒等于0  
     //printf("ADC_Value = %.2f V\r\n", ADC_Value); 
     SendBuffer[4] = ((u8)((ADC_Value * 3.0 - Voltage_Bat_Empty) * 100)) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压   (Voltage_Bat_Full - Voltage_Bat_Empty) = 1.0
-
+    
     // 超声波测距
-    distance = Measured_Range();       // 测距 
-    if(distance)  
+    for(i = 0; i < 9; i++) distance_array[i] = 0;       // 数组数据清0
+    for(i = 0; i < 8; i++)
     {
-        SendBuffer[3] = distance;      // 油桶127cm
-        //printf("distance = %d cm\r\n", distance);
+        distance = Measured_Range();       // 测距 
+        if(distance)                       // 测距可能正确的值                   
+        {
+            distance_array[distance_array[8]] = distance;
+            printf("distance_array[%d] = %d cm\r\n", distance_array[8], distance);
+            distance_array[8]++;
+        }
     }
-    else 
+    if(distance_array[8] == 0)       SendBuffer[3] = 255;                // 测距超过量程
+    else if(distance_array[8] == 1)  SendBuffer[3] = distance_array[0];
+    else if(distance_array[8] == 2)  SendBuffer[3] = (distance_array[0] + distance_array[1]) / 2;
+    else                  // 超过3组   冒泡排序后取最大的两个求均值
     {
-        SendBuffer[3] = 255;
-        //printf("Measured_Error\r\n");
-    } 
-
+        BubbleSort(distance_array, distance_array[8]);    // 冒泡排序
+        SendBuffer[3] = (distance_array[distance_array[8]-1]+distance_array[distance_array[8]-2]) / 2 ;                         // 油桶127cm
+    }
+    
+    printf("distance_ave = %d cm\r\n", SendBuffer[3]);
+    
     //****************************************CC1101发送数据*********************************************
     SendError_Time = 0;                // 出错次数清零
 send:            
@@ -347,6 +362,32 @@ void STM8_PerPwd(void)
     // CC1101 SPI                 OK
     GPIO_Init(GPIOB, GPIO_Pin_3, GPIO_Mode_Out_PP_High_Slow);           // 已测试，最低功耗
     GPIO_Init(GPIOB, GPIO_Pin_4, GPIO_Mode_Out_PP_High_Slow);           // 已测试，最低功耗
+}
+
+void BubbleSort(u8 arr[], u8 num)
+{
+    int k, j;
+    int flag = num;
+    while (flag > 0)
+    {
+        k = flag;
+        flag = 0;
+        for (j = 1; j < k; j++)
+        {
+            if (arr[j - 1] > arr[j])
+            {
+                swap(&arr[j - 1], &arr[j]);
+                flag = j;
+            }
+        }
+    }
+}
+
+void swap(u8 *left, u8 *right)
+{
+    int temp = *left;
+    *left = *right;
+    *right = temp;
 }
 
 //// RTC-AWU测试

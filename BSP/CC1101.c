@@ -311,7 +311,7 @@ void CC1101Reset(void)
     INT8U x;
 
     CC_CSN_HIGH();
-     CC_CSN_LOW();
+    CC_CSN_LOW();
     CC_CSN_HIGH();
     for(x = 0; x < 100; x ++);        // 至少40us
     CC1101WriteCmd(CC1101_SRES);
@@ -489,7 +489,7 @@ void CC1101Init( void )
     CC1101Reset();    
     
     CC1101_Settings();
-    printf("%d ", (int)CC1101ReadReg(CC1101_FSCTRL1));
+    printf("CC1101_FSCTRL1：%d\r\n", (int)CC1101ReadReg(CC1101_FSCTRL1));
     
     CC1101SetAddress(TX_Address, BROAD_0AND255);  // 从机地址
     CC1101SetSYNC(0xD391);                        // 8799

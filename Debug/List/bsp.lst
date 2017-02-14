@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 18/Jan/2017  19:19:19
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 14/Feb/2017  11:57:08
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
@@ -82,7 +82,7 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
      56              GPIO_Init(GPIOA, GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);     // 设置PA->4 为悬空输入，并中断禁止
      57              ADC_Init(ADC1,
      58                       ADC_ConversionMode_Single,   // 单次转换模式
-     59                       ADC_Resolution_12Bit,        // 12位精度转换械
+     59                       ADC_Resolution_12Bit,        // 12位精度转换
      60                       ADC_Prescaler_2              // 时钟设置为2分频
      61                       );  
      62          

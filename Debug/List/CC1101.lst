@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 07/Feb/2017  14:21:08
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 14/Feb/2017  11:57:09
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
@@ -337,7 +337,7 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
     311              INT8U x;
     312          
     313              CC_CSN_HIGH();
-    314               CC_CSN_LOW();
+    314              CC_CSN_LOW();
     315              CC_CSN_HIGH();
     316              for(x = 0; x < 100; x ++);        // 至少40us
     317              CC1101WriteCmd(CC1101_SRES);
@@ -515,7 +515,7 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
     489              CC1101Reset();    
     490              
     491              CC1101_Settings();
-    492              printf("%d ", (int)CC1101ReadReg(CC1101_FSCTRL1));
+    492              printf("CC1101_FSCTRL1：%d\r\n", (int)CC1101ReadReg(CC1101_FSCTRL1));
     493              
     494              CC1101SetAddress(TX_Address, BROAD_0AND255);  // 从机地址
     495              CC1101SetSYNC(0xD391);                        // 8799
@@ -584,7 +584,7 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
    Bytes  Function/Label
    -----  --------------
       19  ?_0
-       4  ?_1
+      21  ?_1
       10  CC1101ClrRXBuff
       10  CC1101ClrTXBuff
        9  CC1101GetRXCnt
@@ -613,10 +613,10 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
  1 458 bytes in section .far_func.text
      1 byte  in section .near.bss
      8 bytes in section .near.data
-    58 bytes in section .near.rodata
+    75 bytes in section .near.rodata
  
  1 458 bytes of CODE  memory
-    58 bytes of CONST memory
+    75 bytes of CONST memory
      9 bytes of DATA  memory
 
 Errors: none
