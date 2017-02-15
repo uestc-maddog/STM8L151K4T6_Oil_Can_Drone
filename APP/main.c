@@ -10,8 +10,7 @@ volatile u8 Dis_Index = 0;
 
 // CC1101
 volatile u16  Cnt1ms = 0;     // 1ms计数变量，每1ms加一 
-int  RecvWaitTime = 0;        // 接收等待时间                
-u16  SendCnt = 0;             // 计数发送的数据包数                
+int  RecvWaitTime = 0;        // 接收等待时间                              
 
                            // 帧头  源地址  目标地址  distance*10  电池电量 帧尾
 u8 SendBuffer[SEND_LENGTH] = {0x55,   0,    0xff,     15,         50,      0xaa}; // 从机待发送数据
@@ -22,15 +21,15 @@ void System_Initial(void);                     // 系统初始化
 void System_GetData(void);                     // ADC采集电池电压、超声波测距、CC1101发送
 
 u8   RF_SendPacket(u8 *Sendbuffer, u8 length);  // 从机发送数据包
-void Get_TheTime(void);
-void RTC_AWU_Initial(uint16_t time);            // time * 26.95 ms 
+void Get_TheTime(void);                        // RTC获取时间
+void RTC_AWU_Initial(uint16_t time);            // RTC自动唤醒时间 time * 26.95 ms 
 void DelayMs(u16 x);                            // TIM3延时函数
 u8   Measured_Range(void);                      // 超声波测距
 void STM8_PerPwd(void);                         // STM8外设低功耗配置
 void IWDG_Init(uint8_t time_1ms);               // 初始化独立看门狗
 
-void BubbleSort(u8 arr[], u8 num);              // 冒泡排序
-void swap(u8 *left, u8 *right);                 // 交换
+void BubbleSort(u16 arr[], u16 num);             // 冒泡排序
+void swap(u16 *left, u16 *right);               // 交换
 
 // printf支持
 int putchar(int c)   
@@ -108,39 +107,49 @@ void System_GetData(void)
 {
     u8 i = 0, SendError_Time = 0;                         // SendError_Time：连续发送出错次数
     volatile u8 distance = 0;                            // 距离
-    u8 distance_array[9];                                 // 8次距离       8B数据+1B正确字节数
+    u16 temp_array[9];                                    // 8组adc   or   8次距离(8B数据+1B正确字节数)
     volatile u8 res = 0;                                 // CC1101发送结果
-    float ADC_Value = 0.0f;                              // 电池 1/3 电压
     SendBuffer[1] = TX_Address;                          // 数据包源地址（从机地址）
         
   
     // ADC采集电池电压
-    ADC_Value = 0;
-    for(i = 0; i < 8; i++) ADC_Value += ADC_Data_Read();                  // PA4
-    ADC_Value = ADC_Value / (float)0x7FF8 * Voltage_Refer;                // 0x7FF8 = 0x0FFF * 8 取8次电压均值
-    if(ADC_Value < 2.4667) ADC_Value = 2.4667;                            // 当电池电压低于7.4V，设置电量百分比恒等于0  
-    //printf("ADC_Value = %.2f V\r\n", ADC_Value); 
-    SendBuffer[4] = ((u8)((ADC_Value * 3.0 - Voltage_Bat_Empty) * 100)) % 101;   // 限定电量百分比在[0,100]      ADC 1/3分压   (Voltage_Bat_Full - Voltage_Bat_Empty) = 1.0
+    for(i = 0; i < 8; i++) 
+    {
+        DelayMs(1);
+        temp_array[i] = ADC_Data_Read();            // PA4
+        printf("temp_array[%d] = %d\r\n", i, temp_array[i]);
+    }
+    BubbleSort(temp_array, 8);                                         // 冒泡排序
+    for(i = 0; i < 8; i++) printf("temp_array[%d] = %d\r\n", i, temp_array[i]); 
+    
+    temp_array[0] = (temp_array[3] + temp_array[4]) / 2;       // 取中间两个值的均值作为ADC采集结果
+    printf("temp_array[0] = %d\r\n", temp_array[0]);
+    if(temp_array[0] > 3408) temp_array[0] = 3408;             // [3002,3408]对应[7.4,8.4]
+    if(temp_array[0] < 3002) temp_array[0] = 3002;
+    temp_array[0] = (u16)((temp_array[0] - 3002) / 4.06);          
+    printf("temp_array[0] = %d\r\n", temp_array[0]);
+    SendBuffer[4] = (u8)temp_array[0];  
+    printf("battery = %d %%\r\n", SendBuffer[4]); 
     
     // 超声波测距
-    for(i = 0; i < 9; i++) distance_array[i] = 0;       // 数组数据清0
+    for(i = 0; i < 9; i++) temp_array[i] = 0;       // 数组数据清0
     for(i = 0; i < 8; i++)
     {
         distance = Measured_Range();       // 测距 
         if(distance)                       // 测距可能正确的值                   
         {
-            distance_array[distance_array[8]] = distance;
-            printf("distance_array[%d] = %d cm\r\n", distance_array[8], distance);
-            distance_array[8]++;
+            temp_array[temp_array[8]] = distance;
+            printf("temp_array[%d] = %d cm\r\n", temp_array[8], distance);
+            temp_array[8]++;
         }
     }
-    if(distance_array[8] == 0)       SendBuffer[3] = 255;                // 测距超过量程
-    else if(distance_array[8] == 1)  SendBuffer[3] = distance_array[0];
-    else if(distance_array[8] == 2)  SendBuffer[3] = (distance_array[0] + distance_array[1]) / 2;
+    if(temp_array[8] == 0)       SendBuffer[3] = 255;                // 测距超过量程
+    else if(temp_array[8] == 1)  SendBuffer[3] = temp_array[0];
+    else if(temp_array[8] == 2)  SendBuffer[3] = (temp_array[0] + temp_array[1]) / 2;
     else                  // 超过3组   冒泡排序后取最大的两个求均值
     {
-        BubbleSort(distance_array, distance_array[8]);    // 冒泡排序
-        SendBuffer[3] = (distance_array[distance_array[8]-1]+distance_array[distance_array[8]-2]) / 2 ;                         // 油桶127cm
+        BubbleSort(temp_array, temp_array[8]);    // 冒泡排序
+        SendBuffer[3] = (temp_array[temp_array[8]-1]+temp_array[temp_array[8]-2]) / 2 ;                         // 油桶127cm
     }
     
     printf("distance_ave = %d cm\r\n", SendBuffer[3]);
@@ -364,7 +373,7 @@ void STM8_PerPwd(void)
     GPIO_Init(GPIOB, GPIO_Pin_4, GPIO_Mode_Out_PP_High_Slow);           // 已测试，最低功耗
 }
 
-void BubbleSort(u8 arr[], u8 num)
+void BubbleSort(u16 arr[], u16 num)
 {
     int k, j;
     int flag = num;
@@ -383,7 +392,7 @@ void BubbleSort(u8 arr[], u8 num)
     }
 }
 
-void swap(u8 *left, u8 *right)
+void swap(u16 *left, u16 *right)
 {
     int temp = *left;
     *left = *right;

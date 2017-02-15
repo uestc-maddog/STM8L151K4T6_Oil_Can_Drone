@@ -73,11 +73,11 @@ void ADC_Initial(void)
 // 读取ADC完成一次模数转换结果
 uint16_t ADC_Data_Read(void)
 {
-  ADC_SoftwareStartConv(ADC1);      //启动ADC
+    ADC_SoftwareStartConv(ADC1);      //启动ADC
 
-  while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
-  ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
-  return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
+    while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
+    ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
+    return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
 }
 
 /*===========================================================================

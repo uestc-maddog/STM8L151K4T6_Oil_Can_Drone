@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 14/Feb/2017  11:57:08
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 15/Feb/2017  11:22:16
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
@@ -99,11 +99,11 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\bsp.c
      73          // 读取ADC完成一次模数转换结果
      74          uint16_t ADC_Data_Read(void)
      75          {
-     76            ADC_SoftwareStartConv(ADC1);      //启动ADC
+     76              ADC_SoftwareStartConv(ADC1);      //启动ADC
      77          
-     78            while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
-     79            ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
-     80            return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
+     78              while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);   // 等待转换结束
+     79              ADC_ClearFlag(ADC1, ADC_FLAG_EOC);                   // 清除中断标志
+     80              return ADC_GetConversionValue(ADC1);                // 读取ADC1，通道1的转换结果
      81          }
      82          
      83          /*===========================================================================

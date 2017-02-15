@@ -19,9 +19,9 @@
 #define RTC_CLK RTC_CLK_LSI
 
 // ADC 参考电压
-#define Voltage_Refer     3.3178f
-#define Voltage_Bat_Full  8.4000f
-#define Voltage_Bat_Empty 7.4000f
+#define Voltage_Refer     3.3655f
+#define Voltage_Bat_Full  8.4000f      // 3408
+#define Voltage_Bat_Empty 7.4000f      // 3002
 
 // SPI引脚定义 SCLK(PB5), MOSI(PB6), MISO(PB7)
 #define PORT_SPI        GPIOB
