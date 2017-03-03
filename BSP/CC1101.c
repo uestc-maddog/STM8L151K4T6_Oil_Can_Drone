@@ -308,7 +308,7 @@ OUTPUT   : None
 */
 void CC1101Reset(void)
 {
-    INT8U x;
+    u8 x;
 
     CC_CSN_HIGH();
     CC_CSN_LOW();
@@ -481,12 +481,10 @@ OUTPUT   : None
 */
 void CC1101Init( void )
 {
-    volatile INT8U i;
-    
     TIM3_Initial();         // 初始化定时器3，基准1ms  
     SPI_Initial();          // 初始化SPI  
     
-    CC1101Reset();    
+    CC1101Reset();          // CC1101复位
     
     CC1101_Settings();
     printf("CC1101_FSCTRL1：%d\r\n", (int)CC1101ReadReg(CC1101_FSCTRL1));

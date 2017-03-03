@@ -51,7 +51,7 @@ void main(void)
     { 
         RTC_AWU_Initial(1116);                  // RTC 唤醒中断    30s
         halt();                                 // 挂起，最低功耗
-        if(++Timer_30s == 20)                   // 10min 重启检测
+        if(++Timer_30s == 4)                    // 10min 重启检测  20
         {
             IWDG_Init(20);                      // 初始化独立看门狗   
             while(1);                           // 不喂狗，20ms后直接IWDG复位  
@@ -92,7 +92,7 @@ void System_Initial(void)
     GPIO_Initial();                    // 初始化GPIO   LED_ON、SWITCH_ON、CC1101控制线(CSN、GDO0、GDO2)   
     CSB_Initial();                     // 初始化超声波模块
     USART1_Initial();                  // 初始化串口1  超声波模块使用 
-    printf("MCU Reseted.\r\n");        // 发送字符串，末尾换行
+    printf("MCU Reseted.\r\n");       
                  
     ADC_Initial();                     // 初始化ADC
     CC1101Init();                      // 初始化CC1101为发送模式  使能TIM3（1ms基准）、SPI
@@ -105,45 +105,50 @@ void System_Initial(void)
 ============================================================================*/
 void System_GetData(void)                
 {
-    u8 i = 0, SendError_Time = 0;                         // SendError_Time：连续发送出错次数
-    volatile u8 distance = 0;                            // 距离
-    u16 temp_array[9];                                    // 8组adc   or   8次距离(8B数据+1B正确字节数)
-    volatile u8 res = 0;                                 // CC1101发送结果
-    SendBuffer[1] = TX_Address;                          // 数据包源地址（从机地址）
+    u8 i = 0, SendError_Time = 0;                         // SendError_Time：CC1101连续发送出错次数
+    u8 distance = 0;                                      // 距离
+    u8 res = 0;                                           // CC1101发送结果
+    u16 temp_array[9];                                    // 记录8次距离(8B数据+1B正确字节数)
+    u8 BlindFlag = 0;                                     // 超声波测距  盲区标识
+    u32 Adc_AddSum = 0;                                   // ADC_12Bit 累加缓存
+    SendBuffer[1] = TX_Address;                           // 数据包源地址（从机地址）
         
-  
     // ADC采集电池电压
-    for(i = 0; i < 8; i++) 
+    Adc_AddSum = 0;
+    for(i = 0; i < 100; i++) 
     {
         DelayMs(1);
-        temp_array[i] = ADC_Data_Read();            // PA4
-        printf("temp_array[%d] = %d\r\n", i, temp_array[i]);
+        Adc_AddSum += ADC_Data_Read();            // PA4
     }
-    BubbleSort(temp_array, 8);                                         // 冒泡排序
-    for(i = 0; i < 8; i++) printf("temp_array[%d] = %d\r\n", i, temp_array[i]); 
-    
-    temp_array[0] = (temp_array[3] + temp_array[4]) / 2;       // 取中间两个值的均值作为ADC采集结果
-    printf("temp_array[0] = %d\r\n", temp_array[0]);
-    if(temp_array[0] > 3408) temp_array[0] = 3408;             // [3002,3408]对应[7.4,8.4]
-    if(temp_array[0] < 3002) temp_array[0] = 3002;
-    temp_array[0] = (u16)((temp_array[0] - 3002) / 4.06);          
-    printf("temp_array[0] = %d\r\n", temp_array[0]);
-    SendBuffer[4] = (u8)temp_array[0];  
+    Adc_AddSum = Adc_AddSum / 10;
+  
+    if(Adc_AddSum > 34080) Adc_AddSum = 34080;             // [3002,3408]对应[7.4,8.4]
+    if(Adc_AddSum < 30020) Adc_AddSum = 30020;
+    SendBuffer[4] = (u8)((Adc_AddSum - 30020) / 41);  
     printf("battery = %d %%\r\n", SendBuffer[4]); 
     
     // 超声波测距
+    BlindFlag = 0;
     for(i = 0; i < 9; i++) temp_array[i] = 0;       // 数组数据清0
     for(i = 0; i < 8; i++)
     {
         distance = Measured_Range();       // 测距 
-        if(distance)                       // 测距可能正确的值                   
+        if(distance > 1)                   // 测距可能正确的值                   
         {
             temp_array[temp_array[8]] = distance;
             printf("temp_array[%d] = %d cm\r\n", temp_array[8], distance);
             temp_array[8]++;
         }
+        else if(distance == 1)            // 盲区(已达到最小识别距离)    连续100次测距 <= 11cm
+        {
+            BlindFlag = 1;
+        }
     }
-    if(temp_array[8] == 0)       SendBuffer[3] = 255;                // 测距超过量程
+    if(temp_array[8] == 0)       
+    {
+        if(BlindFlag) SendBuffer[3] = 1;                  // 距离盲区     [0,11]
+        else          SendBuffer[3] = 255;                // 距离超过量程最大值
+    }
     else if(temp_array[8] == 1)  SendBuffer[3] = temp_array[0];
     else if(temp_array[8] == 2)  SendBuffer[3] = (temp_array[0] + temp_array[1]) / 2;
     else                  // 超过3组   冒泡排序后取最大的两个求均值
@@ -293,7 +298,9 @@ void RTC_AWU_Initial(uint16_t time)    // time * 32 ms
 
 
 // 返回距离   0~255  cm
-// 0:测量出错
+// 0:      距离大于量程最大值
+// 1:      距离[0,11]
+// else :  正确距离
 u8 Measured_Range(void)
 {
     u8 distance_cm = 0, error_timer = 0, threshold_timer = 0;
@@ -320,24 +327,24 @@ Detectde:
     if(Dis_Index == Dis_Len) // 串口收到距离信息
     {
         distance_cm = ( (( (u16)Distance[0] << 8 ) + Distance[1]) / 10 ) & 0xff;    // 限定distance_cm在[0, 255]范围内
-        if(distance_cm <= 11)      // 测距出错
+        if(distance_cm <= 12)      // 盲区距离，判定为已满
         {
-            if(++threshold_timer == 100) 
+            if(++threshold_timer == 20) 
             {
                 printf("Threshold ERROR\r\n");
-                return 0;     // 测距出错，返回0
+                return 1;        // 已满，返回1     连续100次测距 <= 11cm
             }
             DelayMs(15);
             goto Detectde;
         }
-        else return distance_cm;  // 测距正确 
+        else return distance_cm;  // 测距正确   [12, 255]
     }
     else
     {
         if(++error_timer == 10) 
         {
             printf("Timer_10 ERROR\r\n");
-            return 0;           // 测距出错，返回0
+            return 0;           // 测距出错，返回0   连续10次测距 串口未收到返回数据
         }
         DelayMs(15);
         goto Detectde;

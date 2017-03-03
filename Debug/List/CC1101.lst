@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# IAR C/C++ Compiler V2.10.4.157 for STM8                 15/Feb/2017  11:22:17
+# IAR C/C++ Compiler V2.10.4.157 for STM8                 03/Mar/2017  15:11:23
 # Copyright 2010-2015 IAR Systems AB.
 #
 #    Source file  =  E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
@@ -334,7 +334,7 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
     308          */
     309          void CC1101Reset(void)
     310          {
-    311              INT8U x;
+    311              u8 x;
     312          
     313              CC_CSN_HIGH();
     314              CC_CSN_LOW();
@@ -507,77 +507,75 @@ E:\Github Project\STM8L151K4T6_Oil_Can_Drone\BSP\CC1101.c
     481          */
     482          void CC1101Init( void )
     483          {
-    484              volatile INT8U i;
-    485              
-    486              TIM3_Initial();         // 初始化定时器3，基准1ms  
-    487              SPI_Initial();          // 初始化SPI  
+    484              TIM3_Initial();         // 初始化定时器3，基准1ms  
+    485              SPI_Initial();          // 初始化SPI  
+    486              
+    487              CC1101Reset();          // CC1101复位
     488              
-    489              CC1101Reset();    
-    490              
-    491              CC1101_Settings();
-    492              printf("CC1101_FSCTRL1：%d\r\n", (int)CC1101ReadReg(CC1101_FSCTRL1));
-    493              
-    494              CC1101SetAddress(TX_Address, BROAD_0AND255);  // 从机地址
-    495              CC1101SetSYNC(0xD391);                        // 8799
-    496              CC1101WriteReg(CC1101_MDMCFG1, 0x22);         // Modem Configuration      
-    497              CC1101WriteReg(CC1101_MDMCFG0, 0xF8);
-    498          
-    499          //    CC1101WriteMultiReg(CC1101_PATABLE, PaTabel+1, 1);  // 发射功率
-    500              CC1101WriteMultiReg(CC1101_PATABLE, PaTabel, 8);
-    501          }
-    502          
-    503          void CC1101_Settings(void) 
-    504          {
-    505              CC1101WriteReg(CC1101_FSCTRL0,  rfSettings.FSCTRL2);//自已加的
-    506              // Write register settings
-    507              CC1101WriteReg(CC1101_FSCTRL1,  rfSettings.FSCTRL1);
-    508              CC1101WriteReg(CC1101_FSCTRL0,  rfSettings.FSCTRL0);
-    509              CC1101WriteReg(CC1101_FREQ2,    rfSettings.FREQ2);
-    510              CC1101WriteReg(CC1101_FREQ1,    rfSettings.FREQ1);
-    511              CC1101WriteReg(CC1101_FREQ0,    rfSettings.FREQ0);
-    512              CC1101WriteReg(CC1101_MDMCFG4,  rfSettings.MDMCFG4);
-    513              CC1101WriteReg(CC1101_MDMCFG3,  rfSettings.MDMCFG3);
-    514              CC1101WriteReg(CC1101_MDMCFG2,  rfSettings.MDMCFG2);
-    515              CC1101WriteReg(CC1101_MDMCFG1,  rfSettings.MDMCFG1);
-    516              CC1101WriteReg(CC1101_MDMCFG0,  rfSettings.MDMCFG0);
-    517              CC1101WriteReg(CC1101_CHANNR,   rfSettings.CHANNR);
-    518              CC1101WriteReg(CC1101_DEVIATN,  rfSettings.DEVIATN);
-    519              CC1101WriteReg(CC1101_FREND1,   rfSettings.FREND1);
-    520              CC1101WriteReg(CC1101_FREND0,   rfSettings.FREND0);
-    521              CC1101WriteReg(CC1101_MCSM0 ,   rfSettings.MCSM0 );
-    522              CC1101WriteReg(CC1101_FOCCFG,   rfSettings.FOCCFG);
-    523              CC1101WriteReg(CC1101_BSCFG,    rfSettings.BSCFG);
-    524              CC1101WriteReg(CC1101_AGCCTRL2, rfSettings.AGCCTRL2);
-    525              CC1101WriteReg(CC1101_AGCCTRL1, rfSettings.AGCCTRL1);
-    526              CC1101WriteReg(CC1101_AGCCTRL0, rfSettings.AGCCTRL0);
-    527              CC1101WriteReg(CC1101_FSCAL3,   rfSettings.FSCAL3);
-    528              CC1101WriteReg(CC1101_FSCAL2,   rfSettings.FSCAL2);
-    529              CC1101WriteReg(CC1101_FSCAL1,   rfSettings.FSCAL1);
-    530              CC1101WriteReg(CC1101_FSCAL0,   rfSettings.FSCAL0);
-    531              CC1101WriteReg(CC1101_FSTEST,   rfSettings.FSTEST);
-    532              CC1101WriteReg(CC1101_TEST2,    rfSettings.TEST2);
-    533              CC1101WriteReg(CC1101_TEST1,    rfSettings.TEST1);
-    534              CC1101WriteReg(CC1101_TEST0,    rfSettings.TEST0);
-    535              CC1101WriteReg(CC1101_IOCFG2,   rfSettings.IOCFG2);
-    536              CC1101WriteReg(CC1101_IOCFG0,   rfSettings.IOCFG0);    
-    537              CC1101WriteReg(CC1101_PKTCTRL1, rfSettings.PKTCTRL1);
-    538              CC1101WriteReg(CC1101_PKTCTRL0, rfSettings.PKTCTRL0);
-    539              CC1101WriteReg(CC1101_ADDR,     rfSettings.ADDR);
-    540              CC1101WriteReg(CC1101_PKTLEN,   rfSettings.PKTLEN);
-    541          }
-    542          
-    543          // 设置cc1101进入低功耗模式
-    544          void CC1101SetLowPower(void)
-    545          {
-    546              CC1101WriteCmd(CC1101_SPWD);
-    547              CC_CSN_HIGH();
-    548          }
-    549          
-    550          /*
+    489              CC1101_Settings();
+    490              printf("CC1101_FSCTRL1：%d\r\n", (int)CC1101ReadReg(CC1101_FSCTRL1));
+    491              
+    492              CC1101SetAddress(TX_Address, BROAD_0AND255);  // 从机地址
+    493              CC1101SetSYNC(0xD391);                        // 8799
+    494              CC1101WriteReg(CC1101_MDMCFG1, 0x22);         // Modem Configuration      
+    495              CC1101WriteReg(CC1101_MDMCFG0, 0xF8);
+    496          
+    497          //    CC1101WriteMultiReg(CC1101_PATABLE, PaTabel+1, 1);  // 发射功率
+    498              CC1101WriteMultiReg(CC1101_PATABLE, PaTabel, 8);
+    499          }
+    500          
+    501          void CC1101_Settings(void) 
+    502          {
+    503              CC1101WriteReg(CC1101_FSCTRL0,  rfSettings.FSCTRL2);//自已加的
+    504              // Write register settings
+    505              CC1101WriteReg(CC1101_FSCTRL1,  rfSettings.FSCTRL1);
+    506              CC1101WriteReg(CC1101_FSCTRL0,  rfSettings.FSCTRL0);
+    507              CC1101WriteReg(CC1101_FREQ2,    rfSettings.FREQ2);
+    508              CC1101WriteReg(CC1101_FREQ1,    rfSettings.FREQ1);
+    509              CC1101WriteReg(CC1101_FREQ0,    rfSettings.FREQ0);
+    510              CC1101WriteReg(CC1101_MDMCFG4,  rfSettings.MDMCFG4);
+    511              CC1101WriteReg(CC1101_MDMCFG3,  rfSettings.MDMCFG3);
+    512              CC1101WriteReg(CC1101_MDMCFG2,  rfSettings.MDMCFG2);
+    513              CC1101WriteReg(CC1101_MDMCFG1,  rfSettings.MDMCFG1);
+    514              CC1101WriteReg(CC1101_MDMCFG0,  rfSettings.MDMCFG0);
+    515              CC1101WriteReg(CC1101_CHANNR,   rfSettings.CHANNR);
+    516              CC1101WriteReg(CC1101_DEVIATN,  rfSettings.DEVIATN);
+    517              CC1101WriteReg(CC1101_FREND1,   rfSettings.FREND1);
+    518              CC1101WriteReg(CC1101_FREND0,   rfSettings.FREND0);
+    519              CC1101WriteReg(CC1101_MCSM0 ,   rfSettings.MCSM0 );
+    520              CC1101WriteReg(CC1101_FOCCFG,   rfSettings.FOCCFG);
+    521              CC1101WriteReg(CC1101_BSCFG,    rfSettings.BSCFG);
+    522              CC1101WriteReg(CC1101_AGCCTRL2, rfSettings.AGCCTRL2);
+    523              CC1101WriteReg(CC1101_AGCCTRL1, rfSettings.AGCCTRL1);
+    524              CC1101WriteReg(CC1101_AGCCTRL0, rfSettings.AGCCTRL0);
+    525              CC1101WriteReg(CC1101_FSCAL3,   rfSettings.FSCAL3);
+    526              CC1101WriteReg(CC1101_FSCAL2,   rfSettings.FSCAL2);
+    527              CC1101WriteReg(CC1101_FSCAL1,   rfSettings.FSCAL1);
+    528              CC1101WriteReg(CC1101_FSCAL0,   rfSettings.FSCAL0);
+    529              CC1101WriteReg(CC1101_FSTEST,   rfSettings.FSTEST);
+    530              CC1101WriteReg(CC1101_TEST2,    rfSettings.TEST2);
+    531              CC1101WriteReg(CC1101_TEST1,    rfSettings.TEST1);
+    532              CC1101WriteReg(CC1101_TEST0,    rfSettings.TEST0);
+    533              CC1101WriteReg(CC1101_IOCFG2,   rfSettings.IOCFG2);
+    534              CC1101WriteReg(CC1101_IOCFG0,   rfSettings.IOCFG0);    
+    535              CC1101WriteReg(CC1101_PKTCTRL1, rfSettings.PKTCTRL1);
+    536              CC1101WriteReg(CC1101_PKTCTRL0, rfSettings.PKTCTRL0);
+    537              CC1101WriteReg(CC1101_ADDR,     rfSettings.ADDR);
+    538              CC1101WriteReg(CC1101_PKTLEN,   rfSettings.PKTLEN);
+    539          }
+    540          
+    541          // 设置cc1101进入低功耗模式
+    542          void CC1101SetLowPower(void)
+    543          {
+    544              CC1101WriteCmd(CC1101_SPWD);
+    545              CC_CSN_HIGH();
+    546          }
+    547          
+    548          /*
+    549          ================================================================================
+    550          ------------------------------------THE END-------------------------------------
     551          ================================================================================
-    552          ------------------------------------THE END-------------------------------------
-    553          ================================================================================
-    554          */
+    552          */
 
    Section sizes:
 
